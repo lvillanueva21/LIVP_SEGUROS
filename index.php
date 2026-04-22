@@ -254,7 +254,7 @@ $serverToasts = demo_consume_toasts();
                 <div class="auth-hero__cover-wrap">
                     <img
                         class="auth-hero__cover"
-                        src="<?= demo_e(demo_url('assets/familia.webp')) ?>"
+                        src="<?= demo_e(demo_url('assets/img/familia.webp')) ?>"
                         alt="Familia protegida"
                     >
                 </div>
