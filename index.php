@@ -55,7 +55,7 @@ $serverToasts = demo_consume_toasts();
         }
 
         .hero-panel {
-            padding: 1.4rem;
+            padding: 1.35rem;
             display: grid;
             grid-template-rows: auto 1fr auto;
             gap: 1rem;
@@ -95,7 +95,7 @@ $serverToasts = demo_consume_toasts();
         .hero-brand__eyebrow {
             margin: 0 0 .15rem;
             color: var(--auth-soft);
-            font-size: .83rem;
+            font-size: .82rem;
             letter-spacing: .03em;
             text-transform: uppercase;
             font-weight: 700;
@@ -104,7 +104,7 @@ $serverToasts = demo_consume_toasts();
         .hero-brand__title {
             margin: 0;
             color: var(--auth-strong);
-            font-size: 1.1rem;
+            font-size: 1.08rem;
             line-height: 1.2;
         }
 
@@ -112,13 +112,13 @@ $serverToasts = demo_consume_toasts();
             display: inline-flex;
             align-items: center;
             gap: .45rem;
-            padding: .65rem .95rem;
+            padding: .62rem .92rem;
             border-radius: 999px;
             border: 1px solid rgba(79, 70, 229, 0.12);
             background: rgba(79, 70, 229, 0.06);
             color: var(--primary);
             font-weight: 700;
-            font-size: .92rem;
+            font-size: .9rem;
         }
 
         .hero-main {
@@ -137,8 +137,8 @@ $serverToasts = demo_consume_toasts();
         }
 
         .hero-copy h1 {
-            margin: 0 0 .8rem;
-            font-size: clamp(2rem, 4vw, 3.45rem);
+            margin: 0 0 .75rem;
+            font-size: clamp(2rem, 4vw, 3.4rem);
             line-height: 1.02;
             letter-spacing: -.04em;
             color: var(--auth-strong);
@@ -148,13 +148,13 @@ $serverToasts = demo_consume_toasts();
         .hero-copy p {
             margin: 0;
             color: var(--auth-soft);
-            line-height: 1.72;
-            font-size: 1rem;
-            max-width: 58ch;
+            line-height: 1.68;
+            font-size: .98rem;
+            max-width: 52ch;
         }
 
         .hero-feature-grid {
-            margin-top: 1.1rem;
+            margin-top: 1rem;
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: .8rem;
@@ -170,17 +170,17 @@ $serverToasts = demo_consume_toasts();
 
         .hero-feature strong {
             display: block;
-            margin-bottom: .3rem;
             color: var(--auth-strong);
-            font-size: .96rem;
+            font-size: .95rem;
             line-height: 1.3;
         }
 
         .hero-feature span {
             display: block;
+            margin-top: .22rem;
             color: var(--auth-soft);
-            font-size: .9rem;
-            line-height: 1.5;
+            font-size: .88rem;
+            line-height: 1.45;
         }
 
         .hero-media {
@@ -207,7 +207,7 @@ $serverToasts = demo_consume_toasts();
             left: 1rem;
             right: 1rem;
             bottom: 1rem;
-            padding: 1rem 1.05rem;
+            padding: .95rem 1rem;
             border-radius: 18px;
             background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(10px);
@@ -217,16 +217,16 @@ $serverToasts = demo_consume_toasts();
 
         .hero-media__card strong {
             display: block;
-            margin-bottom: .3rem;
-            font-size: .98rem;
+            margin-bottom: .2rem;
+            font-size: .96rem;
             color: var(--auth-strong);
         }
 
         .hero-media__card p {
             margin: 0;
             color: var(--auth-soft);
-            font-size: .9rem;
-            line-height: 1.5;
+            font-size: .88rem;
+            line-height: 1.45;
         }
 
         .hero-bottom {
@@ -236,7 +236,7 @@ $serverToasts = demo_consume_toasts();
         }
 
         .hero-note {
-            padding: 1rem 1.05rem;
+            padding: .95rem 1rem;
             border-radius: 20px;
             border: 1px solid var(--auth-line);
             background: var(--auth-surface-2);
@@ -247,17 +247,17 @@ $serverToasts = demo_consume_toasts();
             display: inline-flex;
             align-items: center;
             gap: .45rem;
-            font-size: .82rem;
+            font-size: .8rem;
             font-weight: 800;
             letter-spacing: .03em;
             text-transform: uppercase;
             color: var(--primary);
-            margin-bottom: .45rem;
+            margin-bottom: .35rem;
         }
 
         .hero-note h2 {
-            margin: 0 0 .45rem;
-            font-size: 1rem;
+            margin: 0 0 .25rem;
+            font-size: .98rem;
             line-height: 1.3;
             color: var(--auth-strong);
         }
@@ -265,17 +265,16 @@ $serverToasts = demo_consume_toasts();
         .hero-note p {
             margin: 0;
             color: var(--auth-soft);
-            font-size: .92rem;
-            line-height: 1.56;
+            font-size: .88rem;
+            line-height: 1.45;
         }
 
         .login-panel {
-            padding: 1.5rem;
+            padding: 1.45rem;
             display: grid;
             grid-template-rows: auto auto 1fr auto;
             gap: 1rem;
-            background:
-                linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(249,252,255,0.98) 100%);
+            background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(249,252,255,0.98) 100%);
         }
 
         .login-header {
@@ -306,10 +305,10 @@ $serverToasts = demo_consume_toasts();
         }
 
         .login-header__text {
-            margin: .35rem 0 0;
+            margin: .3rem 0 0;
             color: var(--auth-soft);
-            line-height: 1.5;
-            font-size: .95rem;
+            line-height: 1.45;
+            font-size: .92rem;
         }
 
         .login-card {
@@ -320,7 +319,7 @@ $serverToasts = demo_consume_toasts();
         }
 
         .login-card__title {
-            margin: 0 0 .25rem;
+            margin: 0 0 .2rem;
             font-size: 1rem;
             color: var(--auth-strong);
         }
@@ -328,8 +327,8 @@ $serverToasts = demo_consume_toasts();
         .login-card__subtitle {
             margin: 0;
             color: var(--auth-soft);
-            font-size: .92rem;
-            line-height: 1.5;
+            font-size: .9rem;
+            line-height: 1.45;
         }
 
         .auth-form {
@@ -340,13 +339,13 @@ $serverToasts = demo_consume_toasts();
 
         .auth-form__actions {
             display: grid;
-            gap: .75rem;
+            gap: .7rem;
         }
 
         .auth-help {
             color: var(--auth-soft);
-            font-size: .9rem;
-            line-height: 1.5;
+            font-size: .88rem;
+            line-height: 1.45;
         }
 
         .auth-submit {
@@ -375,16 +374,16 @@ $serverToasts = demo_consume_toasts();
         }
 
         .credentials-card h3 {
-            margin: 0 0 .2rem;
+            margin: 0 0 .15rem;
             font-size: 1rem;
             color: var(--auth-strong);
         }
 
         .credentials-card p {
-            margin: 0 0 .85rem;
+            margin: 0 0 .75rem;
             color: var(--auth-soft);
-            font-size: .9rem;
-            line-height: 1.5;
+            font-size: .88rem;
+            line-height: 1.4;
         }
 
         .credentials-list {
@@ -405,17 +404,17 @@ $serverToasts = demo_consume_toasts();
 
         .credentials-item strong {
             display: block;
-            font-size: .95rem;
+            font-size: .94rem;
             color: var(--auth-strong);
             line-height: 1.25;
         }
 
         .credentials-item small {
             display: block;
-            margin-top: .15rem;
+            margin-top: .12rem;
             color: var(--auth-soft);
-            font-size: .84rem;
-            line-height: 1.45;
+            font-size: .82rem;
+            line-height: 1.35;
         }
 
         .credentials-item code {
@@ -431,8 +430,8 @@ $serverToasts = demo_consume_toasts();
         .login-footer {
             text-align: center;
             color: var(--auth-soft);
-            font-size: .88rem;
-            line-height: 1.45;
+            font-size: .86rem;
+            line-height: 1.4;
         }
 
         @media (max-width: 1200px) {
@@ -513,12 +512,12 @@ $serverToasts = demo_consume_toasts();
                 <div class="hero-brand">
                     <div class="hero-brand__logo">SGS</div>
                     <div>
-                        <p class="hero-brand__eyebrow">Plataforma demo para broker de seguros</p>
+                        <p class="hero-brand__eyebrow">Demo sistema broker</p>
                         <h2 class="hero-brand__title">Sistema de Gestión de Seguros</h2>
                     </div>
                 </div>
 
-                <div class="hero-chip">Gestión profesional y ordenada</div>
+                <div class="hero-chip">Operación clara y profesional</div>
             </div>
 
             <div class="hero-main">
@@ -526,28 +525,28 @@ $serverToasts = demo_consume_toasts();
                     <h1>Sistema de Gestión de Seguros (SGS)</h1>
 
                     <p>
-                        Una experiencia moderna para administrar clientes, pólizas, cobranzas, siniestros y seguimiento comercial en un solo entorno. Diseñado para transmitir confianza, agilidad y control operativo en cada etapa del servicio asegurador.
+                        Plataforma demo para administrar clientes, pólizas, pagos y siniestros en un entorno moderno, ordenado y confiable.
                     </p>
 
                     <div class="hero-feature-grid">
                         <div class="hero-feature">
-                            <strong>Control centralizado</strong>
-                            <span>Organiza la operación diaria con información clara y accesible por rol.</span>
+                            <strong>Pólizas</strong>
+                            <span>Control y seguimiento</span>
                         </div>
 
                         <div class="hero-feature">
-                            <strong>Seguimiento oportuno</strong>
-                            <span>Da continuidad a pagos, renovaciones y atenciones con mayor orden.</span>
+                            <strong>Cobranzas</strong>
+                            <span>Pagos y vencimientos</span>
                         </div>
 
                         <div class="hero-feature">
-                            <strong>Portal para clientes</strong>
-                            <span>Facilita consulta de pólizas, pagos y reportes desde una vista simple.</span>
+                            <strong>Siniestros</strong>
+                            <span>Registro y atención</span>
                         </div>
 
                         <div class="hero-feature">
-                            <strong>Atención confiable</strong>
-                            <span>Brinda una imagen más profesional y cercana para familias y empresas.</span>
+                            <strong>Portal cliente</strong>
+                            <span>Consulta y autoservicio</span>
                         </div>
                     </div>
                 </div>
@@ -559,29 +558,23 @@ $serverToasts = demo_consume_toasts();
                     >
 
                     <div class="hero-media__card">
-                        <strong>Protección que inspira confianza</strong>
-                        <p>
-                            Una operación aseguradora bien gestionada mejora la experiencia del cliente y fortalece la relación comercial a largo plazo.
-                        </p>
+                        <strong>Protección y confianza</strong>
+                        <p>Un sistema sólido mejora la experiencia del cliente y el control del broker.</p>
                     </div>
                 </div>
             </div>
 
             <div class="hero-bottom">
                 <article class="hero-note">
-                    <div class="hero-note__label">Valor del seguro</div>
-                    <h2>Respaldo real ante situaciones imprevistas</h2>
-                    <p>
-                        Los seguros ayudan a proteger la estabilidad personal, familiar y empresarial, ofreciendo tranquilidad y capacidad de respuesta cuando más se necesita.
-                    </p>
+                    <div class="hero-note__label">Seguros</div>
+                    <h2>Respaldo ante imprevistos</h2>
+                    <p>Orden, seguimiento y atención profesional en un solo lugar.</p>
                 </article>
 
                 <article class="hero-note">
-                    <div class="hero-note__label">Contexto local</div>
-                    <h2>Una atención más digital y cercana en Perú</h2>
-                    <p>
-                        El sector viene reforzando procesos ágiles, seguimiento oportuno y mejor acompañamiento al cliente, con foco en prevención, servicio y confianza.
-                    </p>
+                    <div class="hero-note__label">Perú</div>
+                    <h2>Gestión cada vez más digital</h2>
+                    <p>Procesos más ágiles y mejor acompañamiento al cliente.</p>
                 </article>
             </div>
         </section>
@@ -591,17 +584,13 @@ $serverToasts = demo_consume_toasts();
                 <div class="login-header__logo">BS</div>
                 <div>
                     <h2 class="login-header__title">BrokerSeguros</h2>
-                    <p class="login-header__text">
-                        Accede a la demo con uno de los usuarios disponibles y recorre el sistema según el perfil asignado.
-                    </p>
+                    <p class="login-header__text">Accede con uno de los usuarios demo.</p>
                 </div>
             </div>
 
             <div class="login-card">
-                <h3 class="login-card__title">Acceso al sistema</h3>
-                <p class="login-card__subtitle">
-                    Ingresa tus credenciales demo para continuar.
-                </p>
+                <h3 class="login-card__title">Ingreso al sistema</h3>
+                <p class="login-card__subtitle">Usa tus credenciales para continuar.</p>
 
                 <form id="login-form" class="auth-form" action="<?= demo_e(demo_url('ajax/auth.php')) ?>" method="post" data-ajax-form>
                     <input type="hidden" name="action" value="login">
@@ -619,21 +608,21 @@ $serverToasts = demo_consume_toasts();
                     <div id="login-error" class="auth-error" role="alert" aria-live="assertive"></div>
 
                     <div class="auth-form__actions">
-                        <span class="auth-help">La contraseña inicial coincide con el usuario demo.</span>
-                        <button type="submit" class="btn btn-primary auth-submit">Ingresar al sistema</button>
+                        <span class="auth-help">La contraseña inicial es igual al usuario demo.</span>
+                        <button type="submit" class="btn btn-primary auth-submit">Ingresar</button>
                     </div>
                 </form>
             </div>
 
             <div class="credentials-card">
                 <h3>Credenciales demo</h3>
-                <p>Perfiles listos para validar el flujo del sistema.</p>
+                <p>Perfiles disponibles para probar el sistema.</p>
 
                 <div class="credentials-list">
                     <div class="credentials-item">
                         <div>
                             <strong>Gerente</strong>
-                            <small>Gestión integral del sistema</small>
+                            <small>Gestión general</small>
                         </div>
                         <code>45871234 / 45871234</code>
                     </div>
@@ -641,7 +630,7 @@ $serverToasts = demo_consume_toasts();
                     <div class="credentials-item">
                         <div>
                             <strong>Ejecutivo</strong>
-                            <small>Operación comercial y cartera</small>
+                            <small>Cartera y operación</small>
                         </div>
                         <code>48652137 / 48652137</code>
                     </div>
@@ -649,7 +638,7 @@ $serverToasts = demo_consume_toasts();
                     <div class="credentials-item">
                         <div>
                             <strong>Cliente</strong>
-                            <small>Portal de consulta y seguimiento</small>
+                            <small>Portal de consulta</small>
                         </div>
                         <code>70123456 / 70123456</code>
                     </div>
@@ -657,7 +646,7 @@ $serverToasts = demo_consume_toasts();
             </div>
 
             <div class="login-footer">
-                Demo sin base de datos real · Persistencia temporal por sesión
+                Demo funcional · Persistencia temporal por sesión
             </div>
         </section>
     </div>
