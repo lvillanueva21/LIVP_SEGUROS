@@ -65,24 +65,23 @@ $serverToasts = demo_consume_toasts();
             line-height: 1.65;
         }
 
-        .auth-hero__stats {
+        .auth-hero__cover-wrap {
             margin-top: 1.5rem;
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 1rem;
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid rgba(219, 227, 239, 0.8);
+            box-shadow: var(--shadow-sm);
+            background: #eef4fb;
+            min-height: 380px;
         }
 
-        .auth-stat {
-            background: rgba(255, 255, 255, 0.72);
-            border: 1px solid rgba(219, 227, 239, 0.75);
-            border-radius: 18px;
-            padding: 1rem;
-        }
-
-        .auth-stat strong {
+        .auth-hero__cover {
+            width: 100%;
+            height: 100%;
+            min-height: 380px;
+            object-fit: cover;
+            object-position: center;
             display: block;
-            font-size: 1.35rem;
-            margin-bottom: .25rem;
         }
 
         .auth-card {
@@ -231,8 +230,9 @@ $serverToasts = demo_consume_toasts();
                 border-radius: 22px;
             }
 
-            .auth-hero__stats {
-                grid-template-columns: 1fr;
+            .auth-hero__cover-wrap,
+            .auth-hero__cover {
+                min-height: 260px;
             }
 
             .credentials-item {
@@ -246,31 +246,24 @@ $serverToasts = demo_consume_toasts();
         <section class="auth-hero">
             <div>
                 <span class="auth-hero__badge">● Demo funcional para broker de seguros</span>
-                <h1 class="auth-hero__title">Control comercial, pólizas, cobranzas y seguimiento en una sola plataforma.</h1>
+                <h1 class="auth-hero__title">Sistema de Gestión de Seguros (SGS)</h1>
                 <p class="auth-hero__text">
-                    Esta demo simula un sistema interno moderno para gerencia, ejecutivos y clientes. Está pensada para validar flujo, diseño, jerarquía visual y experiencia real de uso, sin depender de base de datos ni librerías externas.
+                    Los seguros representan tranquilidad, respaldo y previsión para las familias y las empresas. Un buen sistema de gestión ayuda a mantener la información ordenada, dar seguimiento oportuno a las pólizas y ofrecer una atención más cercana, confiable y humana en los momentos en que más se necesita protección.
                 </p>
 
-                <div class="auth-hero__stats">
-                    <article class="auth-stat">
-                        <strong>3</strong>
-                        <span class="muted">Roles activos</span>
-                    </article>
-                    <article class="auth-stat">
-                        <strong>6</strong>
-                        <span class="muted">Clientes demo</span>
-                    </article>
-                    <article class="auth-stat">
-                        <strong>5</strong>
-                        <span class="muted">Pólizas simuladas</span>
-                    </article>
+                <div class="auth-hero__cover-wrap">
+                    <img
+                        class="auth-hero__cover"
+                        src="<?= demo_e(demo_url('assets/familia.webp')) ?>"
+                        alt="Familia protegida"
+                    >
                 </div>
             </div>
 
             <div class="panel">
-                <strong>Base compartida activa</strong>
+                <strong>Panorama del sector asegurador en Perú</strong>
                 <p class="muted mt-1">
-                    Sidebar por rol, header consistente, store temporal en sesión, tablas responsive, modales propios, toasts automáticos y acciones AJAX listas para seguir construyendo módulos encima.
+                    En esta portada demo se destaca un escenario positivo del mercado asegurador peruano, donde cada vez más familias y negocios buscan proteger su salud, su patrimonio y su estabilidad financiera. Los corredores vienen reforzando la atención cercana, los recordatorios de pago y el seguimiento digital para brindar una experiencia más ordenada, ágil y confiable.
                 </p>
             </div>
         </section>
