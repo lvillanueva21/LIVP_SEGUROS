@@ -386,35 +386,29 @@ $serverToasts = demo_consume_toasts();
         };
     </script>
     <script src="<?= demo_e(demo_url('assets/js/app.js')) ?>"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('login-form');
-            const errorBox = document.getElementById('login-error');
+ <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('login-form');
+        const errorBox = document.getElementById('login-error');
 
-            const setError = (message = '') => {
-                errorBox.textContent = message;
-                errorBox.classList.toggle('is-visible', Boolean(message));
-            };
+        const setError = (message = '') => {
+            errorBox.textContent = message;
+            errorBox.classList.toggle('is-visible', Boolean(message));
+        };
 
-            form.addEventListener('ajax:error', (event) => {
-                setError(event.detail?.message || 'No se pudo iniciar sesión.');
-            });
-
-            form.addEventListener('ajax:success', (event) => {
-                setError('');
-                const detail = event.detail || {};
-                DemoApp.toast({
-                    title: detail.title || 'Acceso concedido',
-                    message: detail.message || 'Redirigiendo al sistema…',
-                    type: 'success',
-                    timeout: 1200
-                });
-
-                setTimeout(() => {
-                    window.location.href = detail.redirect || 'home.php';
-                }, 850);
-            });
+        form.addEventListener('ajax:error', (event) => {
+            setError(event.detail?.message || 'No se pudo iniciar sesión.');
         });
-    </script>
+
+        form.addEventListener('ajax:success', (event) => {
+            setError('');
+            const detail = event.detail || {};
+
+            setTimeout(() => {
+                window.location.href = detail.redirect || 'home.php';
+            }, 850);
+        });
+    });
+</script>
 </body>
 </html>
