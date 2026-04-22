@@ -73,9 +73,14 @@ if (function_exists('session_regenerate_id')) {
 
 demo_login_user($user);
 
+demo_push_toast(
+    'Hola, ' . ($user['full_name'] ?? 'usuario') . '. Te damos la bienvenida al sistema.',
+    'success',
+    'Bienvenido'
+);
+
 demo_json(true, [
-    'title' => 'Bienvenido',
-    'message' => 'Hola, ' . ($user['full_name'] ?? 'usuario') . '. Redirigiendo al sistema…',
+    'suppressToast' => true,
     'redirect' => demo_url('home.php'),
     'name' => $user['full_name'] ?? '',
     'role' => $user['role'] ?? '',

@@ -264,29 +264,31 @@
                 body: formData
             });
 
-            if (response.success) {
-                this.toast({
-                    title: response.title || 'Operación exitosa',
-                    message: response.message || 'Se guardaron los cambios.',
-                    type: response.type || 'success'
-                });
+      if (response.success) {
+    if (!response.suppressToast) {
+        this.toast({
+            title: response.title || 'Operación exitosa',
+            message: response.message || 'Se guardaron los cambios.',
+            type: response.type || 'success'
+        });
+    }
 
-                if (response.closeModal) {
-                    this.closeModal(response.closeModal);
-                }
+    if (response.closeModal) {
+        this.closeModal(response.closeModal);
+    }
 
-                if (response.redirect) {
-                    window.setTimeout(() => {
-                        window.location.href = response.redirect;
-                    }, 400);
-                }
+    if (response.redirect) {
+        window.setTimeout(() => {
+            window.location.href = response.redirect;
+        }, 400);
+    }
 
-                if (response.callback && typeof window[response.callback] === 'function') {
-                    window[response.callback](response);
-                }
+    if (response.callback && typeof window[response.callback] === 'function') {
+        window[response.callback](response);
+    }
 
-                form.dispatchEvent(new CustomEvent('ajax:success', { detail: response }));
-            } else {
+    form.dispatchEvent(new CustomEvent('ajax:success', { detail: response }));
+} else {     
                 this.toast({
                     title: response.title || 'No se pudo completar',
                     message: response.message || 'Verifica la información ingresada.',
