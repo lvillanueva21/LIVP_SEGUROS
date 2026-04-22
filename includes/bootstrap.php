@@ -445,10 +445,10 @@ if (!function_exists('demo_menu_items')) {
 if (!function_exists('demo_active_menu')) {
     function demo_active_menu(string $href): bool
     {
-        $current = demo_current_script_relative_path();
+        $current = ltrim(demo_current_script_relative_path(), '/');
         $href = ltrim($href, '/');
 
-        return $current === $href || str_starts_with($current, rtrim(dirname($href), './'));
+        return $current === $href;
     }
 }
 
