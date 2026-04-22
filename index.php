@@ -400,13 +400,8 @@ $serverToasts = demo_consume_toasts();
             setError(event.detail?.message || 'No se pudo iniciar sesión.');
         });
 
-        form.addEventListener('ajax:success', (event) => {
+        form.addEventListener('ajax:success', () => {
             setError('');
-            const detail = event.detail || {};
-
-            setTimeout(() => {
-                window.location.href = detail.redirect || 'home.php';
-            }, 850);
         });
     });
 </script>
