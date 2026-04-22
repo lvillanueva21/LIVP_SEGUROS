@@ -105,7 +105,7 @@ if (!function_exists('demo_render_sidebar')) {
             </nav>
 
             <div class="sidebar__footer">
-                <a href="<?= demo_e($logoutHref) ?>" class="btn btn-ghost btn-block">Cerrar sesión</a>
+                <a href="<?= demo_e($logoutHref) ?>" class="btn btn-danger btn-block">Cerrar sesión</a>
             </div>
         </aside>
         <?php
