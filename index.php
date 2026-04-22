@@ -18,7 +18,7 @@ $serverToasts = demo_consume_toasts();
         .auth-shell {
             min-height: 100vh;
             display: grid;
-            grid-template-columns: 7fr 3fr;
+            grid-template-columns: 6fr 4fr;
             gap: 1.2rem;
             padding: 1.2rem;
             background: #eef4fb;
