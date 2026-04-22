@@ -18,25 +18,41 @@ $serverToasts = demo_consume_toasts();
         .auth-shell {
             min-height: 100vh;
             display: grid;
-            grid-template-columns: minmax(0, 1.15fr) minmax(360px, 460px);
-            gap: 1.5rem;
-            padding: 1.5rem;
+            grid-template-columns: minmax(0, 1.2fr) minmax(360px, 430px);
+            gap: 1.35rem;
+            padding: 1.25rem;
             align-items: stretch;
         }
 
         .auth-hero {
             background:
-                radial-gradient(circle at top right, rgba(79, 70, 229, 0.22), transparent 30%),
-                radial-gradient(circle at bottom left, rgba(14, 165, 164, 0.18), transparent 30%),
+                radial-gradient(circle at top right, rgba(79, 70, 229, 0.18), transparent 30%),
+                radial-gradient(circle at bottom left, rgba(14, 165, 164, 0.14), transparent 28%),
                 linear-gradient(135deg, #ffffff 0%, #f7fbff 100%);
-            border: 1px solid rgba(219, 227, 239, 0.85);
+            border: 1px solid rgba(219, 227, 239, 0.88);
             border-radius: 26px;
             box-shadow: var(--shadow-md);
-            padding: 2rem;
+            padding: 1.6rem;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center;
             overflow: hidden;
+            min-width: 0;
+        }
+
+        .auth-hero__layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr);
+            gap: 1.25rem;
+            align-items: stretch;
+            min-width: 0;
+        }
+
+        .auth-hero__content {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .auth-hero__badge {
@@ -49,47 +65,77 @@ $serverToasts = demo_consume_toasts();
             color: var(--primary);
             font-weight: 700;
             width: fit-content;
+            max-width: 100%;
         }
 
         .auth-hero__title {
-            margin: 1rem 0 .65rem;
-            font-size: clamp(2rem, 4vw, 3.2rem);
-            line-height: 1.05;
+            margin: 1rem 0 .8rem;
+            font-size: clamp(2rem, 4vw, 3.15rem);
+            line-height: 1.02;
+            letter-spacing: -.03em;
+            max-width: 10ch;
         }
 
         .auth-hero__text {
             margin: 0;
-            max-width: 60ch;
             color: var(--text-soft);
             font-size: 1rem;
-            line-height: 1.65;
+            line-height: 1.72;
+            max-width: 60ch;
         }
 
-        .auth-hero__cover-wrap {
-            margin-top: 1.5rem;
+        .auth-hero__aside {
+            min-width: 0;
+            display: grid;
+            grid-template-rows: minmax(260px, 1fr) auto;
+            gap: 1rem;
+        }
+
+        .auth-hero__media {
+            position: relative;
+            min-height: 320px;
             border-radius: 24px;
             overflow: hidden;
-            border: 1px solid rgba(219, 227, 239, 0.8);
-            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(219, 227, 239, 0.88);
             background: #eef4fb;
-            min-height: 380px;
+            box-shadow: var(--shadow-sm);
         }
 
-        .auth-hero__cover {
+        .auth-hero__media img {
             width: 100%;
             height: 100%;
-            min-height: 380px;
             object-fit: cover;
             object-position: center;
             display: block;
         }
 
-        .auth-card {
-            background: rgba(255, 255, 255, 0.96);
+        .auth-hero__news {
+            padding: 1rem 1.05rem;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.82);
             border: 1px solid rgba(219, 227, 239, 0.85);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .auth-hero__news strong {
+            display: block;
+            margin-bottom: .4rem;
+            font-size: .95rem;
+        }
+
+        .auth-hero__news p {
+            margin: 0;
+            color: var(--text-soft);
+            font-size: .92rem;
+            line-height: 1.58;
+        }
+
+        .auth-card {
+            background: rgba(255, 255, 255, 0.97);
+            border: 1px solid rgba(219, 227, 239, 0.88);
             border-radius: 26px;
             box-shadow: var(--shadow-md);
-            padding: 1.5rem;
+            padding: 1.45rem;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -100,7 +146,7 @@ $serverToasts = demo_consume_toasts();
             display: flex;
             align-items: center;
             gap: .9rem;
-            margin-bottom: 1.25rem;
+            margin-bottom: 1.2rem;
         }
 
         .auth-card__logo {
@@ -114,11 +160,13 @@ $serverToasts = demo_consume_toasts();
             font-weight: 900;
             font-size: 1.05rem;
             box-shadow: var(--shadow-sm);
+            flex-shrink: 0;
         }
 
         .auth-card__title {
             margin: 0;
-            font-size: 1.5rem;
+            font-size: 1.45rem;
+            line-height: 1.1;
         }
 
         .auth-card__subtitle {
@@ -129,7 +177,7 @@ $serverToasts = demo_consume_toasts();
         .auth-form {
             display: grid;
             gap: 1rem;
-            margin-top: 1rem;
+            margin-top: .9rem;
         }
 
         .auth-form__actions {
@@ -159,7 +207,7 @@ $serverToasts = demo_consume_toasts();
         }
 
         .credentials-card {
-            margin-top: 1.25rem;
+            margin-top: 1.15rem;
             background: linear-gradient(180deg, #fbfdff 0%, #f7faff 100%);
             border: 1px dashed rgba(100, 116, 139, 0.28);
             border-radius: 18px;
@@ -205,17 +253,42 @@ $serverToasts = demo_consume_toasts();
             text-align: center;
         }
 
+        @media (max-width: 1200px) {
+            .auth-hero__layout {
+                grid-template-columns: 1fr;
+            }
+
+            .auth-hero__title {
+                max-width: none;
+            }
+
+            .auth-hero__aside {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: none;
+            }
+
+            .auth-hero__media {
+                min-height: 260px;
+            }
+        }
+
         @media (max-width: 980px) {
             .auth-shell {
                 grid-template-columns: 1fr;
             }
 
+            .auth-card {
+                order: 1;
+            }
+
             .auth-hero {
                 order: 2;
             }
+        }
 
-            .auth-card {
-                order: 1;
+        @media (max-width: 760px) {
+            .auth-hero__aside {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -230,9 +303,12 @@ $serverToasts = demo_consume_toasts();
                 border-radius: 22px;
             }
 
-            .auth-hero__cover-wrap,
-            .auth-hero__cover {
-                min-height: 260px;
+            .auth-hero__title {
+                font-size: clamp(1.8rem, 9vw, 2.5rem);
+            }
+
+            .auth-hero__media {
+                min-height: 220px;
             }
 
             .credentials-item {
@@ -244,27 +320,32 @@ $serverToasts = demo_consume_toasts();
 <body>
     <div class="auth-shell">
         <section class="auth-hero">
-            <div>
-                <span class="auth-hero__badge">● Demo funcional para broker de seguros</span>
-                <h1 class="auth-hero__title">Sistema de Gestión de Seguros (SGS)</h1>
-                <p class="auth-hero__text">
-                    Los seguros representan tranquilidad, respaldo y previsión para las familias y las empresas. Un buen sistema de gestión ayuda a mantener la información ordenada, dar seguimiento oportuno a las pólizas y ofrecer una atención más cercana, confiable y humana en los momentos en que más se necesita protección.
-                </p>
+            <div class="auth-hero__layout">
+                <div class="auth-hero__content">
+                    <span class="auth-hero__badge">● Demo funcional para broker de seguros</span>
 
-                <div class="auth-hero__cover-wrap">
-                    <img
-                        class="auth-hero__cover"
-                        src="<?= demo_e(demo_url('assets/img/familia.webp')) ?>"
-                        alt="Familia protegida"
-                    >
+                    <h1 class="auth-hero__title">Sistema de Gestión de Seguros (SGS)</h1>
+
+                    <p class="auth-hero__text">
+                        Los seguros brindan estabilidad, respaldo y tranquilidad frente a imprevistos que pueden afectar a una familia o a una empresa. Un sistema de gestión bien organizado permite controlar pólizas, pagos y seguimientos con mayor claridad, ofreciendo una atención oportuna, cercana y confiable en cada etapa del servicio.
+                    </p>
                 </div>
-            </div>
 
-            <div class="panel">
-                <strong>Panorama del sector asegurador en Perú</strong>
-                <p class="muted mt-1">
-                    En esta portada demo se destaca un escenario positivo del mercado asegurador peruano, donde cada vez más familias y negocios buscan proteger su salud, su patrimonio y su estabilidad financiera. Los corredores vienen reforzando la atención cercana, los recordatorios de pago y el seguimiento digital para brindar una experiencia más ordenada, ágil y confiable.
-                </p>
+                <div class="auth-hero__aside">
+                    <div class="auth-hero__media">
+                        <img
+                            src="<?= demo_e(demo_url('assets/img/familia.webp')) ?>"
+                            alt="Familia protegida"
+                        >
+                    </div>
+
+                    <div class="auth-hero__news">
+                        <strong>Panorama asegurador en Perú</strong>
+                        <p>
+                            El mercado asegurador peruano sigue impulsando una atención más digital y más cercana al cliente, con mayor enfoque en prevención, seguimiento de pagos y acompañamiento oportuno ante siniestros. Esta demo refleja esa visión moderna, ordenada y confiable del servicio.
+                        </p>
+                    </div>
+                </div>
             </div>
         </section>
 
