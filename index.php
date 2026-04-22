@@ -18,39 +18,54 @@ $serverToasts = demo_consume_toasts();
         .auth-shell {
             min-height: 100vh;
             display: grid;
-            grid-template-columns: minmax(0, 1.35fr) minmax(360px, 430px);
-            gap: 1.25rem;
-            padding: 1.25rem;
-            align-items: stretch;
+            grid-template-columns: 7fr 3fr;
+            gap: 1.2rem;
+            padding: 1.2rem;
+            background: #eef4fb;
         }
 
-        .auth-hero {
-            background:
-                radial-gradient(circle at top right, rgba(79, 70, 229, 0.16), transparent 28%),
-                radial-gradient(circle at bottom left, rgba(14, 165, 164, 0.12), transparent 26%),
-                linear-gradient(135deg, #ffffff 0%, #f7fbff 100%);
+        .hero-panel,
+        .login-panel {
+            background: rgba(255, 255, 255, 0.97);
             border: 1px solid rgba(219, 227, 239, 0.88);
-            border-radius: 28px;
+            border-radius: 26px;
             box-shadow: var(--shadow-md);
-            padding: 1.25rem;
-            display: grid;
-            grid-template-rows: auto 1fr;
-            gap: 1.15rem;
             overflow: hidden;
             min-width: 0;
         }
 
-        .auth-hero__media {
-            position: relative;
-            min-height: 320px;
-            border-radius: 24px;
-            overflow: hidden;
-            border: 1px solid rgba(219, 227, 239, 0.88);
-            background: #eef4fb;
-            box-shadow: var(--shadow-sm);
+        .hero-panel {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            min-height: calc(100vh - 2.4rem);
+            background:
+                radial-gradient(circle at top right, rgba(79, 70, 229, 0.10), transparent 26%),
+                radial-gradient(circle at bottom left, rgba(14, 165, 164, 0.08), transparent 26%),
+                linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
         }
 
-        .auth-hero__media img {
+        .hero-panel__top {
+            padding: 1.1rem 1.4rem;
+            border-bottom: 1px solid rgba(219, 227, 239, 0.85);
+            text-align: center;
+            background: rgba(255,255,255,.72);
+        }
+
+        .hero-panel__top h1 {
+            margin: 0;
+            font-size: clamp(1.8rem, 3vw, 2.8rem);
+            line-height: 1.08;
+            letter-spacing: -.03em;
+        }
+
+        .hero-panel__media {
+            position: relative;
+            min-height: 0;
+            overflow: hidden;
+            background: #eaf1f9;
+        }
+
+        .hero-panel__media img {
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -58,99 +73,54 @@ $serverToasts = demo_consume_toasts();
             display: block;
         }
 
-        .auth-hero__overlay {
-            position: absolute;
-            inset: auto 1.1rem 1.1rem 1.1rem;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            pointer-events: none;
-        }
-
-        .auth-hero__badge {
-            display: inline-flex;
-            align-items: center;
-            gap: .55rem;
-            padding: .65rem 1rem;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.88);
-            color: var(--primary);
-            font-weight: 700;
-            box-shadow: var(--shadow-sm);
-            backdrop-filter: blur(8px);
-            max-width: 100%;
-        }
-
-        .auth-hero__body {
+        .hero-panel__bottom {
             display: grid;
-            grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr);
-            gap: 1.15rem;
-            align-items: start;
+            grid-template-columns: 1fr 1.35fr;
+            border-top: 1px solid rgba(219, 227, 239, 0.85);
+            min-height: 160px;
+        }
+
+        .hero-box {
+            padding: 1.15rem 1.25rem;
             min-width: 0;
-        }
-
-        .auth-hero__content {
-            min-width: 0;
-        }
-
-        .auth-hero__title {
-            margin: 0 0 .85rem;
-            font-size: clamp(2rem, 4vw, 3.4rem);
-            line-height: 1.02;
-            letter-spacing: -.035em;
-            max-width: 12ch;
-        }
-
-        .auth-hero__text {
-            margin: 0;
-            color: var(--text-soft);
-            font-size: 1rem;
-            line-height: 1.72;
-            max-width: 62ch;
-        }
-
-        .auth-hero__news {
-            padding: 1.1rem 1.1rem;
-            border-radius: 22px;
-            background: rgba(255, 255, 255, 0.86);
-            border: 1px solid rgba(219, 227, 239, 0.86);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .auth-hero__news strong {
-            display: block;
-            margin-bottom: .45rem;
-            font-size: 1rem;
-            line-height: 1.3;
-        }
-
-        .auth-hero__news p {
-            margin: 0;
-            color: var(--text-soft);
-            font-size: .95rem;
-            line-height: 1.62;
-        }
-
-        .auth-card {
-            background: rgba(255, 255, 255, 0.97);
-            border: 1px solid rgba(219, 227, 239, 0.88);
-            border-radius: 28px;
-            box-shadow: var(--shadow-md);
-            padding: 1.45rem;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            min-width: 0;
         }
 
-        .auth-card__brand {
+        .hero-box + .hero-box {
+            border-left: 1px solid rgba(219, 227, 239, 0.85);
+        }
+
+        .hero-box h2 {
+            margin: 0 0 .45rem;
+            font-size: 1.02rem;
+            line-height: 1.25;
+        }
+
+        .hero-box p {
+            margin: 0;
+            color: var(--text-soft);
+            line-height: 1.62;
+            font-size: .95rem;
+        }
+
+        .login-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 1.45rem;
+            min-height: calc(100vh - 2.4rem);
+        }
+
+        .login-panel__brand {
             display: flex;
             align-items: center;
             gap: .95rem;
-            margin-bottom: 1.2rem;
+            margin-bottom: 1.4rem;
         }
 
-        .auth-card__logo {
+        .login-panel__logo {
             width: 58px;
             height: 58px;
             border-radius: 18px;
@@ -164,13 +134,13 @@ $serverToasts = demo_consume_toasts();
             flex-shrink: 0;
         }
 
-        .auth-card__title {
+        .login-panel__brand h2 {
             margin: 0;
             font-size: 1.45rem;
             line-height: 1.1;
         }
 
-        .auth-card__subtitle {
+        .login-panel__brand p {
             margin: .35rem 0 0;
             color: var(--text-soft);
         }
@@ -178,7 +148,7 @@ $serverToasts = demo_consume_toasts();
         .auth-form {
             display: grid;
             gap: 1rem;
-            margin-top: .9rem;
+            margin-top: .4rem;
         }
 
         .auth-form__actions {
@@ -255,50 +225,52 @@ $serverToasts = demo_consume_toasts();
         }
 
         @media (max-width: 1180px) {
-            .auth-hero__body {
-                grid-template-columns: 1fr;
-            }
-
-            .auth-hero__title {
-                max-width: none;
-            }
-        }
-
-        @media (max-width: 980px) {
             .auth-shell {
                 grid-template-columns: 1fr;
             }
 
-            .auth-card {
+            .login-panel {
+                min-height: auto;
                 order: 1;
             }
 
-            .auth-hero {
+            .hero-panel {
+                min-height: auto;
                 order: 2;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .hero-panel__bottom {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-box + .hero-box {
+                border-left: 0;
+                border-top: 1px solid rgba(219, 227, 239, 0.85);
             }
         }
 
         @media (max-width: 640px) {
             .auth-shell {
                 padding: 1rem;
+                gap: 1rem;
             }
 
-            .auth-hero,
-            .auth-card {
-                padding: 1rem;
+            .hero-panel,
+            .login-panel {
                 border-radius: 22px;
             }
 
-            .auth-hero__media {
+            .hero-panel__top,
+            .hero-box,
+            .login-panel {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            .hero-panel__media {
                 min-height: 220px;
-            }
-
-            .auth-hero__overlay {
-                inset: auto .75rem .75rem .75rem;
-            }
-
-            .auth-hero__title {
-                font-size: clamp(1.85rem, 9vw, 2.6rem);
             }
 
             .credentials-item {
@@ -309,41 +281,41 @@ $serverToasts = demo_consume_toasts();
 </head>
 <body>
     <div class="auth-shell">
-        <section class="auth-hero">
-            <div class="auth-hero__media">
+        <section class="hero-panel">
+            <div class="hero-panel__top">
+                <h1>Sistema de Gestión de Seguros (SGS)</h1>
+            </div>
+
+            <div class="hero-panel__media">
                 <img
                     src="<?= demo_e(demo_url('assets/img/familia.webp')) ?>"
                     alt="Familia protegida"
                 >
-                <div class="auth-hero__overlay">
-                    <span class="auth-hero__badge">● Demo funcional para broker de seguros</span>
-                </div>
             </div>
 
-            <div class="auth-hero__body">
-                <div class="auth-hero__content">
-                    <h1 class="auth-hero__title">Sistema de Gestión de Seguros (SGS)</h1>
-
-                    <p class="auth-hero__text">
-                        Los seguros brindan estabilidad, respaldo y tranquilidad frente a imprevistos que pueden afectar a una familia o a una empresa. Un sistema de gestión bien organizado permite controlar pólizas, pagos y seguimientos con mayor claridad, ofreciendo una atención oportuna, cercana y confiable en cada etapa del servicio.
+            <div class="hero-panel__bottom">
+                <div class="hero-box">
+                    <h2>Protección, confianza y tranquilidad</h2>
+                    <p>
+                        Los seguros ayudan a cuidar la estabilidad de las familias y de las empresas frente a eventos inesperados. Un sistema moderno de gestión permite brindar un servicio más ordenado, cercano y confiable, mejorando el seguimiento de pólizas, pagos y atenciones.
                     </p>
                 </div>
 
-                <div class="auth-hero__news">
-                    <strong>Panorama asegurador en Perú</strong>
+                <div class="hero-box">
+                    <h2>Panorama asegurador en el Perú</h2>
                     <p>
-                        El sector asegurador peruano viene reforzando una atención más cercana, digital y preventiva, con mayor seguimiento de pólizas, pagos y acompañamiento al cliente. Esta portada busca transmitir esa idea de confianza, orden y protección que hoy esperan las familias y empresas.
+                        El sector asegurador peruano continúa fortaleciendo la atención digital y el acompañamiento al cliente, con mayor enfoque en prevención, seguimiento oportuno y respuesta ágil ante siniestros. Esta plataforma demo representa esa visión de servicio profesional, claro y bien organizado.
                     </p>
                 </div>
             </div>
         </section>
 
-        <section class="auth-card">
-            <div class="auth-card__brand">
-                <div class="auth-card__logo">BS</div>
+        <section class="login-panel">
+            <div class="login-panel__brand">
+                <div class="login-panel__logo">BS</div>
                 <div>
-                    <h2 class="auth-card__title">BrokerSeguros</h2>
-                    <p class="auth-card__subtitle">Inicia sesión con uno de los usuarios demo</p>
+                    <h2>BrokerSeguros</h2>
+                    <p>Inicia sesión con uno de los usuarios demo</p>
                 </div>
             </div>
 
