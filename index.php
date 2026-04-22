@@ -18,77 +18,26 @@ $serverToasts = demo_consume_toasts();
         .auth-shell {
             min-height: 100vh;
             display: grid;
-            grid-template-columns: minmax(0, 1.2fr) minmax(360px, 430px);
-            gap: 1.35rem;
+            grid-template-columns: minmax(0, 1.35fr) minmax(360px, 430px);
+            gap: 1.25rem;
             padding: 1.25rem;
             align-items: stretch;
         }
 
         .auth-hero {
             background:
-                radial-gradient(circle at top right, rgba(79, 70, 229, 0.18), transparent 30%),
-                radial-gradient(circle at bottom left, rgba(14, 165, 164, 0.14), transparent 28%),
+                radial-gradient(circle at top right, rgba(79, 70, 229, 0.16), transparent 28%),
+                radial-gradient(circle at bottom left, rgba(14, 165, 164, 0.12), transparent 26%),
                 linear-gradient(135deg, #ffffff 0%, #f7fbff 100%);
             border: 1px solid rgba(219, 227, 239, 0.88);
-            border-radius: 26px;
+            border-radius: 28px;
             box-shadow: var(--shadow-md);
-            padding: 1.6rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            padding: 1.25rem;
+            display: grid;
+            grid-template-rows: auto 1fr;
+            gap: 1.15rem;
             overflow: hidden;
             min-width: 0;
-        }
-
-        .auth-hero__layout {
-            display: grid;
-            grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr);
-            gap: 1.25rem;
-            align-items: stretch;
-            min-width: 0;
-        }
-
-        .auth-hero__content {
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .auth-hero__badge {
-            display: inline-flex;
-            align-items: center;
-            gap: .55rem;
-            padding: .55rem .9rem;
-            border-radius: 999px;
-            background: rgba(79, 70, 229, 0.08);
-            color: var(--primary);
-            font-weight: 700;
-            width: fit-content;
-            max-width: 100%;
-        }
-
-        .auth-hero__title {
-            margin: 1rem 0 .8rem;
-            font-size: clamp(2rem, 4vw, 3.15rem);
-            line-height: 1.02;
-            letter-spacing: -.03em;
-            max-width: 10ch;
-        }
-
-        .auth-hero__text {
-            margin: 0;
-            color: var(--text-soft);
-            font-size: 1rem;
-            line-height: 1.72;
-            max-width: 60ch;
-        }
-
-        .auth-hero__aside {
-            min-width: 0;
-            display: grid;
-            grid-template-rows: minmax(260px, 1fr) auto;
-            gap: 1rem;
         }
 
         .auth-hero__media {
@@ -109,31 +58,83 @@ $serverToasts = demo_consume_toasts();
             display: block;
         }
 
+        .auth-hero__overlay {
+            position: absolute;
+            inset: auto 1.1rem 1.1rem 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            pointer-events: none;
+        }
+
+        .auth-hero__badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .55rem;
+            padding: .65rem 1rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.88);
+            color: var(--primary);
+            font-weight: 700;
+            box-shadow: var(--shadow-sm);
+            backdrop-filter: blur(8px);
+            max-width: 100%;
+        }
+
+        .auth-hero__body {
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr);
+            gap: 1.15rem;
+            align-items: start;
+            min-width: 0;
+        }
+
+        .auth-hero__content {
+            min-width: 0;
+        }
+
+        .auth-hero__title {
+            margin: 0 0 .85rem;
+            font-size: clamp(2rem, 4vw, 3.4rem);
+            line-height: 1.02;
+            letter-spacing: -.035em;
+            max-width: 12ch;
+        }
+
+        .auth-hero__text {
+            margin: 0;
+            color: var(--text-soft);
+            font-size: 1rem;
+            line-height: 1.72;
+            max-width: 62ch;
+        }
+
         .auth-hero__news {
-            padding: 1rem 1.05rem;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.82);
-            border: 1px solid rgba(219, 227, 239, 0.85);
+            padding: 1.1rem 1.1rem;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.86);
+            border: 1px solid rgba(219, 227, 239, 0.86);
             box-shadow: var(--shadow-sm);
         }
 
         .auth-hero__news strong {
             display: block;
-            margin-bottom: .4rem;
-            font-size: .95rem;
+            margin-bottom: .45rem;
+            font-size: 1rem;
+            line-height: 1.3;
         }
 
         .auth-hero__news p {
             margin: 0;
             color: var(--text-soft);
-            font-size: .92rem;
-            line-height: 1.58;
+            font-size: .95rem;
+            line-height: 1.62;
         }
 
         .auth-card {
             background: rgba(255, 255, 255, 0.97);
             border: 1px solid rgba(219, 227, 239, 0.88);
-            border-radius: 26px;
+            border-radius: 28px;
             box-shadow: var(--shadow-md);
             padding: 1.45rem;
             display: flex;
@@ -145,7 +146,7 @@ $serverToasts = demo_consume_toasts();
         .auth-card__brand {
             display: flex;
             align-items: center;
-            gap: .9rem;
+            gap: .95rem;
             margin-bottom: 1.2rem;
         }
 
@@ -253,22 +254,13 @@ $serverToasts = demo_consume_toasts();
             text-align: center;
         }
 
-        @media (max-width: 1200px) {
-            .auth-hero__layout {
+        @media (max-width: 1180px) {
+            .auth-hero__body {
                 grid-template-columns: 1fr;
             }
 
             .auth-hero__title {
                 max-width: none;
-            }
-
-            .auth-hero__aside {
-                grid-template-columns: 1fr 1fr;
-                grid-template-rows: none;
-            }
-
-            .auth-hero__media {
-                min-height: 260px;
             }
         }
 
@@ -286,12 +278,6 @@ $serverToasts = demo_consume_toasts();
             }
         }
 
-        @media (max-width: 760px) {
-            .auth-hero__aside {
-                grid-template-columns: 1fr;
-            }
-        }
-
         @media (max-width: 640px) {
             .auth-shell {
                 padding: 1rem;
@@ -299,16 +285,20 @@ $serverToasts = demo_consume_toasts();
 
             .auth-hero,
             .auth-card {
-                padding: 1.15rem;
+                padding: 1rem;
                 border-radius: 22px;
-            }
-
-            .auth-hero__title {
-                font-size: clamp(1.8rem, 9vw, 2.5rem);
             }
 
             .auth-hero__media {
                 min-height: 220px;
+            }
+
+            .auth-hero__overlay {
+                inset: auto .75rem .75rem .75rem;
+            }
+
+            .auth-hero__title {
+                font-size: clamp(1.85rem, 9vw, 2.6rem);
             }
 
             .credentials-item {
@@ -320,10 +310,18 @@ $serverToasts = demo_consume_toasts();
 <body>
     <div class="auth-shell">
         <section class="auth-hero">
-            <div class="auth-hero__layout">
-                <div class="auth-hero__content">
+            <div class="auth-hero__media">
+                <img
+                    src="<?= demo_e(demo_url('assets/img/familia.webp')) ?>"
+                    alt="Familia protegida"
+                >
+                <div class="auth-hero__overlay">
                     <span class="auth-hero__badge">● Demo funcional para broker de seguros</span>
+                </div>
+            </div>
 
+            <div class="auth-hero__body">
+                <div class="auth-hero__content">
                     <h1 class="auth-hero__title">Sistema de Gestión de Seguros (SGS)</h1>
 
                     <p class="auth-hero__text">
@@ -331,20 +329,11 @@ $serverToasts = demo_consume_toasts();
                     </p>
                 </div>
 
-                <div class="auth-hero__aside">
-                    <div class="auth-hero__media">
-                        <img
-                            src="<?= demo_e(demo_url('assets/img/familia.webp')) ?>"
-                            alt="Familia protegida"
-                        >
-                    </div>
-
-                    <div class="auth-hero__news">
-                        <strong>Panorama asegurador en Perú</strong>
-                        <p>
-                            El mercado asegurador peruano sigue impulsando una atención más digital y más cercana al cliente, con mayor enfoque en prevención, seguimiento de pagos y acompañamiento oportuno ante siniestros. Esta demo refleja esa visión moderna, ordenada y confiable del servicio.
-                        </p>
-                    </div>
+                <div class="auth-hero__news">
+                    <strong>Panorama asegurador en Perú</strong>
+                    <p>
+                        El sector asegurador peruano viene reforzando una atención más cercana, digital y preventiva, con mayor seguimiento de pólizas, pagos y acompañamiento al cliente. Esta portada busca transmitir esa idea de confianza, orden y protección que hoy esperan las familias y empresas.
+                    </p>
                 </div>
             </div>
         </section>
