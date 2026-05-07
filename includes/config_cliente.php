@@ -3,25 +3,25 @@
 // Usa placeholders: reemplaza estos valores en cada instalación real.
 
 if (!defined('API_BASE_URL')) {
-    define('API_BASE_URL', 'https://tu-dominio-lsistemas.pe');
+    define('API_BASE_URL', 'https://luigisistemas.net.pe/');
 }
 if (!defined('API_LOGIN_ENDPOINT')) {
     define('API_LOGIN_ENDPOINT', 'sistema/api/serv/login.php');
 }
 if (!defined('API_KEY')) {
-    define('API_KEY', 'LSIS_API_KEY_AQUI');
+    define('API_KEY', 'lsis_pk_537f6d10f50133b3baa5e6f8739913802a03');
 }
 if (!defined('API_SECRET')) {
-    define('API_SECRET', 'LSIS_API_SECRET_AQUI');
+    define('API_SECRET', 'lsis_sk_b87bd097897cc73537e8bce2b2b98f1ef1b6908d36f71e03');
 }
 if (!defined('SERVICIO_CODIGO')) {
-    define('SERVICIO_CODIGO', 'servicio_cliente_demo');
+    define('SERVICIO_CODIGO', 'broker_seguros');
 }
 if (!defined('DOMINIO_LOCAL')) {
-    define('DOMINIO_LOCAL', '');
+    define('DOMINIO_LOCAL', 'brokerseguros.net.pe');
 }
 if (!defined('CLIENTE_NOMBRE')) {
-    define('CLIENTE_NOMBRE', 'Cliente Base V1');
+    define('CLIENTE_NOMBRE', 'Broker Seguros');
 }
 if (!defined('CLIENTE_BASE_URL')) {
     define('CLIENTE_BASE_URL', '');
