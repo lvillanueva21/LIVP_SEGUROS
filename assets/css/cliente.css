@@ -1,0 +1,23 @@
+:root {
+  --cliente-primario: #007BFF;
+  --cliente-secundario: #6C757D;
+}
+
+.btn-primary,
+.card-primary.card-outline,
+.main-sidebar.sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link.active {
+  border-color: var(--cliente-primario) !important;
+}
+
+.btn-primary {
+  background-color: var(--cliente-primario) !important;
+}
+
+.cliente-login-page {
+  background: linear-gradient(135deg, var(--cliente-primario), var(--cliente-secundario));
+}
+
+.login-box .card {
+  border-radius: 0.5rem;
+}
+
