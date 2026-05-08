@@ -250,7 +250,7 @@ h1, h2, h3, h4, h5,
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 230px;
+  max-width: 100%;
   text-shadow: 0 1px 2px rgba(0, 0, 0, .35);
 }
 
@@ -297,6 +297,23 @@ h1, h2, h3, h4, h5,
   font-size: .75rem;
   font-weight: 700;
   border-radius: 999px;
+}
+
+.uc-meta {
+  gap: .35rem;
+  flex-wrap: wrap;
+  justify-content: center !important;
+}
+
+#lsis-sidebar-user-company,
+#lsis-sidebar-user-location,
+#lsis-sidebar-user-role {
+  display: inline-block;
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
 }
 
 .sidebar-mini.sidebar-collapse .main-sidebar .user-card {
@@ -414,5 +431,25 @@ h1, h2, h3, h4, h5,
   .cliente-login-cover-carousel .carousel-item,
   .cliente-login-cover-carousel .carousel-item img {
     height: 190px;
+  }
+
+  .uc-avatar > img {
+    width: 78px;
+    height: 78px;
+  }
+
+  .emp-mini-logo {
+    width: 34px;
+    height: 34px;
+  }
+
+  #lsis-sidebar-user-company,
+  #lsis-sidebar-user-location,
+  #lsis-sidebar-user-role {
+    max-width: 132px;
+  }
+
+  .cliente-footer {
+    text-align: center;
   }
 }

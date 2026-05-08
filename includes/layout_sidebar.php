@@ -10,6 +10,9 @@ $cbMenu = cb_cliente_menu();
 $cbLogo = cb_asset_url((string) ($cbAssets['logo_url'] ?? ''), 'assets/default/branding/logo_cliente.svg');
 $cbAvatar = cb_asset_url((string) ($cbAssets['avatar_default_url'] ?? ''), 'assets/default/ui/avatar_default.svg');
 $cbCover = cb_asset_url((string) ($cbAssets['login_bg_url'] ?? ''), 'assets/default/login/login_fondo.svg');
+$cbLogoFallback = cb_asset_url('', 'assets/default/branding/logo_cliente.svg');
+$cbAvatarFallback = cb_asset_url('', 'assets/default/ui/avatar_default.svg');
+$cbCoverFallback = cb_asset_url('', 'assets/default/login/login_fondo.svg');
 
 $cbNombreCompleto = trim((string) ($cbUsuario['nombres'] ?? '') . ' ' . (string) ($cbUsuario['apellidos'] ?? ''));
 if ($cbNombreCompleto === '') {
@@ -30,7 +33,7 @@ if ($cbDocumentoVisible === '') {
 
 $cbUbicacionVisible = trim((string) DOMINIO_LOCAL);
 if ($cbUbicacionVisible === '') {
-    $cbUbicacionVisible = 'Sin ubicacion';
+    $cbUbicacionVisible = 'Sin ubicación';
 }
 
 $cbCurrentScript = strtolower((string) basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')));
@@ -39,7 +42,7 @@ $cbInicioDashboardActivo = $cbCurrentScript === 'dashboard.php';
 ?>
   <aside id="lsis-main-sidebar" class="main-sidebar sidebar-dark-primary elevation-4 cliente-sidebar">
     <a href="<?php echo cb_e(cb_url('dashboard.php')); ?>" class="brand-link cliente-brand-link">
-      <img src="<?php echo cb_e($cbLogo); ?>" alt="Logo cliente" class="brand-image img-circle elevation-3 cliente-brand-image" style="opacity:.8">
+      <img src="<?php echo cb_e($cbLogo); ?>" alt="Logo cliente" class="brand-image img-circle elevation-3 cliente-brand-image" style="opacity:.8" onerror="this.onerror=null;this.src='<?php echo cb_e($cbLogoFallback); ?>';">
       <span id="lsis-brand-text" class="brand-text font-weight-light"><?php echo cb_e(CLIENTE_NOMBRE); ?></span>
     </a>
 
@@ -49,12 +52,12 @@ $cbInicioDashboardActivo = $cbCurrentScript === 'dashboard.php';
         class="user-card text-center p-3 mb-3 lsis-user-card"
         style="background:url('<?php echo cb_e($cbCover); ?>') no-repeat center center; background-size:cover;"
       >
-        <img id="lsis-sidebar-user-cover-img" class="d-none" src="<?php echo cb_e($cbCover); ?>" alt="Portada">
+        <img id="lsis-sidebar-user-cover-img" class="d-none" src="<?php echo cb_e($cbCover); ?>" alt="Portada" onerror="var c=document.getElementById('lsis-sidebar-user-card');if(c){c.style.backgroundImage='url(<?php echo cb_e($cbCoverFallback); ?>)';}this.onerror=null;this.src='<?php echo cb_e($cbCoverFallback); ?>';">
 
         <div class="mb-2 uc-avatar" title="<?php echo cb_e($cbNombreCompleto); ?>">
-          <img id="lsis-sidebar-user-photo" src="<?php echo cb_e($cbAvatar); ?>" alt="Avatar" class="img-circle elevation-3">
+          <img id="lsis-sidebar-user-photo" src="<?php echo cb_e($cbAvatar); ?>" alt="Avatar" class="img-circle elevation-3" onerror="this.onerror=null;this.src='<?php echo cb_e($cbAvatarFallback); ?>';">
           <span class="emp-mini-logo" title="Logo servicio">
-            <img id="lsis-sidebar-company-logo" src="<?php echo cb_e($cbLogo); ?>" alt="Logo servicio">
+            <img id="lsis-sidebar-company-logo" src="<?php echo cb_e($cbLogo); ?>" alt="Logo servicio" onerror="this.onerror=null;this.src='<?php echo cb_e($cbLogoFallback); ?>';">
           </span>
         </div>
 

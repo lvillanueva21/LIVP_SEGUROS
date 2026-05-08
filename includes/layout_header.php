@@ -22,6 +22,7 @@ if ($cbServicioNombre === '') {
 $cbAssets = is_array($cbVisual['assets'] ?? null) ? $cbVisual['assets'] : [];
 $cbFavicon = cb_asset_url((string) ($cbAssets['favicon_url'] ?? ''), 'assets/default/branding/favicon.svg');
 $cbAvatar = cb_asset_url((string) ($cbAssets['avatar_default_url'] ?? ''), 'assets/default/ui/avatar_default.svg');
+$cbAvatarFallback = cb_asset_url('', 'assets/default/ui/avatar_default.svg');
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -80,6 +81,7 @@ $cbAvatar = cb_asset_url((string) ($cbAssets['avatar_default_url'] ?? ''), 'asse
             alt="Foto"
             class="img-circle elevation-1 mr-1"
             style="width:24px;height:24px;object-fit:cover;"
+            onerror="this.onerror=null;this.src='<?php echo cb_e($cbAvatarFallback); ?>';"
           >
           <i class="far fa-user"></i>
           <span class="d-none d-sm-inline"><?php echo cb_e($cbNombreCompleto); ?></span>

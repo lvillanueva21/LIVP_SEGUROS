@@ -7,7 +7,7 @@
   <footer class="main-footer cliente-footer">
     <strong>&copy; <?php echo date('Y'); ?> - <?php echo cb_e(CLIENTE_NOMBRE); ?> - Todos los derechos reservados.</strong>
     <div class="float-right d-none d-sm-inline-block">
-      <b>Version</b> <?php echo cb_e(cb_cliente_version_label()); ?>
+      <b>Versión</b> <?php echo cb_e(cb_cliente_version_label()); ?>
     </div>
   </footer>
 </div>
