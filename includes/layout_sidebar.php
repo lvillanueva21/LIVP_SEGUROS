@@ -3,18 +3,28 @@ require_once __DIR__ . '/menu_cliente.php';
 $cbAuth = cb_get_auth();
 $cbUsuario = is_array($cbAuth) && isset($cbAuth['usuario']) && is_array($cbAuth['usuario']) ? $cbAuth['usuario'] : [];
 $cbServicio = is_array($cbAuth) && isset($cbAuth['servicio']) && is_array($cbAuth['servicio']) ? $cbAuth['servicio'] : [];
+$cbVisual = cb_get_visual_config();
+$cbAssets = is_array($cbVisual['assets'] ?? null) ? $cbVisual['assets'] : [];
 $cbMenu = cb_cliente_menu();
+$cbLogo = cb_asset_url((string) ($cbAssets['logo_url'] ?? ''), 'assets/default/branding/logo_cliente.svg');
+$cbAvatar = cb_asset_url((string) ($cbAssets['avatar_default_url'] ?? ''), 'assets/default/ui/avatar_default.svg');
 ?>
-  <aside class="main-sidebar sidebar-dark-primary elevation-4">
-    <a href="<?php echo cb_e(cb_url('dashboard.php')); ?>" class="brand-link">
+  <aside class="main-sidebar sidebar-dark-primary elevation-4 cliente-sidebar">
+    <a href="<?php echo cb_e(cb_url('dashboard.php')); ?>" class="brand-link cliente-brand-link">
+      <img src="<?php echo cb_e($cbLogo); ?>" alt="Logo cliente" class="brand-image cliente-brand-image elevation-2">
       <span class="brand-text font-weight-light"><?php echo cb_e(CLIENTE_NOMBRE); ?></span>
     </a>
 
     <div class="sidebar">
-      <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+      <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center cliente-user-panel">
+        <div class="image">
+          <img src="<?php echo cb_e($cbAvatar); ?>" class="img-circle elevation-1" alt="Avatar">
+        </div>
         <div class="info">
-          <a href="#" class="d-block"><?php echo cb_e(trim((string) ($cbUsuario['nombres'] ?? '') . ' ' . (string) ($cbUsuario['apellidos'] ?? ''))); ?></a>
-          <small class="text-muted"><?php echo cb_e((string) ($cbServicio['nombre'] ?? '')); ?></small>
+          <a href="#" class="d-block text-truncate" title="<?php echo cb_e(trim((string) ($cbUsuario['nombres'] ?? '') . ' ' . (string) ($cbUsuario['apellidos'] ?? ''))); ?>">
+            <?php echo cb_e(trim((string) ($cbUsuario['nombres'] ?? '') . ' ' . (string) ($cbUsuario['apellidos'] ?? ''))); ?>
+          </a>
+          <small class="text-muted d-block text-truncate" title="<?php echo cb_e((string) ($cbServicio['nombre'] ?? '')); ?>"><?php echo cb_e((string) ($cbServicio['nombre'] ?? '')); ?></small>
         </div>
       </div>
 
@@ -58,4 +68,3 @@ $cbMenu = cb_cliente_menu();
 
     <section class="content">
       <div class="container-fluid">
-

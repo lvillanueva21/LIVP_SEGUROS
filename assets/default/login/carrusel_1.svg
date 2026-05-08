@@ -1,0 +1,9 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="900" height="720" viewBox="0 0 900 720" role="img" aria-label="Carrusel 1">
+  <rect width="900" height="720" fill="#0f4da8"/>
+  <rect x="108" y="128" width="684" height="464" rx="24" fill="#ffffff" opacity="0.12"/>
+  <text x="150" y="230" font-size="44" font-family="Arial, sans-serif" fill="#ffffff" font-weight="700">Acceso Centralizado</text>
+  <text x="150" y="292" font-size="28" font-family="Arial, sans-serif" fill="#e6eef9">Un solo punto de validación para tus sistemas</text>
+  <circle cx="214" cy="430" r="40" fill="#ffffff" opacity="0.24"/>
+  <circle cx="330" cy="430" r="40" fill="#ffffff" opacity="0.24"/>
+  <circle cx="446" cy="430" r="40" fill="#ffffff" opacity="0.24"/>
+</svg>

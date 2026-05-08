@@ -1,0 +1,8 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="900" height="720" viewBox="0 0 900 720" role="img" aria-label="Carrusel 2">
+  <rect width="900" height="720" fill="#1f2d3d"/>
+  <rect x="120" y="108" width="660" height="504" rx="30" fill="#3d5a80" opacity="0.4"/>
+  <text x="168" y="224" font-size="40" font-family="Arial, sans-serif" fill="#ffffff" font-weight="700">Sesión Local Segura</text>
+  <text x="168" y="282" font-size="26" font-family="Arial, sans-serif" fill="#dbe7f4">Protección con timeout y guard en cada módulo</text>
+  <rect x="168" y="350" width="370" height="56" rx="10" fill="#ffffff" opacity="0.2"/>
+  <rect x="168" y="432" width="460" height="56" rx="10" fill="#ffffff" opacity="0.2"/>
+</svg>

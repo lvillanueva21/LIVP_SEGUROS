@@ -8,6 +8,9 @@ if (!defined('API_BASE_URL')) {
 if (!defined('API_LOGIN_ENDPOINT')) {
     define('API_LOGIN_ENDPOINT', 'sistema/api/serv/login.php');
 }
+if (!defined('API_CONFIG_VISUAL_ENDPOINT')) {
+    define('API_CONFIG_VISUAL_ENDPOINT', 'sistema/api/serv/config_visual.php');
+}
 if (!defined('API_KEY')) {
     define('API_KEY', 'lsis_pk_537f6d10f50133b3baa5e6f8739913802a03');
 }
@@ -32,6 +35,21 @@ if (!defined('CLIENTE_TIMEZONE')) {
 if (!defined('CLIENTE_DEBUG')) {
     define('CLIENTE_DEBUG', false);
 }
+if (!defined('CLIENTE_VERSION_LABEL')) {
+    define('CLIENTE_VERSION_LABEL', 'Broker Seguros');
+}
+if (!defined('CLIENTE_VISUAL_REMOTO_ACTIVO')) {
+    define('CLIENTE_VISUAL_REMOTO_ACTIVO', true);
+}
+if (!defined('CLIENTE_VISUAL_CACHE_ACTIVO')) {
+    define('CLIENTE_VISUAL_CACHE_ACTIVO', true);
+}
+if (!defined('CLIENTE_VISUAL_CACHE_TTL_DEFAULT')) {
+    define('CLIENTE_VISUAL_CACHE_TTL_DEFAULT', 600);
+}
+if (!defined('CLIENTE_VISUAL_CACHE_STALE_TTL')) {
+    define('CLIENTE_VISUAL_CACHE_STALE_TTL', 86400);
+}
 
 // Fallback visual local para login/dashboard.
 if (!defined('CLIENTE_LOGIN_TITULO')) {
@@ -45,6 +63,35 @@ if (!defined('CLIENTE_COLOR_PRIMARIO')) {
 }
 if (!defined('CLIENTE_COLOR_SECUNDARIO')) {
     define('CLIENTE_COLOR_SECUNDARIO', '#6C757D');
+}
+
+// Assets default locales (rutas relativas internas).
+if (!defined('CLIENTE_FAVICON_PATH')) {
+    define('CLIENTE_FAVICON_PATH', 'assets/default/branding/favicon.svg');
+}
+if (!defined('CLIENTE_LOGO_PATH')) {
+    define('CLIENTE_LOGO_PATH', 'assets/default/branding/logo_cliente.svg');
+}
+if (!defined('CLIENTE_LOGIN_BG_PATH')) {
+    define('CLIENTE_LOGIN_BG_PATH', 'assets/default/login/login_fondo.svg');
+}
+if (!defined('CLIENTE_LOGIN_CARRUSEL_ACTIVO')) {
+    define('CLIENTE_LOGIN_CARRUSEL_ACTIVO', true);
+}
+if (!defined('CLIENTE_LOGIN_CARRUSEL_1_PATH')) {
+    define('CLIENTE_LOGIN_CARRUSEL_1_PATH', 'assets/default/login/carrusel_1.svg');
+}
+if (!defined('CLIENTE_LOGIN_CARRUSEL_2_PATH')) {
+    define('CLIENTE_LOGIN_CARRUSEL_2_PATH', 'assets/default/login/carrusel_2.svg');
+}
+if (!defined('CLIENTE_LOGIN_CARRUSEL_3_PATH')) {
+    define('CLIENTE_LOGIN_CARRUSEL_3_PATH', 'assets/default/login/carrusel_3.svg');
+}
+if (!defined('CLIENTE_AVATAR_DEFAULT_PATH')) {
+    define('CLIENTE_AVATAR_DEFAULT_PATH', 'assets/default/ui/avatar_default.svg');
+}
+if (!defined('CLIENTE_EMPTY_STATE_PATH')) {
+    define('CLIENTE_EMPTY_STATE_PATH', 'assets/default/ui/empty_state.svg');
 }
 
 // Base de datos local opcional para módulos del cliente.
@@ -70,4 +117,3 @@ if (!defined('CLIENTE_DB_CHARSET')) {
 if (function_exists('date_default_timezone_set')) {
     @date_default_timezone_set(CLIENTE_TIMEZONE);
 }
-

@@ -1,0 +1,12 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="Fondo login">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f4da8"/>
+      <stop offset="1" stop-color="#1f2d3d"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <circle cx="210" cy="110" r="130" fill="#ffffff" opacity="0.08"/>
+  <circle cx="1090" cy="620" r="220" fill="#ffffff" opacity="0.08"/>
+  <path d="M0 545C195 472 357 682 560 620s300-194 492-116 228 58 228 58V720H0z" fill="#ffffff" opacity="0.06"/>
+</svg>

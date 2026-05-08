@@ -33,4 +33,3 @@ function cb_guard_fail($isApiRequest, $message)
 
     cb_redirect('login.php?m=sesion');
 }
-

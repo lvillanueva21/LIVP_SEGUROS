@@ -1,6 +1,25 @@
 :root {
   --cliente-primario: #007BFF;
   --cliente-secundario: #6C757D;
+  --cliente-oscuro: #1F2D3D;
+  --cliente-header-bg: #343A40;
+  --cliente-header-text: #FFFFFF;
+  --cliente-sidebar-bg: #343A40;
+  --cliente-sidebar-text: #FFFFFF;
+  --cliente-sidebar-brand-bg: #343A40;
+  --cliente-sidebar-brand-text: #FFFFFF;
+  --cliente-sidebar-hover-bg: #1F2D3D;
+  --cliente-sidebar-hover-text: #FFFFFF;
+  --cliente-sidebar-active-bg: #007BFF;
+  --cliente-sidebar-active-text: #FFFFFF;
+  --cliente-sidebar-group-active-bg: #0069D9;
+  --cliente-sidebar-group-active-text: #FFFFFF;
+  --cliente-login-bg: #FFFFFF;
+  --cliente-login-saludo-text: #212529;
+}
+
+body {
+  color: #2f3a45;
 }
 
 .btn-primary,
@@ -14,10 +33,193 @@
 }
 
 .cliente-login-page {
-  background: linear-gradient(135deg, var(--cliente-primario), var(--cliente-secundario));
+  min-height: 100vh;
 }
 
-.login-box .card {
-  border-radius: 0.5rem;
+.cliente-login-shell {
+  min-height: 100vh;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
+.cliente-login-card {
+  border: 0;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.cliente-login-panel {
+  padding: 2rem;
+  background: var(--cliente-login-bg);
+  color: var(--cliente-login-saludo-text);
+}
+
+.cliente-login-logo {
+  max-height: 62px;
+  width: auto;
+  margin-bottom: 0.85rem;
+}
+
+.cliente-login-hero {
+  background: #0f2238;
+  min-height: 460px;
+}
+
+.cliente-login-hero .carousel,
+.cliente-login-hero .carousel-inner,
+.cliente-login-hero .carousel-item {
+  width: 100%;
+  height: 100%;
+}
+
+.cliente-login-hero .carousel-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cliente-main-header {
+  border-bottom: 1px solid #e9edf2;
+  background: var(--cliente-header-bg) !important;
+  color: var(--cliente-header-text) !important;
+}
+
+.cliente-main-header .nav-link,
+.cliente-main-header .cliente-header-title {
+  color: var(--cliente-header-text) !important;
+}
+
+.cliente-main-header .nav-link:hover,
+.cliente-main-header .nav-link:focus {
+  opacity: 0.9;
+}
+
+.cliente-header-title {
+  font-weight: 600;
+}
+
+.cliente-sidebar {
+  background: var(--cliente-sidebar-bg) !important;
+}
+
+.cliente-sidebar .brand-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--cliente-sidebar-brand-bg) !important;
+  color: var(--cliente-sidebar-brand-text) !important;
+}
+
+.cliente-sidebar .brand-text {
+  color: var(--cliente-sidebar-brand-text) !important;
+}
+
+.cliente-brand-image {
+  object-fit: contain;
+  background: #fff;
+  padding: 2px;
+  border-radius: 6px;
+}
+
+.cliente-sidebar .sidebar,
+.cliente-sidebar .user-panel,
+.cliente-sidebar .user-panel .info > a,
+.cliente-sidebar .nav-sidebar .nav-link,
+.cliente-sidebar .nav-sidebar .nav-link p,
+.cliente-sidebar .nav-sidebar .nav-icon {
+  color: var(--cliente-sidebar-text) !important;
+}
+
+.cliente-sidebar .nav-sidebar .nav-link:hover {
+  background: var(--cliente-sidebar-hover-bg) !important;
+  color: var(--cliente-sidebar-hover-text) !important;
+}
+
+.cliente-sidebar .nav-sidebar .nav-item > .nav-link.active,
+.cliente-sidebar .nav-sidebar .nav-item.menu-open > .nav-link {
+  background: var(--cliente-sidebar-active-bg) !important;
+  color: var(--cliente-sidebar-active-text) !important;
+}
+
+.cliente-sidebar .nav-treeview > .nav-item > .nav-link.active {
+  background: var(--cliente-sidebar-group-active-bg) !important;
+  color: var(--cliente-sidebar-group-active-text) !important;
+}
+
+.cliente-user-panel .image img {
+  width: 2.2rem;
+  height: 2.2rem;
+  object-fit: cover;
+}
+
+.cliente-empty-state {
+  max-width: 150px;
+}
+
+.cliente-footer {
+  font-size: 0.9rem;
+}
+
+.lsis-text-truncate {
+  max-width: 280px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lsis-table-actions-cell {
+  width: 1%;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.lsis-table-actions-stack {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.lsis-table-action-btn {
+  min-width: 34px;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0.35rem;
+}
+
+.cliente-toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1060;
+  max-width: 360px;
+}
+
+.cliente-toast {
+  background: #1f2d3d;
+  color: #fff;
+  border-radius: 10px;
+  padding: 0.8rem 0.95rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  margin-bottom: 0.75rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.cliente-toast-progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 100%;
+  background: var(--cliente-primario);
+  transform-origin: left;
+}
+
+@media (max-width: 767.98px) {
+  .cliente-login-panel {
+    padding: 1.5rem;
+  }
+}
