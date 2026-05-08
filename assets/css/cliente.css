@@ -139,16 +139,26 @@ h1, h2, h3, h4, h5,
   border-color: #0e2d63 !important;
 }
 
-.cliente-login-cover-carousel .carousel-item {
+.login-cover-carousel .carousel-item {
   height: 220px;
 }
 
-.cliente-login-cover-carousel .carousel-item img {
+.login-cover-carousel .carousel-item img {
   width: 100%;
   height: 220px;
   object-fit: cover;
+  cursor: grab;
   user-select: none;
   -webkit-user-drag: none;
+}
+
+.login-cover-carousel .carousel-inner {
+  cursor: grab;
+}
+
+.login-cover-carousel.is-dragging .carousel-inner,
+.login-cover-carousel.is-dragging .carousel-item img {
+  cursor: grabbing;
 }
 
 #lsis-main-header {
@@ -428,8 +438,8 @@ h1, h2, h3, h4, h5,
     padding: 1.5rem !important;
   }
 
-  .cliente-login-cover-carousel .carousel-item,
-  .cliente-login-cover-carousel .carousel-item img {
+  .login-cover-carousel .carousel-item,
+  .login-cover-carousel .carousel-item img {
     height: 190px;
   }
 
