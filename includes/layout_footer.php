@@ -2,11 +2,13 @@
     </section>
   </div>
 
+  <aside class="control-sidebar control-sidebar-dark"></aside>
+
   <footer class="main-footer cliente-footer">
+    <strong>&copy; <?php echo date('Y'); ?> - <?php echo cb_e(CLIENTE_NOMBRE); ?> - Todos los derechos reservados.</strong>
     <div class="float-right d-none d-sm-inline-block">
-      <?php echo cb_e(cb_cliente_version_label()); ?>
+      <b>Version</b> <?php echo cb_e(cb_cliente_version_label()); ?>
     </div>
-    <strong><?php echo cb_e(CLIENTE_NOMBRE); ?></strong>
   </footer>
 </div>
 

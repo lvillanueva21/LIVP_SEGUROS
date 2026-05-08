@@ -6,34 +6,85 @@ $cbServicio = is_array($cbAuth) && isset($cbAuth['servicio']) && is_array($cbAut
 $cbVisual = cb_get_visual_config();
 $cbAssets = is_array($cbVisual['assets'] ?? null) ? $cbVisual['assets'] : [];
 $cbMenu = cb_cliente_menu();
+
 $cbLogo = cb_asset_url((string) ($cbAssets['logo_url'] ?? ''), 'assets/default/branding/logo_cliente.svg');
 $cbAvatar = cb_asset_url((string) ($cbAssets['avatar_default_url'] ?? ''), 'assets/default/ui/avatar_default.svg');
+$cbCover = cb_asset_url((string) ($cbAssets['login_bg_url'] ?? ''), 'assets/default/login/login_fondo.svg');
+
+$cbNombreCompleto = trim((string) ($cbUsuario['nombres'] ?? '') . ' ' . (string) ($cbUsuario['apellidos'] ?? ''));
+if ($cbNombreCompleto === '') {
+    $cbNombreCompleto = 'Usuario externo';
+}
+
+$cbServicioNombre = trim((string) ($cbServicio['nombre'] ?? ''));
+if ($cbServicioNombre === '') {
+    $cbServicioNombre = CLIENTE_NOMBRE;
+}
+
+$cbDocumentoTipo = trim((string) ($cbUsuario['documento_tipo'] ?? ''));
+$cbDocumentoNumero = trim((string) ($cbUsuario['documento_numero'] ?? ''));
+$cbDocumentoVisible = trim($cbDocumentoTipo . ' ' . $cbDocumentoNumero);
+if ($cbDocumentoVisible === '') {
+    $cbDocumentoVisible = 'Usuario externo';
+}
+
+$cbUbicacionVisible = trim((string) DOMINIO_LOCAL);
+if ($cbUbicacionVisible === '') {
+    $cbUbicacionVisible = 'Sin ubicacion';
+}
+
+$cbCurrentScript = strtolower((string) basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')));
+$cbCurrentModule = strtolower(trim((string) ($_GET['m'] ?? '')));
+$cbInicioDashboardActivo = $cbCurrentScript === 'dashboard.php';
 ?>
-  <aside class="main-sidebar sidebar-dark-primary elevation-4 cliente-sidebar">
+  <aside id="lsis-main-sidebar" class="main-sidebar sidebar-dark-primary elevation-4 cliente-sidebar">
     <a href="<?php echo cb_e(cb_url('dashboard.php')); ?>" class="brand-link cliente-brand-link">
-      <img src="<?php echo cb_e($cbLogo); ?>" alt="Logo cliente" class="brand-image cliente-brand-image elevation-2">
-      <span class="brand-text font-weight-light"><?php echo cb_e(CLIENTE_NOMBRE); ?></span>
+      <img src="<?php echo cb_e($cbLogo); ?>" alt="Logo cliente" class="brand-image img-circle elevation-3 cliente-brand-image" style="opacity:.8">
+      <span id="lsis-brand-text" class="brand-text font-weight-light"><?php echo cb_e(CLIENTE_NOMBRE); ?></span>
     </a>
 
     <div class="sidebar">
-      <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center cliente-user-panel">
-        <div class="image">
-          <img src="<?php echo cb_e($cbAvatar); ?>" class="img-circle elevation-1" alt="Avatar">
+      <div
+        id="lsis-sidebar-user-card"
+        class="user-card text-center p-3 mb-3 lsis-user-card"
+        style="background:url('<?php echo cb_e($cbCover); ?>') no-repeat center center; background-size:cover;"
+      >
+        <img id="lsis-sidebar-user-cover-img" class="d-none" src="<?php echo cb_e($cbCover); ?>" alt="Portada">
+
+        <div class="mb-2 uc-avatar" title="<?php echo cb_e($cbNombreCompleto); ?>">
+          <img id="lsis-sidebar-user-photo" src="<?php echo cb_e($cbAvatar); ?>" alt="Avatar" class="img-circle elevation-3">
+          <span class="emp-mini-logo" title="Logo servicio">
+            <img id="lsis-sidebar-company-logo" src="<?php echo cb_e($cbLogo); ?>" alt="Logo servicio">
+          </span>
         </div>
-        <div class="info">
-          <a href="#" class="d-block text-truncate" title="<?php echo cb_e(trim((string) ($cbUsuario['nombres'] ?? '') . ' ' . (string) ($cbUsuario['apellidos'] ?? ''))); ?>">
-            <?php echo cb_e(trim((string) ($cbUsuario['nombres'] ?? '') . ' ' . (string) ($cbUsuario['apellidos'] ?? ''))); ?>
-          </a>
-          <small class="text-muted d-block text-truncate" title="<?php echo cb_e((string) ($cbServicio['nombre'] ?? '')); ?>"><?php echo cb_e((string) ($cbServicio['nombre'] ?? '')); ?></small>
+
+        <div id="lsis-sidebar-user-name" class="font-weight-bold mb-1 uc-name" title="<?php echo cb_e($cbNombreCompleto); ?>">
+          <?php echo cb_e($cbNombreCompleto); ?>
+        </div>
+        <div class="mb-2 uc-company">
+          <span class="badge badge-primary px-3 py-2">
+            <span id="lsis-sidebar-user-company"><?php echo cb_e($cbServicioNombre); ?></span>
+          </span>
+        </div>
+
+        <div class="d-flex justify-content-between mt-2 uc-meta">
+          <span class="badge bg-light text-dark mr-1" title="<?php echo cb_e($cbUbicacionVisible); ?>">
+            <span aria-hidden="true">&#x1F4CD;</span>
+            <span id="lsis-sidebar-user-location"><?php echo cb_e($cbUbicacionVisible); ?></span>
+          </span>
+          <span class="badge bg-primary" id="lsis-sidebar-user-role-wrap" title="<?php echo cb_e($cbDocumentoVisible); ?>">
+            <i class="fas fa-id-card-alt mr-1" aria-hidden="true"></i>
+            <span id="lsis-sidebar-user-role"><?php echo cb_e($cbDocumentoVisible); ?></span>
+          </span>
         </div>
       </div>
 
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <li class="nav-item">
-            <a href="<?php echo cb_e(cb_url('dashboard.php')); ?>" class="nav-link">
-              <i class="nav-icon fas fa-tachometer-alt"></i>
-              <p>Dashboard</p>
+            <a href="<?php echo cb_e(cb_url('dashboard.php')); ?>" class="nav-link<?php echo $cbInicioDashboardActivo ? ' active' : ''; ?>">
+              <i class="nav-icon fas fa-home"></i>
+              <p>Inicio</p>
             </a>
           </li>
 
@@ -42,9 +93,14 @@ $cbAvatar = cb_asset_url((string) ($cbAssets['avatar_default_url'] ?? ''), 'asse
               $icono = (string) ($item['icono'] ?? 'fas fa-circle');
               $titulo = (string) ($item['titulo'] ?? '');
               $url = (string) ($item['url'] ?? '#');
+              $codigo = strtolower(trim((string) ($item['codigo'] ?? '')));
+              $esActivo = false;
+              if ($cbCurrentScript === 'modulo.php' && $codigo !== '' && $codigo === $cbCurrentModule) {
+                  $esActivo = true;
+              }
             ?>
             <li class="nav-item">
-              <a href="<?php echo cb_e(cb_url($url)); ?>" class="nav-link">
+              <a href="<?php echo cb_e(cb_url($url)); ?>" class="nav-link<?php echo $esActivo ? ' active' : ''; ?>">
                 <i class="nav-icon <?php echo cb_e($icono); ?>"></i>
                 <p><?php echo cb_e($titulo); ?></p>
               </a>

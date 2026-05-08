@@ -1,55 +1,47 @@
 <?php
 require_once __DIR__ . '/includes/session_guard.php';
-require_once __DIR__ . '/includes/menu_cliente.php';
 
 $auth = cb_get_auth();
 $usuario = is_array($auth['usuario'] ?? null) ? $auth['usuario'] : [];
 $servicio = is_array($auth['servicio'] ?? null) ? $auth['servicio'] : [];
 $timeout = cb_get_timeout_minutes();
-$visual = cb_get_visual_config();
-$visualAssets = is_array($visual['assets'] ?? null) ? $visual['assets'] : [];
-$emptyStateUrl = cb_asset_url((string) ($visualAssets['empty_state_url'] ?? ''), 'assets/default/ui/empty_state.svg');
 
-$cbPageTitle = 'Dashboard';
+$nombreCompleto = trim((string) ($usuario['nombres'] ?? '') . ' ' . (string) ($usuario['apellidos'] ?? ''));
+if ($nombreCompleto === '') {
+    $nombreCompleto = 'Usuario externo';
+}
+
+$servicioNombre = trim((string) ($servicio['nombre'] ?? ''));
+if ($servicioNombre === '') {
+    $servicioNombre = CLIENTE_NOMBRE;
+}
+
+$servicioCodigo = trim((string) ($servicio['codigo_servicio'] ?? ''));
+$documentoVisible = trim((string) ($usuario['documento_tipo'] ?? '') . ' ' . (string) ($usuario['documento_numero'] ?? ''));
+if ($documentoVisible === '') {
+    $documentoVisible = 'Sin documento';
+}
+
+$cbPageTitle = 'Inicio';
 require_once __DIR__ . '/includes/layout_header.php';
 require_once __DIR__ . '/includes/layout_sidebar.php';
 ?>
-<div class="row">
-  <div class="col-12 col-lg-8">
-    <div class="card card-primary card-outline">
-      <div class="card-header">
-        <h3 class="card-title">Bienvenido</h3>
-      </div>
-      <div class="card-body">
-        <p class="mb-2">
-          Usuario: <strong><?php echo cb_e(trim((string) ($usuario['nombres'] ?? '') . ' ' . (string) ($usuario['apellidos'] ?? ''))); ?></strong>
-        </p>
-        <p class="mb-2">
-          Documento: <strong><?php echo cb_e((string) ($usuario['documento_tipo'] ?? '')); ?> <?php echo cb_e((string) ($usuario['documento_numero'] ?? '')); ?></strong>
-        </p>
-        <p class="mb-2">
-          Servicio: <strong><?php echo cb_e((string) ($servicio['nombre'] ?? '')); ?></strong>
-          <small class="text-muted">(<?php echo cb_e((string) ($servicio['codigo_servicio'] ?? '')); ?>)</small>
-        </p>
-        <p class="mb-0">
-          Timeout de sesión local: <strong><?php echo cb_e((string) $timeout); ?> minutos</strong>
-        </p>
-      </div>
-    </div>
+<div class="card card-primary card-outline">
+  <div class="card-header">
+    <h3 class="card-title">Panel inicial</h3>
   </div>
-  <div class="col-12 col-lg-4">
-    <div class="card h-100">
-      <div class="card-body text-center d-flex flex-column justify-content-center">
-        <img src="<?php echo cb_e($emptyStateUrl); ?>" alt="Estado inicial" class="img-fluid cliente-empty-state mb-3">
-        <p class="mb-0 text-muted">Aquí podrás integrar los módulos propios del sistema cliente.</p>
-      </div>
-    </div>
+  <div class="card-body">
+    <p class="mb-2">Bienvenido, <strong><?php echo cb_e($nombreCompleto); ?></strong>.</p>
+    <p class="mb-2">Documento: <strong><?php echo cb_e($documentoVisible); ?></strong></p>
+    <p class="mb-2">Servicio: <strong><?php echo cb_e($servicioNombre); ?></strong><?php if ($servicioCodigo !== ''): ?> <small class="text-muted">(<?php echo cb_e($servicioCodigo); ?>)</small><?php endif; ?></p>
+    <p class="mb-2">Perfil visual: <strong>Usuario externo</strong></p>
+    <p class="mb-0">Timeout de sesión local: <strong><?php echo cb_e((string) $timeout); ?> minutos</strong></p>
   </div>
 </div>
 
 <div class="card">
   <div class="card-body">
-    <p class="mb-0">Este cliente base está listo para que agregues módulos propios en <code>modules/</code>.</p>
+    <p class="mb-0">Puedes continuar desde <a href="<?php echo cb_e(cb_url('modulo.php?m=inicio')); ?>">módulo Inicio</a> para integrar funciones del cliente.</p>
   </div>
 </div>
 <?php require_once __DIR__ . '/includes/layout_footer.php'; ?>
