@@ -10,8 +10,7 @@ if (cb_is_logged_in()) {
 $visual = cb_get_effective_visual_config(true);
 $errorMsg = '';
 $infoMsg = '';
-$inputTipo = 'DNI';
-$inputNumero = '';
+$inputUsuario = '';
 
 $csrfKey = 'cliente_login_csrf';
 if (empty($_SESSION[$csrfKey]) || !is_string($_SESSION[$csrfKey])) {
@@ -24,8 +23,8 @@ if ((string) ($_GET['m'] ?? '') === 'sesion') {
 }
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
-    $inputTipo = strtoupper(trim((string) ($_POST['documento_tipo'] ?? '')));
-    $inputNumero = trim((string) ($_POST['documento_numero'] ?? ''));
+    $inputUsuario = strtoupper(trim((string) ($_POST['usuario'] ?? '')));
+    $inputUsuario = preg_replace('/\s+/', '', $inputUsuario);
     $clave = (string) ($_POST['clave'] ?? '');
     $postedCsrf = (string) ($_POST['csrf_token'] ?? '');
 
@@ -37,17 +36,19 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         $_SESSION[$csrfKey] = cb_random_token(32);
         $csrfToken = (string) $_SESSION[$csrfKey];
 
-        $validTipos = ['DNI', 'CE'];
-        if (!in_array($inputTipo, $validTipos, true)) {
-            $errorMsg = 'Credenciales inválidas o acceso no autorizado.';
-        } elseif ($inputTipo === 'DNI' && preg_match('/^\d{8}$/', $inputNumero) !== 1) {
-            $errorMsg = 'Credenciales inválidas o acceso no autorizado.';
-        } elseif ($inputTipo === 'CE' && preg_match('/^[A-Za-z0-9]{6,15}$/', $inputNumero) !== 1) {
-            $errorMsg = 'Credenciales inválidas o acceso no autorizado.';
-        } elseif (trim($clave) === '') {
+        $documentoTipo = '';
+        $documentoNumero = $inputUsuario;
+
+        if (preg_match('/^\d{8}$/', $documentoNumero) === 1) {
+            $documentoTipo = 'DNI';
+        } elseif (preg_match('/^[A-Z0-9]{6,15}$/', $documentoNumero) === 1) {
+            $documentoTipo = 'CE';
+        }
+
+        if ($documentoTipo === '' || trim($clave) === '') {
             $errorMsg = 'Credenciales inválidas o acceso no autorizado.';
         } else {
-            $apiResult = cb_api_login($inputTipo, $inputNumero, $clave);
+            $apiResult = cb_api_login($documentoTipo, $documentoNumero, $clave);
             if (!empty($apiResult['ok'])) {
                 $data = is_array($apiResult['data'] ?? null) ? $apiResult['data'] : [];
                 $usuario = is_array($data['usuario'] ?? null) ? $data['usuario'] : [];
@@ -106,6 +107,30 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     }
 }
 
+$hour = (int) date('G');
+if ($hour < 12) {
+    $saludo = '¡Buenos días!';
+} elseif ($hour < 19) {
+    $saludo = '¡Buenas tardes!';
+} else {
+    $saludo = '¡Buenas noches!';
+}
+
+$emojis = ['🌟', '🚀', '💡', '✨', '👋', '🧠', '⚡', '🔐', '📌', '✅'];
+$mensajes = [
+    '{saludo} {emoji} Tu compromiso hace la diferencia cada día.',
+    '{saludo} {emoji} Sigamos trabajando por un mejor servicio.',
+    'Bienvenid@ {emoji} Gracias por contribuir con la calidad y eficiencia del sistema.',
+    '{saludo} {emoji} Cada acción cuenta para lograr resultados.',
+    '¡Excelente jornada por delante! {emoji}',
+];
+$plantilla = $mensajes[array_rand($mensajes)];
+$mensajeBienvenida = str_replace(
+    ['{saludo}', '{emoji}'],
+    [$saludo, $emojis[array_rand($emojis)]],
+    $plantilla
+);
+
 $visualAssets = is_array($visual['assets'] ?? null) ? $visual['assets'] : [];
 $faviconUrl = cb_asset_url((string) ($visualAssets['favicon_url'] ?? ''), 'assets/default/branding/favicon.svg');
 $logoUrl = cb_asset_url((string) ($visualAssets['logo_url'] ?? ''), 'assets/default/branding/logo_cliente.svg');
@@ -128,129 +153,139 @@ if (!$carouselItems) {
         cb_config_asset_url(CLIENTE_LOGIN_CARRUSEL_3_PATH, 'assets/default/login/carrusel_3.svg'),
     ];
 }
+$coverImageUrl = $carouselItems[0] ?? $bgUrl;
 if (count($carouselItems) < 2) {
     $carouselEnabled = false;
 }
 ?>
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Login - <?php echo cb_e(CLIENTE_NOMBRE); ?></title>
   <link rel="icon" href="<?php echo cb_e($faviconUrl); ?>">
+
+  <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="<?php echo cb_e(cb_url('plugins/fontawesome-free/css/all.min.css')); ?>">
-  <link rel="stylesheet" href="<?php echo cb_e(cb_url('plugins/icheck-bootstrap/icheck-bootstrap.min.css')); ?>">
-  <link rel="stylesheet" href="<?php echo cb_e(cb_url('dist/css/adminlte.min.css')); ?>">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="<?php echo cb_e(cb_url('assets/css/cliente.css')); ?>">
+
   <style>
     :root {
-      --cliente-primario: <?php echo cb_e($visual['color_primario']); ?>;
-      --cliente-secundario: <?php echo cb_e($visual['color_secundario']); ?>;
+      --cliente-primario: <?php echo cb_e((string) ($visual['color_primario'] ?? '#007BFF')); ?>;
+      --cliente-secundario: <?php echo cb_e((string) ($visual['color_secundario'] ?? '#6C757D')); ?>;
       --cliente-login-bg: <?php echo cb_e((string) ($visual['color_login_bg'] ?? '#FFFFFF')); ?>;
       --cliente-login-saludo-text: <?php echo cb_e((string) ($visual['color_login_saludo_text'] ?? '#212529')); ?>;
-      --cliente-header-bg: <?php echo cb_e((string) ($visual['color_header_bg'] ?? '#343A40')); ?>;
-      --cliente-header-text: <?php echo cb_e((string) ($visual['color_header_text'] ?? '#FFFFFF')); ?>;
-      --cliente-sidebar-bg: <?php echo cb_e((string) ($visual['color_sidebar_bg'] ?? '#343A40')); ?>;
-      --cliente-sidebar-text: <?php echo cb_e((string) ($visual['color_sidebar_text'] ?? '#FFFFFF')); ?>;
-      --cliente-sidebar-brand-bg: <?php echo cb_e((string) ($visual['color_sidebar_brand_bg'] ?? '#343A40')); ?>;
-      --cliente-sidebar-brand-text: <?php echo cb_e((string) ($visual['color_sidebar_brand_text'] ?? '#FFFFFF')); ?>;
-      --cliente-sidebar-hover-bg: <?php echo cb_e((string) ($visual['color_sidebar_item_hover_bg'] ?? '#1F2D3D')); ?>;
-      --cliente-sidebar-hover-text: <?php echo cb_e((string) ($visual['color_sidebar_item_hover_text'] ?? '#FFFFFF')); ?>;
-      --cliente-sidebar-active-bg: <?php echo cb_e((string) ($visual['color_sidebar_item_active_bg'] ?? '#007BFF')); ?>;
-      --cliente-sidebar-active-text: <?php echo cb_e((string) ($visual['color_sidebar_item_active_text'] ?? '#FFFFFF')); ?>;
-      --cliente-sidebar-group-active-bg: <?php echo cb_e((string) ($visual['color_sidebar_group_active_bg'] ?? '#0069D9')); ?>;
-      --cliente-sidebar-group-active-text: <?php echo cb_e((string) ($visual['color_sidebar_group_active_text'] ?? '#FFFFFF')); ?>;
     }
   </style>
 </head>
-<body class="hold-transition cliente-login-page">
-<div class="cliente-login-shell" style="background-color: <?php echo cb_e((string) ($visual['color_login_bg'] ?? '#FFFFFF')); ?>; background-image: linear-gradient(140deg, rgba(11,33,61,0.86), rgba(6,22,41,0.78)), url('<?php echo cb_e($bgUrl); ?>');">
-  <div class="container-fluid h-100">
-    <div class="row h-100 align-items-center justify-content-center">
-      <div class="col-12 col-lg-10 col-xl-9">
-        <div class="cliente-login-card card shadow-sm">
-          <div class="card-body p-0">
-            <div class="row no-gutters">
-              <div class="col-12 col-md-6 cliente-login-panel">
-                <div class="cliente-login-brand text-center mb-3">
-                  <img src="<?php echo cb_e($logoUrl); ?>" alt="Logo cliente" class="cliente-login-logo">
-                  <h1 class="h5 mb-1"><?php echo cb_e($visual['titulo_login']); ?></h1>
-                  <p class="text-muted mb-0"><?php echo cb_e($visual['subtitulo_login']); ?></p>
+<body>
+<section class="ftco-section cliente-login-page" style="background-color: <?php echo cb_e((string) ($visual['color_login_bg'] ?? '#FFFFFF')); ?>;">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-7 text-center mb-5">
+        <h2 class="heading-section" style="color: <?php echo cb_e((string) ($visual['color_login_saludo_text'] ?? '#212529')); ?>;"><?php echo cb_e($mensajeBienvenida); ?></h2>
+      </div>
+    </div>
+
+    <div class="row justify-content-center">
+      <div class="col-md-7 col-lg-5">
+        <div class="wrap cliente-login-wrap">
+          <div id="cliente-login-carousel" class="carousel slide cliente-login-cover-carousel" data-ride="carousel" data-interval="5000">
+            <?php if ($carouselEnabled): ?>
+              <ol class="carousel-indicators">
+                <?php foreach ($carouselItems as $idx => $itemUrl): ?>
+                  <li data-target="#cliente-login-carousel" data-slide-to="<?php echo cb_e((string) $idx); ?>" class="<?php echo $idx === 0 ? 'active' : ''; ?>"></li>
+                <?php endforeach; ?>
+              </ol>
+            <?php endif; ?>
+            <div class="carousel-inner">
+              <?php if ($carouselEnabled): ?>
+                <?php foreach ($carouselItems as $idx => $itemUrl): ?>
+                  <div class="carousel-item<?php echo $idx === 0 ? ' active' : ''; ?>">
+                    <img src="<?php echo cb_e($itemUrl); ?>" class="d-block w-100" alt="Portada login <?php echo cb_e((string) ($idx + 1)); ?>" draggable="false">
+                  </div>
+                <?php endforeach; ?>
+              <?php else: ?>
+                <div class="carousel-item active">
+                  <img src="<?php echo cb_e($coverImageUrl); ?>" class="d-block w-100" alt="Portada login" draggable="false">
                 </div>
+              <?php endif; ?>
+            </div>
+          </div>
 
-                <?php if ($infoMsg !== ''): ?>
-                  <div class="alert alert-warning" role="alert"><?php echo cb_e($infoMsg); ?></div>
-                <?php endif; ?>
-                <?php if ($errorMsg !== ''): ?>
-                  <div class="alert alert-danger" role="alert"><?php echo cb_e($errorMsg); ?></div>
-                <?php endif; ?>
-
-                <form method="post" action="<?php echo cb_e(cb_url('login.php')); ?>" autocomplete="off" novalidate>
-                  <input type="hidden" name="csrf_token" value="<?php echo cb_e($csrfToken); ?>">
-
-                  <div class="form-group">
-                    <label for="documento_tipo">Tipo de documento</label>
-                    <select class="form-control" id="documento_tipo" name="documento_tipo" required>
-                      <option value="DNI" <?php echo $inputTipo === 'DNI' ? 'selected' : ''; ?>>DNI</option>
-                      <option value="CE" <?php echo $inputTipo === 'CE' ? 'selected' : ''; ?>>CE</option>
-                    </select>
-                  </div>
-
-                  <div class="form-group">
-                    <label for="documento_numero">Número de documento</label>
-                    <input type="text" class="form-control" id="documento_numero" name="documento_numero" maxlength="20" value="<?php echo cb_e($inputNumero); ?>" required>
-                  </div>
-
-                  <div class="form-group">
-                    <label for="clave">Clave</label>
-                    <div class="input-group">
-                      <input type="password" class="form-control" id="clave" name="clave" required>
-                      <div class="input-group-append">
-                        <button
-                          type="button"
-                          class="btn btn-outline-secondary js-toggle-password"
-                          data-target="#clave"
-                          title="Mostrar u ocultar clave"
-                          aria-label="Mostrar u ocultar clave"
-                        >
-                          <i class="fas fa-eye" aria-hidden="true"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
-                </form>
+          <div class="login-wrap p-4 p-md-5">
+            <div class="d-flex align-items-center mb-2">
+              <div class="w-100">
+                <h4 class="mb-0">Iniciar sesión</h4>
               </div>
-
-              <div class="col-12 col-md-6 cliente-login-hero d-none d-md-flex">
-                <?php if ($carouselEnabled): ?>
-                  <div id="cliente-login-carousel" class="carousel slide w-100" data-ride="carousel" data-interval="4500">
-                    <ol class="carousel-indicators">
-                      <?php foreach ($carouselItems as $idx => $itemUrl): ?>
-                        <li data-target="#cliente-login-carousel" data-slide-to="<?php echo cb_e((string) $idx); ?>" class="<?php echo $idx === 0 ? 'active' : ''; ?>"></li>
-                      <?php endforeach; ?>
-                    </ol>
-                    <div class="carousel-inner">
-                      <?php foreach ($carouselItems as $idx => $itemUrl): ?>
-                        <div class="carousel-item <?php echo $idx === 0 ? 'active' : ''; ?>">
-                          <img src="<?php echo cb_e($itemUrl); ?>" class="d-block w-100" alt="Imagen informativa <?php echo cb_e((string) ($idx + 1)); ?>">
-                        </div>
-                      <?php endforeach; ?>
-                    </div>
-                  </div>
-                <?php else: ?>
-                  <img src="<?php echo cb_e($carouselItems[0]); ?>" alt="Imagen de acceso" class="img-fluid">
-                <?php endif; ?>
+              <div class="w-100 text-right">
+                <img src="<?php echo cb_e($logoUrl); ?>" alt="Logo cliente" class="cliente-login-logo-inline">
               </div>
             </div>
+
+            <?php if ($infoMsg !== ''): ?>
+              <div class="alert alert-info py-2 mb-3" role="alert"><?php echo cb_e($infoMsg); ?></div>
+            <?php endif; ?>
+            <?php if ($errorMsg !== ''): ?>
+              <div class="alert alert-danger py-2 mb-3" role="alert"><?php echo cb_e($errorMsg); ?></div>
+            <?php endif; ?>
+
+            <form id="form-login" method="post" action="<?php echo cb_e(cb_url('login.php')); ?>" class="signin-form" autocomplete="off" novalidate>
+              <input type="hidden" name="csrf_token" value="<?php echo cb_e($csrfToken); ?>">
+
+              <div class="form-group mt-3">
+                <label for="usuario" class="form-label-fixed">Usuario (DNI/CE)</label>
+                <input
+                  id="usuario"
+                  type="text"
+                  name="usuario"
+                  class="form-control"
+                  maxlength="15"
+                  autocomplete="username"
+                  required
+                  autofocus
+                  value="<?php echo cb_e($inputUsuario); ?>"
+                >
+              </div>
+
+              <div class="form-group">
+                <label for="password-field" class="form-label-fixed">Contraseña</label>
+                <div class="position-relative">
+                  <input
+                    id="password-field"
+                    type="password"
+                    name="clave"
+                    class="form-control"
+                    autocomplete="current-password"
+                    required
+                  >
+                  <span
+                    toggle="#password-field"
+                    class="fa fa-fw fa-eye field-icon toggle-password"
+                    title="Mostrar u ocultar clave"
+                    aria-label="Mostrar u ocultar clave"
+                  ></span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <button id="btn-login" class="form-control btn btn-primary rounded submit px-3" type="submit">
+                  Ingresar
+                </button>
+              </div>
+            </form>
+
+            <p class="text-center text-muted mt-3 mb-0 small">
+              © <?php echo date('Y'); ?> - LuigiSistemas - Todos los derechos reservados.
+            </p>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+</section>
 
 <script src="<?php echo cb_e(cb_url('plugins/jquery/jquery.min.js')); ?>"></script>
 <script src="<?php echo cb_e(cb_url('plugins/bootstrap/js/bootstrap.bundle.min.js')); ?>"></script>
