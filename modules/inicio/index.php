@@ -27,19 +27,14 @@ $cbServicioCodigoInicio = trim((string) ($cbServicioInicio['codigo_servicio'] ??
   </div>
   <div class="card-body">
     <p class="mb-2">Bienvenido, <strong><?php echo cb_e($cbNombreInicio); ?></strong>.</p>
-    <p class="mb-2">Documento: <strong><?php echo cb_e($cbDocumentoInicio); ?></strong></p>
+    <p class="mb-2">Usuario: <strong><?php echo cb_e($cbDocumentoInicio); ?></strong></p>
+    <p class="mb-2">Rol activo: <strong>Usuario externo</strong></p>
     <p class="mb-2">
       Servicio: <strong><?php echo cb_e($cbServicioNombreInicio); ?></strong>
       <?php if ($cbServicioCodigoInicio !== ''): ?>
         <small class="text-muted">(<?php echo cb_e($cbServicioCodigoInicio); ?>)</small>
       <?php endif; ?>
     </p>
-    <p class="mb-0">Rol visual: <strong>Usuario externo</strong></p>
-  </div>
-</div>
-
-<div class="card">
-  <div class="card-body">
-    <p class="mb-0">Módulo base listo para ampliar funcionalidades propias del cliente.</p>
+    <p class="mb-0">Módulo base del cliente externo.</p>
   </div>
 </div>

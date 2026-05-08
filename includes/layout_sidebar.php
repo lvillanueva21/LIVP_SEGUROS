@@ -76,7 +76,7 @@ $cbInicioDashboardActivo = $cbCurrentScript === 'dashboard.php';
             <span id="lsis-sidebar-user-location"><?php echo cb_e($cbUbicacionVisible); ?></span>
           </span>
           <span class="badge bg-primary" id="lsis-sidebar-user-role-wrap" title="<?php echo cb_e($cbDocumentoVisible); ?>">
-            <i class="fas fa-id-card-alt mr-1" aria-hidden="true"></i>
+            <i class="fas fa-id-badge mr-1" aria-hidden="true"></i>
             <span id="lsis-sidebar-user-role"><?php echo cb_e($cbDocumentoVisible); ?></span>
           </span>
         </div>

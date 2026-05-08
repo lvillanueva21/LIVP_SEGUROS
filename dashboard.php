@@ -32,16 +32,10 @@ require_once __DIR__ . '/includes/layout_sidebar.php';
   </div>
   <div class="card-body">
     <p class="mb-2">Bienvenido, <strong><?php echo cb_e($nombreCompleto); ?></strong>.</p>
-    <p class="mb-2">Documento: <strong><?php echo cb_e($documentoVisible); ?></strong></p>
+    <p class="mb-2">Usuario: <strong><?php echo cb_e($documentoVisible); ?></strong></p>
+    <p class="mb-2">Rol activo: <strong>Usuario externo</strong></p>
     <p class="mb-2">Servicio: <strong><?php echo cb_e($servicioNombre); ?></strong><?php if ($servicioCodigo !== ''): ?> <small class="text-muted">(<?php echo cb_e($servicioCodigo); ?>)</small><?php endif; ?></p>
-    <p class="mb-2">Perfil visual: <strong>Usuario externo</strong></p>
     <p class="mb-0">Timeout de sesión local: <strong><?php echo cb_e((string) $timeout); ?> minutos</strong></p>
-  </div>
-</div>
-
-<div class="card">
-  <div class="card-body">
-    <p class="mb-0">Puedes continuar desde <a href="<?php echo cb_e(cb_url('modulo.php?m=inicio')); ?>">módulo Inicio</a> para integrar funciones del cliente.</p>
   </div>
 </div>
 <?php require_once __DIR__ . '/includes/layout_footer.php'; ?>

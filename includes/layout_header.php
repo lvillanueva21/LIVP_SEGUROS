@@ -65,9 +65,6 @@ $cbAvatarFallback = cb_asset_url('', 'assets/default/ui/avatar_default.svg');
       <li class="nav-item d-none d-sm-inline-block">
         <a href="<?php echo cb_e(cb_url('dashboard.php')); ?>" class="nav-link">Inicio</a>
       </li>
-      <li class="nav-item d-none d-lg-inline-block">
-        <span class="nav-link cliente-header-page-title"><?php echo cb_e($cbPageTitle); ?></span>
-      </li>
     </ul>
 
     <ul class="navbar-nav ml-auto">
@@ -77,6 +74,7 @@ $cbAvatarFallback = cb_asset_url('', 'assets/default/ui/avatar_default.svg');
       <li class="nav-item">
         <a class="nav-link" href="#" title="Usuario">
           <img
+            id="lsis-header-user-photo"
             src="<?php echo cb_e($cbAvatar); ?>"
             alt="Foto"
             class="img-circle elevation-1 mr-1"
@@ -84,7 +82,7 @@ $cbAvatarFallback = cb_asset_url('', 'assets/default/ui/avatar_default.svg');
             onerror="this.onerror=null;this.src='<?php echo cb_e($cbAvatarFallback); ?>';"
           >
           <i class="far fa-user"></i>
-          <span class="d-none d-sm-inline"><?php echo cb_e($cbNombreCompleto); ?></span>
+          <span id="lsis-header-user-name" class="d-none d-sm-inline"><?php echo cb_e($cbNombreCompleto); ?></span>
         </a>
       </li>
       <li class="nav-item">

@@ -177,11 +177,6 @@ h1, h2, h3, h4, h5,
   color: #dc3545 !important;
 }
 
-.cliente-header-page-title {
-  font-weight: 600;
-  opacity: 0.95;
-}
-
 #lsis-main-sidebar {
   background-color: var(--cliente-sidebar-bg) !important;
 }
