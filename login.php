@@ -283,7 +283,7 @@ $loginBotones = [
           <div class="login-wrap p-4 p-md-5">
             <div class="d-flex align-items-center mb-2">
               <div class="w-100">
-                <h4 class="mb-0">Iniciar sesión</h4>
+                <h4 class="mb-0">Comenzar sesión</h4>
               </div>
               <div class="w-100">
                 <p class="social-media d-flex justify-content-end m-0">
