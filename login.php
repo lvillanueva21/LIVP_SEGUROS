@@ -154,11 +154,7 @@ foreach ($carouselItemsRaw as $itemUrl) {
     }
 }
 if (!$carouselItems) {
-    $carouselItems = [
-        cb_config_asset_url(CLIENTE_LOGIN_CARRUSEL_1_PATH, 'assets/default/login/carrusel_1.svg'),
-        cb_config_asset_url(CLIENTE_LOGIN_CARRUSEL_2_PATH, 'assets/default/login/carrusel_2.svg'),
-        cb_config_asset_url(CLIENTE_LOGIN_CARRUSEL_3_PATH, 'assets/default/login/carrusel_3.svg'),
-    ];
+    $carouselItems = [$bgUrl];
 }
 $carouselItems = array_values(array_filter($carouselItems));
 if (!$carouselItems) {
