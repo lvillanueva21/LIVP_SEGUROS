@@ -59,11 +59,18 @@ h1, h2, h3, h4, h5,
   padding: 5.25rem 0;
 }
 
+@media (max-width: 575.98px) {
+  .ftco-section.cliente-login-page {
+    padding: 2rem 0;
+  }
+}
+
 .heading-section {
   font-size: 28px;
   color: var(--cliente-login-saludo-text);
 }
 
+.wrap.cliente-login-wrap,
 .cliente-login-wrap {
   width: 100%;
   overflow: hidden;
@@ -77,7 +84,7 @@ h1, h2, h3, h4, h5,
 }
 
 .login-wrap h4 {
-  font-weight: 300;
+  font-weight: 500;
 }
 
 .cliente-login-logo-inline {
@@ -154,6 +161,12 @@ h1, h2, h3, h4, h5,
 
 .login-cover-carousel .carousel-inner {
   cursor: grab;
+}
+
+.wrap.cliente-login-wrap .login-cover-carousel,
+.wrap.cliente-login-wrap .login-cover-carousel .carousel-inner {
+  overflow: hidden;
+  border-radius: 5px 5px 0 0;
 }
 
 .login-cover-carousel.is-dragging .carousel-inner,

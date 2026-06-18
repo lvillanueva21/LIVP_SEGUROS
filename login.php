@@ -238,7 +238,7 @@ $loginBotones = cb_normalize_login_botones($remoteLoginBotones, $loginBotones);
   </style>
 </head>
 <body>
-<section class="ftco-section">
+<section class="ftco-section cliente-login-page">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-md-7 text-center mb-5">
@@ -248,7 +248,7 @@ $loginBotones = cb_normalize_login_botones($remoteLoginBotones, $loginBotones);
 
     <div class="row justify-content-center">
       <div class="col-md-7 col-lg-5">
-        <div class="wrap">
+        <div class="wrap cliente-login-wrap">
           <div id="loginCoverCarousel" class="carousel slide login-cover-carousel" data-ride="carousel" data-interval="5000">
             <div class="carousel-inner">
               <?php foreach ($carouselItems as $idx => $rutaImg): ?>
