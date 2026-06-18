@@ -1048,9 +1048,25 @@ function cb_get_effective_visual_config($preferRemote = false)
     }
 
     if ($preferRemote) {
-        $remoteVisual = cb_get_remote_visual_config_cached();
-        if (is_array($remoteVisual)) {
-            $effective = cb_merge_visual_config($effective, $remoteVisual);
+        $remoteVisualResult = cb_get_remote_visual_config();
+        if (!empty($remoteVisualResult['ok']) && is_array($remoteVisualResult['visual'] ?? null)) {
+            $remoteVisual = $remoteVisualResult['visual'];
+            $ttl = (int) ($remoteVisual['_cache_ttl_seconds'] ?? CLIENTE_VISUAL_CACHE_TTL_DEFAULT);
+            $visualToCache = $remoteVisual;
+            unset($visualToCache['_cache_ttl_seconds']);
+            if (defined('CLIENTE_VISUAL_CACHE_ACTIVO') && CLIENTE_VISUAL_CACHE_ACTIVO) {
+                cb_write_visual_cache($visualToCache, $ttl);
+            }
+
+            $remoteVisual = cb_apply_local_visual_assets($remoteVisual);
+            if (is_array($remoteVisual)) {
+                $effective = cb_merge_visual_config($effective, $remoteVisual);
+            }
+        } else {
+            $remoteVisual = cb_get_remote_visual_config_cached();
+            if (is_array($remoteVisual)) {
+                $effective = cb_merge_visual_config($effective, $remoteVisual);
+            }
         }
     }
 

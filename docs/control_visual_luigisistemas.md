@@ -14,10 +14,11 @@ LIVP_SEGUROS conserva sus assets locales por defecto y solo usa la configuracion
 ## Flujo visual esperado
 
 1. El cliente pide la configuracion visual a LUIGISISTEMAS usando `API_CONFIG_VISUAL_ENDPOINT`.
-2. La respuesta se guarda en cache JSON dentro de `storage/cache`.
-3. Si la respuesta trae un `asset_version`, el cliente lo usa para saber si debe actualizar imagenes locales.
-4. Las imagenes remotas validas se descargan a `storage/visual_assets`.
-5. Las pantallas usan la copia local cuando existe; si falla la descarga, usan la URL remota; si eso tampoco existe, usan los defaults locales.
+2. La respuesta se guarda en cache JSON dentro de `storage/cache` como respaldo.
+3. En cada carga visual, el cliente pregunta primero al servidor principal; si no responde, usa la cache local.
+4. Si la respuesta trae un `asset_version`, el cliente lo usa para saber si debe actualizar imagenes locales.
+5. Las imagenes remotas validas se descargan a `storage/visual_assets`.
+6. Las pantallas usan la copia local cuando existe; si falla la descarga, usan la URL remota; si eso tampoco existe, usan los defaults locales.
 
 ## Campos controlados
 
@@ -39,4 +40,3 @@ LIVP_SEGUROS conserva sus assets locales por defecto y solo usa la configuracion
 Para la configuracion visual no se requiere una base de datos en LIVP_SEGUROS.
 La base de datos principal de LUIGISISTEMAS sigue siendo la fuente de verdad.
 El cliente solo usa archivos de cache y assets locales para rendimiento y resiliencia.
-
