@@ -177,6 +177,8 @@ $loginBotones = [
         'url_destino' => 'https://wa.me/51964881841?text=Hola%2C%20quiero%20recuperar%20mi%20contrase%C3%B1a%2C%20mi%20DNI%20y%2Fo%20nombre%20completo%20es%3A',
     ],
 ];
+$remoteLoginBotones = is_array($visual['login_botones'] ?? null) ? $visual['login_botones'] : [];
+$loginBotones = cb_normalize_login_botones($remoteLoginBotones, $loginBotones);
 ?>
 <!doctype html>
 <html lang="es">

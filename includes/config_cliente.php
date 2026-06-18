@@ -50,6 +50,15 @@ if (!defined('CLIENTE_VISUAL_CACHE_TTL_DEFAULT')) {
 if (!defined('CLIENTE_VISUAL_CACHE_STALE_TTL')) {
     define('CLIENTE_VISUAL_CACHE_STALE_TTL', 86400);
 }
+if (!defined('CLIENTE_VISUAL_ASSET_SYNC_ACTIVO')) {
+    define('CLIENTE_VISUAL_ASSET_SYNC_ACTIVO', true);
+}
+if (!defined('CLIENTE_VISUAL_ASSET_SYNC_DIR')) {
+    define('CLIENTE_VISUAL_ASSET_SYNC_DIR', 'storage/visual_assets');
+}
+if (!defined('CLIENTE_VISUAL_ASSET_SYNC_MAX_BYTES')) {
+    define('CLIENTE_VISUAL_ASSET_SYNC_MAX_BYTES', 5242880);
+}
 
 // Fallback visual local para login/dashboard.
 if (!defined('CLIENTE_LOGIN_TITULO')) {

@@ -267,6 +267,13 @@ function cb_config_asset_url($constantValue, $fallback)
 
 function cb_cliente_version_label()
 {
+    if (isset($GLOBALS['CB_CLIENTE_VERSION_LABEL_OVERRIDE'])) {
+        $override = trim((string) $GLOBALS['CB_CLIENTE_VERSION_LABEL_OVERRIDE']);
+        if ($override !== '') {
+            return $override;
+        }
+    }
+
     $label = trim((string) CLIENTE_VERSION_LABEL);
     if ($label === '') {
         $label = 'Cliente Base V1';
@@ -275,11 +282,119 @@ function cb_cliente_version_label()
     return $label;
 }
 
+function cb_normalize_login_button_text($value)
+{
+    $text = trim((string) $value);
+    if ($text === '') {
+        return '';
+    }
+    if (function_exists('mb_substr')) {
+        $text = mb_substr($text, 0, 120, 'UTF-8');
+    } else {
+        $text = substr($text, 0, 120);
+    }
+    return trim($text);
+}
+
+function cb_normalize_icon_css($value)
+{
+    $icon = trim((string) $value);
+    if ($icon === '') {
+        return 'fas fa-link';
+    }
+    $icon = preg_replace('/[^A-Za-z0-9 _-]/', '', $icon);
+    $icon = preg_replace('/\s+/', ' ', (string) $icon);
+    $icon = trim((string) $icon);
+    if ($icon === '') {
+        return 'fas fa-link';
+    }
+    if (function_exists('mb_substr')) {
+        $icon = mb_substr($icon, 0, 80, 'UTF-8');
+    } else {
+        $icon = substr($icon, 0, 80);
+    }
+    return trim((string) $icon);
+}
+
+function cb_default_login_botones()
+{
+    return [
+        [
+            'texto_boton' => 'Contactar a soporte',
+            'icono_css' => 'fa fa-whatsapp',
+            'url_destino' => 'https://wa.me/51964881841?text=Hola%2C%20necesito%20apoyo%20del%20%C3%A1rea%20de%20Soporte.',
+            'orden' => 1,
+        ],
+        [
+            'texto_boton' => 'Recuperar contraseÃ±a',
+            'icono_css' => 'fa fa-unlock-alt',
+            'url_destino' => 'https://wa.me/51964881841?text=Hola%2C%20quiero%20recuperar%20mi%20contrase%C3%B1a%2C%20mi%20DNI%20y%2Fo%20nombre%20completo%20es%3A',
+            'orden' => 2,
+        ],
+    ];
+}
+
+function cb_normalize_login_botones($rawButtons, array $fallbackButtons = [])
+{
+    $safe = [];
+    $source = is_array($rawButtons) ? $rawButtons : [];
+    foreach ($source as $item) {
+        if (!is_array($item)) {
+            continue;
+        }
+        $url = trim((string) ($item['url_destino'] ?? ''));
+        if (!cb_is_valid_remote_asset_url($url)) {
+            continue;
+        }
+        $safe[] = [
+            'texto_boton' => cb_normalize_login_button_text($item['texto_boton'] ?? ''),
+            'icono_css' => cb_normalize_icon_css($item['icono_css'] ?? ''),
+            'url_destino' => $url,
+            'orden' => (int) ($item['orden'] ?? 0),
+        ];
+    }
+
+    usort($safe, static function ($a, $b) {
+        $oa = (int) ($a['orden'] ?? 0);
+        $ob = (int) ($b['orden'] ?? 0);
+        if ($oa === $ob) {
+            return 0;
+        }
+        return ($oa < $ob) ? -1 : 1;
+    });
+
+    if ($safe) {
+        return array_values($safe);
+    }
+
+    $fallback = [];
+    foreach ($fallbackButtons as $item) {
+        if (!is_array($item)) {
+            continue;
+        }
+        $url = trim((string) ($item['url_destino'] ?? ''));
+        if (!cb_is_valid_remote_asset_url($url)) {
+            continue;
+        }
+        $fallback[] = [
+            'texto_boton' => cb_normalize_login_button_text($item['texto_boton'] ?? ''),
+            'icono_css' => cb_normalize_icon_css($item['icono_css'] ?? ''),
+            'url_destino' => $url,
+            'orden' => (int) ($item['orden'] ?? 0),
+        ];
+    }
+
+    return array_values($fallback);
+}
+
 function cb_default_visual_config()
 {
     return [
         'titulo_login' => (string) CLIENTE_LOGIN_TITULO,
         'subtitulo_login' => (string) CLIENTE_LOGIN_SUBTITULO,
+        'titulo_sistema_cliente' => (string) CLIENTE_NOMBRE,
+        'footer_texto' => '',
+        'footer_version_label' => cb_cliente_version_label(),
         'color_primario' => cb_normalize_hex_color(CLIENTE_COLOR_PRIMARIO, '#007BFF'),
         'color_secundario' => cb_normalize_hex_color(CLIENTE_COLOR_SECUNDARIO, '#6C757D'),
         'color_header_bg' => '#343A40',
@@ -299,10 +414,13 @@ function cb_default_visual_config()
         'id_archivo_logo' => null,
         'id_archivo_favicon' => null,
         'id_archivo_fondo' => null,
+        'id_archivo_sidebar_cover' => null,
+        'id_archivo_avatar_default' => null,
         'assets' => [
             'favicon_url' => (string) CLIENTE_FAVICON_PATH,
             'logo_url' => (string) CLIENTE_LOGO_PATH,
             'login_bg_url' => (string) CLIENTE_LOGIN_BG_PATH,
+            'sidebar_cover_url' => (string) CLIENTE_LOGIN_BG_PATH,
             'carrusel' => ((bool) CLIENTE_LOGIN_CARRUSEL_ACTIVO) ? [
                 (string) CLIENTE_LOGIN_CARRUSEL_1_PATH,
                 (string) CLIENTE_LOGIN_CARRUSEL_2_PATH,
@@ -311,6 +429,11 @@ function cb_default_visual_config()
             'avatar_default_url' => (string) CLIENTE_AVATAR_DEFAULT_PATH,
             'empty_state_url' => (string) CLIENTE_EMPTY_STATE_PATH,
         ],
+        'login_botones' => cb_default_login_botones(),
+        'preview' => [
+            'login_preview_ready' => false,
+            'shell_preview_ready' => false,
+        ],
     ];
 }
 
@@ -318,6 +441,284 @@ function cb_visual_cache_path()
 {
     $fingerprint = hash('sha256', trim((string) API_BASE_URL) . '|' . trim((string) SERVICIO_CODIGO) . '|' . cb_local_domain());
     return __DIR__ . '/../storage/cache/config_visual_' . $fingerprint . '.json';
+}
+
+function cb_visual_asset_sync_enabled()
+{
+    return defined('CLIENTE_VISUAL_ASSET_SYNC_ACTIVO') && CLIENTE_VISUAL_ASSET_SYNC_ACTIVO;
+}
+
+function cb_visual_assets_root_dir()
+{
+    $configured = defined('CLIENTE_VISUAL_ASSET_SYNC_DIR')
+        ? trim((string) CLIENTE_VISUAL_ASSET_SYNC_DIR)
+        : 'storage/visual_assets';
+    if (!cb_is_safe_asset_path($configured)) {
+        $configured = 'storage/visual_assets';
+    }
+
+    return rtrim(__DIR__ . '/../' . $configured, '/\\');
+}
+
+function cb_visual_assets_root_rel()
+{
+    $configured = defined('CLIENTE_VISUAL_ASSET_SYNC_DIR')
+        ? trim((string) CLIENTE_VISUAL_ASSET_SYNC_DIR)
+        : 'storage/visual_assets';
+    if (!cb_is_safe_asset_path($configured)) {
+        $configured = 'storage/visual_assets';
+    }
+
+    return trim(str_replace('\\', '/', $configured), '/');
+}
+
+function cb_visual_assets_fingerprint()
+{
+    return hash('sha256', trim((string) API_BASE_URL) . '|' . trim((string) SERVICIO_CODIGO) . '|' . cb_local_domain());
+}
+
+function cb_visual_assets_manifest_path()
+{
+    return cb_visual_assets_root_dir() . '/' . cb_visual_assets_fingerprint() . '/manifest.json';
+}
+
+function cb_visual_assets_manifest_read()
+{
+    $path = cb_visual_assets_manifest_path();
+    if (!is_file($path) || !is_readable($path)) {
+        return [];
+    }
+    $raw = @file_get_contents($path);
+    if (!is_string($raw) || trim($raw) === '') {
+        return [];
+    }
+    $decoded = json_decode($raw, true);
+    return is_array($decoded) ? $decoded : [];
+}
+
+function cb_visual_assets_manifest_write(array $manifest)
+{
+    $path = cb_visual_assets_manifest_path();
+    $dir = dirname($path);
+    if (!is_dir($dir) && !@mkdir($dir, 0755, true)) {
+        return false;
+    }
+    if (!is_writable($dir)) {
+        return false;
+    }
+    $json = json_encode($manifest, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+    if (!is_string($json) || $json === '') {
+        return false;
+    }
+
+    return @file_put_contents($path, $json, LOCK_EX) !== false;
+}
+
+function cb_visual_asset_extension_from_url($url, $contentType = '')
+{
+    $path = (string) (parse_url((string) $url, PHP_URL_PATH) ?: '');
+    $ext = strtolower((string) pathinfo($path, PATHINFO_EXTENSION));
+    $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'ico'];
+    if (in_array($ext, $allowed, true)) {
+        return $ext;
+    }
+
+    $type = strtolower(trim((string) $contentType));
+    if (strpos($type, 'image/jpeg') !== false) {
+        return 'jpg';
+    }
+    if (strpos($type, 'image/png') !== false) {
+        return 'png';
+    }
+    if (strpos($type, 'image/gif') !== false) {
+        return 'gif';
+    }
+    if (strpos($type, 'image/webp') !== false) {
+        return 'webp';
+    }
+    if (strpos($type, 'image/svg') !== false) {
+        return 'svg';
+    }
+    if (strpos($type, 'image/x-icon') !== false || strpos($type, 'image/vnd.microsoft.icon') !== false) {
+        return 'ico';
+    }
+
+    return '';
+}
+
+function cb_visual_asset_download($url, $targetPath, &$contentType = '')
+{
+    $url = trim((string) $url);
+    if (!cb_is_valid_remote_asset_url($url)) {
+        return false;
+    }
+
+    $maxBytes = defined('CLIENTE_VISUAL_ASSET_SYNC_MAX_BYTES') ? (int) CLIENTE_VISUAL_ASSET_SYNC_MAX_BYTES : 5242880;
+    if ($maxBytes < 1024) {
+        $maxBytes = 5242880;
+    }
+
+    $body = false;
+    $contentType = '';
+    if (function_exists('curl_init')) {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 3,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_TIMEOUT => 15,
+            CURLOPT_USERAGENT => 'LIVP-SEGUROS VisualAssetSync',
+            CURLOPT_HTTPHEADER => ['Accept: image/*,*/*;q=0.8'],
+        ]);
+        $body = curl_exec($ch);
+        $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $contentType = (string) curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+        curl_close($ch);
+        if ($httpCode < 200 || $httpCode >= 300) {
+            return false;
+        }
+    } else {
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'header' => "Accept: image/*,*/*;q=0.8\r\nUser-Agent: LIVP-SEGUROS VisualAssetSync\r\n",
+                'timeout' => 15,
+                'ignore_errors' => true,
+            ],
+        ]);
+        $body = @file_get_contents($url, false, $context);
+        if (isset($http_response_header) && is_array($http_response_header)) {
+            foreach ($http_response_header as $headerLine) {
+                if (stripos((string) $headerLine, 'content-type:') === 0) {
+                    $contentType = trim(substr((string) $headerLine, 13));
+                    break;
+                }
+            }
+        }
+    }
+
+    if (!is_string($body) || $body === '' || strlen($body) > $maxBytes) {
+        return false;
+    }
+
+    $dir = dirname($targetPath);
+    if (!is_dir($dir) && !@mkdir($dir, 0755, true)) {
+        return false;
+    }
+    if (!is_writable($dir)) {
+        return false;
+    }
+
+    return @file_put_contents($targetPath, $body, LOCK_EX) !== false;
+}
+
+function cb_visual_asset_sync_one($key, $url, $assetVersion, array &$manifest)
+{
+    $url = trim((string) $url);
+    if (!cb_is_valid_remote_asset_url($url)) {
+        return $url;
+    }
+
+    $assetVersion = trim((string) $assetVersion);
+    if ($assetVersion === '') {
+        $assetVersion = hash('sha256', $url);
+    }
+
+    $entries = is_array($manifest['assets'] ?? null) ? $manifest['assets'] : [];
+    $entry = is_array($entries[$key] ?? null) ? $entries[$key] : [];
+    $existingRel = trim((string) ($entry['local_rel'] ?? ''));
+    $existingAbs = $existingRel !== '' && cb_is_safe_asset_path($existingRel) ? (__DIR__ . '/../' . $existingRel) : '';
+    if (
+        trim((string) ($manifest['asset_version'] ?? '')) === $assetVersion
+        && trim((string) ($entry['remote_url'] ?? '')) === $url
+        && $existingAbs !== ''
+        && is_file($existingAbs)
+    ) {
+        return $existingRel;
+    }
+
+    $contentType = '';
+    $baseDir = cb_visual_assets_root_dir() . '/' . cb_visual_assets_fingerprint() . '/assets';
+    $baseRel = cb_visual_assets_root_rel() . '/' . cb_visual_assets_fingerprint() . '/assets';
+    $safeKey = preg_replace('/[^A-Za-z0-9_-]/', '_', (string) $key);
+    $tmpPath = $baseDir . '/' . $safeKey . '_' . substr(hash('sha256', $assetVersion . '|' . $url), 0, 16) . '.tmp';
+
+    if (!cb_visual_asset_download($url, $tmpPath, $contentType)) {
+        if ($existingAbs !== '' && is_file($existingAbs)) {
+            return $existingRel;
+        }
+        return $url;
+    }
+
+    $ext = cb_visual_asset_extension_from_url($url, $contentType);
+    if ($ext === '') {
+        @unlink($tmpPath);
+        return $url;
+    }
+
+    $finalName = $safeKey . '_' . substr(hash('sha256', $assetVersion . '|' . $url), 0, 16) . '.' . $ext;
+    $finalAbs = $baseDir . '/' . $finalName;
+    $finalRel = $baseRel . '/' . $finalName;
+    if (!@rename($tmpPath, $finalAbs)) {
+        @unlink($tmpPath);
+        return $url;
+    }
+
+    $manifest['assets'][$key] = [
+        'remote_url' => $url,
+        'local_rel' => $finalRel,
+        'content_type' => $contentType,
+        'synced_at' => time(),
+    ];
+
+    return $finalRel;
+}
+
+function cb_apply_local_visual_assets(array $visual)
+{
+    if (!cb_visual_asset_sync_enabled() || !is_array($visual['assets'] ?? null)) {
+        return $visual;
+    }
+
+    $assets = $visual['assets'];
+    $assetVersion = trim((string) ($visual['_asset_version'] ?? ''));
+    if ($assetVersion === '') {
+        $assetsJson = json_encode($assets, JSON_UNESCAPED_SLASHES);
+        $assetVersion = hash('sha256', is_string($assetsJson) ? $assetsJson : '');
+    }
+
+    $manifest = cb_visual_assets_manifest_read();
+    if (!is_array($manifest['assets'] ?? null)) {
+        $manifest['assets'] = [];
+    }
+    $manifest['asset_version'] = $assetVersion;
+    $manifest['servicio_codigo'] = (string) SERVICIO_CODIGO;
+    $manifest['dominio'] = cb_local_domain();
+
+    $scalarKeys = ['favicon_url', 'logo_url', 'login_bg_url', 'sidebar_cover_url', 'avatar_default_url'];
+    foreach ($scalarKeys as $assetKey) {
+        if (isset($assets[$assetKey]) && cb_is_valid_remote_asset_url((string) $assets[$assetKey])) {
+            $assets[$assetKey] = cb_visual_asset_sync_one($assetKey, (string) $assets[$assetKey], $assetVersion, $manifest);
+        }
+    }
+
+    if (isset($assets['carrusel']) && is_array($assets['carrusel'])) {
+        $localCarrusel = [];
+        foreach ($assets['carrusel'] as $idx => $url) {
+            $key = 'carrusel_' . ((int) $idx + 1);
+            $localCarrusel[] = cb_is_valid_remote_asset_url((string) $url)
+                ? cb_visual_asset_sync_one($key, (string) $url, $assetVersion, $manifest)
+                : (string) $url;
+        }
+        $assets['carrusel'] = $localCarrusel;
+    }
+
+    $manifest['updated_at'] = time();
+    cb_visual_assets_manifest_write($manifest);
+    $visual['assets'] = $assets;
+
+    return $visual;
 }
 
 function cb_write_visual_cache(array $normalizedVisual, $ttlSeconds)
@@ -434,8 +835,11 @@ function cb_normalize_remote_visual_config($data)
     }
 
     $defaults = cb_default_visual_config();
+    $servicioRaw = is_array($data['servicio'] ?? null) ? $data['servicio'] : [];
     $visualRaw = is_array($data['visual'] ?? null) ? $data['visual'] : [];
     $assetsRaw = is_array($data['assets'] ?? null) ? $data['assets'] : [];
+    $loginBotonesRaw = is_array($data['login_botones'] ?? null) ? $data['login_botones'] : [];
+    $previewRaw = is_array($data['preview'] ?? null) ? $data['preview'] : [];
     $cacheRaw = is_array($data['cache'] ?? null) ? $data['cache'] : [];
 
     $normalized = $defaults;
@@ -443,6 +847,18 @@ function cb_normalize_remote_visual_config($data)
         ? trim((string) $visualRaw['titulo_login'])
         : $defaults['titulo_login'];
     $normalized['subtitulo_login'] = (string) ($visualRaw['subtitulo_login'] ?? $defaults['subtitulo_login']);
+    $footerTexto = trim((string) ($visualRaw['footer_texto'] ?? ''));
+    $footerVersion = trim((string) ($visualRaw['footer_version_label'] ?? ''));
+    $tituloSistema = trim((string) ($visualRaw['titulo_sistema_cliente'] ?? ''));
+    if ($tituloSistema === '') {
+        $tituloSistema = trim((string) ($servicioRaw['nombre'] ?? ''));
+    }
+    if ($tituloSistema === '') {
+        $tituloSistema = trim((string) CLIENTE_NOMBRE);
+    }
+    $normalized['footer_texto'] = $footerTexto;
+    $normalized['footer_version_label'] = $footerVersion !== '' ? $footerVersion : cb_cliente_version_label();
+    $normalized['titulo_sistema_cliente'] = $tituloSistema;
 
     $colorFields = [
         'color_primario',
@@ -469,6 +885,8 @@ function cb_normalize_remote_visual_config($data)
     $faviconUrl = trim((string) ($assetsRaw['favicon_url'] ?? ''));
     $logoUrl = trim((string) ($assetsRaw['logo_url'] ?? ''));
     $loginBgUrl = trim((string) ($assetsRaw['login_bg_url'] ?? ''));
+    $sidebarCoverUrl = trim((string) ($assetsRaw['sidebar_cover_url'] ?? ''));
+    $avatarDefaultUrl = trim((string) ($assetsRaw['avatar_default_url'] ?? ''));
     $remoteCarrusel = isset($assetsRaw['carrusel']) && is_array($assetsRaw['carrusel']) ? $assetsRaw['carrusel'] : [];
     $safeCarrusel = [];
     foreach ($remoteCarrusel as $itemUrl) {
@@ -482,9 +900,19 @@ function cb_normalize_remote_visual_config($data)
         'favicon_url' => cb_is_valid_remote_asset_url($faviconUrl) ? $faviconUrl : $defaults['assets']['favicon_url'],
         'logo_url' => cb_is_valid_remote_asset_url($logoUrl) ? $logoUrl : $defaults['assets']['logo_url'],
         'login_bg_url' => cb_is_valid_remote_asset_url($loginBgUrl) ? $loginBgUrl : $defaults['assets']['login_bg_url'],
+        'sidebar_cover_url' => cb_is_valid_remote_asset_url($sidebarCoverUrl)
+            ? $sidebarCoverUrl
+            : (cb_is_valid_remote_asset_url($loginBgUrl) ? $loginBgUrl : $defaults['assets']['sidebar_cover_url']),
         'carrusel' => $safeCarrusel ?: $defaults['assets']['carrusel'],
-        'avatar_default_url' => $defaults['assets']['avatar_default_url'],
+        'avatar_default_url' => cb_is_valid_remote_asset_url($avatarDefaultUrl)
+            ? $avatarDefaultUrl
+            : $defaults['assets']['avatar_default_url'],
         'empty_state_url' => $defaults['assets']['empty_state_url'],
+    ];
+    $normalized['login_botones'] = cb_normalize_login_botones($loginBotonesRaw, $defaults['login_botones']);
+    $normalized['preview'] = [
+        'login_preview_ready' => !empty($previewRaw['login_preview_ready']),
+        'shell_preview_ready' => !empty($previewRaw['shell_preview_ready']),
     ];
 
     $ttlSeconds = (int) ($cacheRaw['ttl_seconds'] ?? 0);
@@ -495,6 +923,7 @@ function cb_normalize_remote_visual_config($data)
         $ttlSeconds = 600;
     }
     $normalized['_cache_ttl_seconds'] = $ttlSeconds;
+    $normalized['_asset_version'] = trim((string) ($cacheRaw['asset_version'] ?? ''));
 
     return $normalized;
 }
@@ -521,6 +950,20 @@ function cb_get_remote_visual_config()
     return ['ok' => true, 'code' => 'ok', 'visual' => $normalized];
 }
 
+function cb_normalize_cached_visual_config(array $cachedVisual)
+{
+    return cb_normalize_remote_visual_config([
+        'visual' => $cachedVisual,
+        'assets' => (array) ($cachedVisual['assets'] ?? []),
+        'login_botones' => (array) ($cachedVisual['login_botones'] ?? []),
+        'preview' => (array) ($cachedVisual['preview'] ?? []),
+        'cache' => [
+            'ttl_seconds' => (int) CLIENTE_VISUAL_CACHE_TTL_DEFAULT,
+            'asset_version' => (string) ($cachedVisual['_asset_version'] ?? ''),
+        ],
+    ]);
+}
+
 function cb_get_remote_visual_config_cached()
 {
     $cacheEnabled = (defined('CLIENTE_VISUAL_CACHE_ACTIVO') && CLIENTE_VISUAL_CACHE_ACTIVO);
@@ -536,11 +979,8 @@ function cb_get_remote_visual_config_cached()
     if ($cacheEnabled) {
         $cache = cb_read_visual_cache();
         if (!empty($cache['ok']) && !empty($cache['is_fresh']) && is_array($cache['visual'] ?? null)) {
-            return cb_normalize_remote_visual_config([
-                'visual' => $cache['visual'],
-                'assets' => (array) ($cache['visual']['assets'] ?? []),
-                'cache' => ['ttl_seconds' => (int) CLIENTE_VISUAL_CACHE_TTL_DEFAULT],
-            ]);
+            $cachedVisual = cb_normalize_cached_visual_config($cache['visual']);
+            return is_array($cachedVisual) ? cb_apply_local_visual_assets($cachedVisual) : null;
         }
     }
 
@@ -556,15 +996,12 @@ function cb_get_remote_visual_config_cached()
         if ($cacheEnabled) {
             cb_write_visual_cache($visualToCache, $ttl);
         }
-        return $visualToCache;
+        return cb_apply_local_visual_assets($visualToCache);
     }
 
     if ($cacheEnabled && !empty($cache['ok']) && !empty($cache['is_stale']) && is_array($cache['visual'] ?? null)) {
-        return cb_normalize_remote_visual_config([
-            'visual' => $cache['visual'],
-            'assets' => (array) ($cache['visual']['assets'] ?? []),
-            'cache' => ['ttl_seconds' => (int) CLIENTE_VISUAL_CACHE_TTL_DEFAULT],
-        ]);
+        $cachedVisual = cb_normalize_cached_visual_config($cache['visual']);
+        return is_array($cachedVisual) ? cb_apply_local_visual_assets($cachedVisual) : null;
     }
 
     return null;
@@ -578,7 +1015,7 @@ function cb_merge_visual_config(array $base, array $override)
             $result['assets'] = array_merge($result['assets'], $value);
             continue;
         }
-        if ($key === '_cache_ttl_seconds') {
+        if ($key === '_cache_ttl_seconds' || $key === '_asset_version') {
             continue;
         }
         $result[$key] = $value;
@@ -598,7 +1035,12 @@ function cb_get_effective_visual_config($preferRemote = false)
         $normalizedSession = cb_normalize_remote_visual_config([
             'visual' => $sessionVisual,
             'assets' => (array) ($sessionVisual['assets'] ?? []),
-            'cache' => ['ttl_seconds' => (int) CLIENTE_VISUAL_CACHE_TTL_DEFAULT],
+            'login_botones' => (array) ($sessionVisual['login_botones'] ?? []),
+            'preview' => (array) ($sessionVisual['preview'] ?? []),
+            'cache' => [
+                'ttl_seconds' => (int) CLIENTE_VISUAL_CACHE_TTL_DEFAULT,
+                'asset_version' => (string) ($sessionVisual['_asset_version'] ?? ''),
+            ],
         ]);
         if (is_array($normalizedSession)) {
             $effective = cb_merge_visual_config($effective, $normalizedSession);
@@ -617,7 +1059,7 @@ function cb_get_effective_visual_config($preferRemote = false)
 
 function cb_get_visual_config()
 {
-    return cb_get_effective_visual_config(false);
+    return cb_get_effective_visual_config(true);
 }
 
 function cb_get_timeout_minutes()

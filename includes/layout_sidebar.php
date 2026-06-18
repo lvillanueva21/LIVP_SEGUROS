@@ -9,7 +9,11 @@ $cbMenu = cb_cliente_menu();
 
 $cbLogo = cb_asset_url((string) ($cbAssets['logo_url'] ?? ''), 'assets/default/branding/logo_cliente.svg');
 $cbAvatar = cb_asset_url((string) ($cbAssets['avatar_default_url'] ?? ''), 'assets/default/ui/avatar_default.svg');
-$cbCover = cb_asset_url((string) ($cbAssets['login_bg_url'] ?? ''), 'assets/default/login/login_fondo.svg');
+$cbCoverRaw = trim((string) ($cbAssets['sidebar_cover_url'] ?? ''));
+if ($cbCoverRaw === '') {
+    $cbCoverRaw = trim((string) ($cbAssets['login_bg_url'] ?? ''));
+}
+$cbCover = cb_asset_url($cbCoverRaw, 'assets/default/login/login_fondo.svg');
 $cbLogoFallback = cb_asset_url('', 'assets/default/branding/logo_cliente.svg');
 $cbAvatarFallback = cb_asset_url('', 'assets/default/ui/avatar_default.svg');
 $cbCoverFallback = cb_asset_url('', 'assets/default/login/login_fondo.svg');
@@ -22,6 +26,10 @@ if ($cbNombreCompleto === '') {
 $cbServicioNombre = trim((string) ($cbServicio['nombre'] ?? ''));
 if ($cbServicioNombre === '') {
     $cbServicioNombre = CLIENTE_NOMBRE;
+}
+$cbTituloSistema = trim((string) ($cbVisual['titulo_sistema_cliente'] ?? ''));
+if ($cbTituloSistema === '') {
+    $cbTituloSistema = $cbServicioNombre !== '' ? $cbServicioNombre : CLIENTE_NOMBRE;
 }
 
 $cbDocumentoTipo = trim((string) ($cbUsuario['documento_tipo'] ?? ''));
@@ -43,7 +51,7 @@ $cbInicioDashboardActivo = $cbCurrentScript === 'dashboard.php';
   <aside id="lsis-main-sidebar" class="main-sidebar sidebar-dark-primary elevation-4 cliente-sidebar">
     <a href="<?php echo cb_e(cb_url('dashboard.php')); ?>" class="brand-link cliente-brand-link">
       <img src="<?php echo cb_e($cbLogo); ?>" alt="Logo cliente" class="brand-image img-circle elevation-3 cliente-brand-image" style="opacity:.8" onerror="this.onerror=null;this.src='<?php echo cb_e($cbLogoFallback); ?>';">
-      <span id="lsis-brand-text" class="brand-text font-weight-light"><?php echo cb_e(CLIENTE_NOMBRE); ?></span>
+      <span id="lsis-brand-text" class="brand-text font-weight-light"><?php echo cb_e($cbTituloSistema); ?></span>
     </a>
 
     <div class="sidebar">

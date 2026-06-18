@@ -23,13 +23,17 @@ $cbAssets = is_array($cbVisual['assets'] ?? null) ? $cbVisual['assets'] : [];
 $cbFavicon = cb_asset_url((string) ($cbAssets['favicon_url'] ?? ''), 'assets/default/branding/favicon.svg');
 $cbAvatar = cb_asset_url((string) ($cbAssets['avatar_default_url'] ?? ''), 'assets/default/ui/avatar_default.svg');
 $cbAvatarFallback = cb_asset_url('', 'assets/default/ui/avatar_default.svg');
+$cbTituloSistema = trim((string) ($cbVisual['titulo_sistema_cliente'] ?? ''));
+if ($cbTituloSistema === '') {
+    $cbTituloSistema = $cbServicioNombre !== '' ? $cbServicioNombre : CLIENTE_NOMBRE;
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><?php echo cb_e($cbPageTitle); ?> - <?php echo cb_e(CLIENTE_NOMBRE); ?></title>
+  <title><?php echo cb_e($cbPageTitle); ?> - <?php echo cb_e($cbTituloSistema); ?></title>
   <link rel="icon" href="<?php echo cb_e($cbFavicon); ?>">
   <link rel="stylesheet" href="<?php echo cb_e(cb_url('plugins/fontawesome-free/css/all.min.css')); ?>">
   <link rel="stylesheet" href="<?php echo cb_e(cb_url('dist/css/adminlte.min.css')); ?>">
