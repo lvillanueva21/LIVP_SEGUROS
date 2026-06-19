@@ -34,3 +34,17 @@ function cb_cliente_db()
     return $pdo;
 }
 
+function cb_cliente_db_required()
+{
+    try {
+        $pdo = cb_cliente_db();
+    } catch (Throwable $e) {
+        throw new RuntimeException('No se pudo inicializar la base de datos local.');
+    }
+
+    if (!$pdo instanceof PDO) {
+        throw new RuntimeException('La base de datos local no esta disponible para este modulo.');
+    }
+
+    return $pdo;
+}

@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/autorizacion_cliente.php';
 
 function cb_cliente_menu_fallback()
 {
@@ -11,12 +12,6 @@ function cb_cliente_menu_fallback()
             'hijos' => [],
         ],
     ];
-}
-
-function cb_cliente_normalize_codigo_pagina($value)
-{
-    $value = strtolower(trim((string) $value));
-    return preg_match('/^[a-z0-9_-]+$/', $value) === 1 ? $value : '';
 }
 
 function cb_cliente_normalize_menu_item(array $item)
@@ -101,29 +96,6 @@ function cb_cliente_menu_codigos()
     }
 
     return array_values(array_unique($codigos));
-}
-
-function cb_cliente_permisos()
-{
-    $auth = cb_get_auth();
-    return is_array($auth) && is_array($auth['permisos'] ?? null) ? $auth['permisos'] : [];
-}
-
-function cb_cliente_permiso_pagina($codigoPagina)
-{
-    $codigoPagina = cb_cliente_normalize_codigo_pagina($codigoPagina);
-    if ($codigoPagina === '') {
-        return null;
-    }
-
-    $permisos = cb_cliente_permisos();
-    return is_array($permisos[$codigoPagina] ?? null) ? $permisos[$codigoPagina] : null;
-}
-
-function cb_cliente_puede_ver_pagina($codigoPagina)
-{
-    $permiso = cb_cliente_permiso_pagina($codigoPagina);
-    return is_array($permiso) && (int) ($permiso['puede_ver'] ?? 0) === 1;
 }
 
 function cb_cliente_titulo_pagina($codigoPagina)

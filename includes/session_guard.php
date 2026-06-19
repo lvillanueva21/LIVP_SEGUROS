@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/helpers.php';
+require_once __DIR__ . '/autorizacion_cliente.php';
 
 cb_boot_session();
 
