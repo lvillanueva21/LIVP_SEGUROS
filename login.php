@@ -46,7 +46,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         }
 
         if ($documentoTipo === '' || trim($clave) === '') {
-            $errorMsg = 'Credenciales inválidas o acceso no autorizado.';
+            $errorMsg = 'Credenciales invalidas o acceso no autorizado.';
         } else {
             $apiResult = cb_api_login($documentoTipo, $documentoNumero, $clave);
             if (!empty($apiResult['ok'])) {
@@ -55,6 +55,15 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 $servicio = is_array($data['servicio'] ?? null) ? $data['servicio'] : [];
                 $configVisual = is_array($data['config_visual'] ?? null) ? $data['config_visual'] : [];
                 $configLogin = is_array($data['config_login'] ?? null) ? $data['config_login'] : [];
+                $rol = is_array($data['rol'] ?? null) ? $data['rol'] : [];
+                $menu = is_array($data['menu'] ?? null) ? $data['menu'] : [];
+                $permisos = is_array($data['permisos'] ?? null) ? $data['permisos'] : [];
+                $rolCodigo = trim((string) ($rol['codigo_rol'] ?? ''));
+                $rolNombre = trim((string) ($rol['nombre'] ?? ''));
+
+                if ($rolCodigo === '' || $rolNombre === '' || !$permisos) {
+                    $errorMsg = 'Usuario sin rol asignado para este servicio. Consulte a soporte informatico.';
+                } else {
 
                 $timeout = (int) ($configLogin['timeout_sesion_minutos'] ?? 30);
                 if ($timeout < 5) {
@@ -95,14 +104,32 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                     'config_login' => [
                         'timeout_sesion_minutos' => $timeout,
                     ],
+                    'rol' => [
+                        'id' => (int) ($rol['id'] ?? 0),
+                        'codigo_rol' => $rolCodigo,
+                        'nombre' => $rolNombre,
+                        'descripcion' => (string) ($rol['descripcion'] ?? ''),
+                    ],
+                    'menu' => $menu,
+                    'permisos' => $permisos,
                     'login_at' => time(),
                     'last_activity_at' => time(),
                 ];
 
                 cb_redirect('dashboard.php');
+                }
             }
 
-            $errorMsg = 'Credenciales inválidas o acceso no autorizado.';
+            if ($errorMsg === '') {
+                $apiCode = (string) ($apiResult['code'] ?? '');
+                if ($apiCode === 'usuario_sin_rol' || $apiCode === 'rol_sin_paginas_visibles') {
+                    $errorMsg = (string) ($apiResult['message'] ?? 'Usuario sin rol asignado para este servicio. Consulte a soporte informatico.');
+                } elseif ($apiCode === 'api_sin_respuesta') {
+                    $errorMsg = 'Error de conexion con el sistema maestro. Consulte a soporte informatico.';
+                } else {
+                    $errorMsg = 'Credenciales invalidas o acceso no autorizado.';
+                }
+            }
         }
     }
 }

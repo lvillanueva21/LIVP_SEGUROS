@@ -10,6 +10,11 @@ if (!is_array($auth) || empty($auth['ok'])) {
     cb_guard_fail($isApiRequest, 'Sesión no válida.');
 }
 
+if (!cb_auth_has_authorization_payload($auth)) {
+    cb_destroy_session();
+    cb_guard_fail($isApiRequest, 'Sesion no valida.');
+}
+
 $now = time();
 $lastActivity = isset($auth['last_activity_at']) ? (int) $auth['last_activity_at'] : 0;
 $timeoutSeconds = cb_get_timeout_minutes() * 60;
@@ -32,4 +37,23 @@ function cb_guard_fail($isApiRequest, $message)
     }
 
     cb_redirect('login.php?m=sesion');
+}
+
+function cb_auth_has_authorization_payload(array $auth)
+{
+    $rol = is_array($auth['rol'] ?? null) ? $auth['rol'] : [];
+    $permisos = is_array($auth['permisos'] ?? null) ? $auth['permisos'] : [];
+    $menu = is_array($auth['menu'] ?? null) ? $auth['menu'] : null;
+
+    if (trim((string) ($rol['codigo_rol'] ?? '')) === '') {
+        return false;
+    }
+    if (trim((string) ($rol['nombre'] ?? '')) === '') {
+        return false;
+    }
+    if (!$permisos) {
+        return false;
+    }
+
+    return is_array($menu);
 }

@@ -3,6 +3,7 @@ $cbPageTitle = 'Inicio';
 $cbAuthInicio = cb_get_auth();
 $cbUsuarioInicio = is_array($cbAuthInicio['usuario'] ?? null) ? $cbAuthInicio['usuario'] : [];
 $cbServicioInicio = is_array($cbAuthInicio['servicio'] ?? null) ? $cbAuthInicio['servicio'] : [];
+$cbRolInicio = is_array($cbAuthInicio['rol'] ?? null) ? $cbAuthInicio['rol'] : [];
 
 $cbNombreInicio = trim((string) ($cbUsuarioInicio['nombres'] ?? '') . ' ' . (string) ($cbUsuarioInicio['apellidos'] ?? ''));
 if ($cbNombreInicio === '') {
@@ -20,6 +21,10 @@ if ($cbServicioNombreInicio === '') {
 }
 
 $cbServicioCodigoInicio = trim((string) ($cbServicioInicio['codigo_servicio'] ?? ''));
+$cbRolVisibleInicio = trim((string) ($cbRolInicio['nombre'] ?? ''));
+if ($cbRolVisibleInicio === '') {
+    $cbRolVisibleInicio = 'Usuario externo';
+}
 ?>
 <div class="card card-primary card-outline">
   <div class="card-header">
@@ -28,7 +33,7 @@ $cbServicioCodigoInicio = trim((string) ($cbServicioInicio['codigo_servicio'] ??
   <div class="card-body">
     <p class="mb-2">Bienvenido, <strong><?php echo cb_e($cbNombreInicio); ?></strong>.</p>
     <p class="mb-2">Usuario: <strong><?php echo cb_e($cbDocumentoInicio); ?></strong></p>
-    <p class="mb-2">Rol activo: <strong>Usuario externo</strong></p>
+    <p class="mb-2">Rol activo: <strong><?php echo cb_e($cbRolVisibleInicio); ?></strong></p>
     <p class="mb-2">
       Servicio: <strong><?php echo cb_e($cbServicioNombreInicio); ?></strong>
       <?php if ($cbServicioCodigoInicio !== ''): ?>

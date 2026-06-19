@@ -3,6 +3,7 @@ require_once __DIR__ . '/menu_cliente.php';
 $cbAuth = cb_get_auth();
 $cbUsuario = is_array($cbAuth) && isset($cbAuth['usuario']) && is_array($cbAuth['usuario']) ? $cbAuth['usuario'] : [];
 $cbServicio = is_array($cbAuth) && isset($cbAuth['servicio']) && is_array($cbAuth['servicio']) ? $cbAuth['servicio'] : [];
+$cbRol = is_array($cbAuth) && isset($cbAuth['rol']) && is_array($cbAuth['rol']) ? $cbAuth['rol'] : [];
 $cbVisual = cb_get_visual_config();
 $cbAssets = is_array($cbVisual['assets'] ?? null) ? $cbVisual['assets'] : [];
 $cbMenu = cb_cliente_menu();
@@ -37,6 +38,10 @@ $cbDocumentoNumero = trim((string) ($cbUsuario['documento_numero'] ?? ''));
 $cbDocumentoVisible = trim($cbDocumentoTipo . ' ' . $cbDocumentoNumero);
 if ($cbDocumentoVisible === '') {
     $cbDocumentoVisible = 'Usuario externo';
+}
+$cbRolVisible = trim((string) ($cbRol['nombre'] ?? ''));
+if ($cbRolVisible === '') {
+    $cbRolVisible = 'Usuario externo';
 }
 
 $cbUbicacionVisible = trim((string) DOMINIO_LOCAL);
@@ -85,7 +90,7 @@ $cbInicioDashboardActivo = $cbCurrentScript === 'dashboard.php';
           </span>
           <span class="badge bg-primary" id="lsis-sidebar-user-role-wrap" title="<?php echo cb_e($cbDocumentoVisible); ?>">
             <i class="fas fa-id-badge mr-1" aria-hidden="true"></i>
-            <span id="lsis-sidebar-user-role"><?php echo cb_e($cbDocumentoVisible); ?></span>
+            <span id="lsis-sidebar-user-role"><?php echo cb_e($cbRolVisible); ?></span>
           </span>
         </div>
       </div>
@@ -105,16 +110,45 @@ $cbInicioDashboardActivo = $cbCurrentScript === 'dashboard.php';
               $titulo = (string) ($item['titulo'] ?? '');
               $url = (string) ($item['url'] ?? '#');
               $codigo = strtolower(trim((string) ($item['codigo'] ?? '')));
+              $children = is_array($item['hijos'] ?? null) ? $item['hijos'] : [];
               $esActivo = false;
               if ($cbCurrentScript === 'modulo.php' && $codigo !== '' && $codigo === $cbCurrentModule) {
                   $esActivo = true;
               }
+              foreach ($children as $child) {
+                  $childCode = strtolower(trim((string) ($child['codigo'] ?? '')));
+                  if ($cbCurrentScript === 'modulo.php' && $childCode !== '' && $childCode === $cbCurrentModule) {
+                      $esActivo = true;
+                  }
+              }
             ?>
-            <li class="nav-item">
-              <a href="<?php echo cb_e(cb_url($url)); ?>" class="nav-link<?php echo $esActivo ? ' active' : ''; ?>">
+            <li class="nav-item<?php echo ($children && $esActivo) ? ' menu-open' : ''; ?>">
+              <a href="<?php echo $children ? '#' : cb_e(cb_url($url)); ?>" class="nav-link<?php echo $esActivo ? ' active' : ''; ?>">
                 <i class="nav-icon <?php echo cb_e($icono); ?>"></i>
-                <p><?php echo cb_e($titulo); ?></p>
+                <p>
+                  <?php echo cb_e($titulo); ?>
+                  <?php if ($children): ?><i class="right fas fa-angle-left"></i><?php endif; ?>
+                </p>
               </a>
+              <?php if ($children): ?>
+                <ul class="nav nav-treeview">
+                  <?php foreach ($children as $child): ?>
+                    <?php
+                      $childIcon = (string) ($child['icono'] ?? 'far fa-circle');
+                      $childTitle = (string) ($child['titulo'] ?? '');
+                      $childUrl = (string) ($child['url'] ?? '#');
+                      $childCode = strtolower(trim((string) ($child['codigo'] ?? '')));
+                      $childActive = $cbCurrentScript === 'modulo.php' && $childCode !== '' && $childCode === $cbCurrentModule;
+                    ?>
+                    <li class="nav-item">
+                      <a href="<?php echo cb_e(cb_url($childUrl)); ?>" class="nav-link<?php echo $childActive ? ' active' : ''; ?>">
+                        <i class="nav-icon <?php echo cb_e($childIcon); ?>"></i>
+                        <p><?php echo cb_e($childTitle); ?></p>
+                      </a>
+                    </li>
+                  <?php endforeach; ?>
+                </ul>
+              <?php endif; ?>
             </li>
           <?php endforeach; ?>
         </ul>

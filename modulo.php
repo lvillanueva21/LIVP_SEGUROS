@@ -2,29 +2,22 @@
 require_once __DIR__ . '/includes/session_guard.php';
 require_once __DIR__ . '/includes/menu_cliente.php';
 
-$menu = cb_cliente_menu();
-$menuCodigos = cb_cliente_menu_codigos();
 $modulo = strtolower(trim((string) ($_GET['m'] ?? 'inicio')));
-$moduloValido = preg_match('/^[a-z0-9_]+$/', $modulo) === 1 && in_array($modulo, $menuCodigos, true);
+$moduloValido = cb_cliente_normalize_codigo_pagina($modulo) === $modulo;
+$puedeVer = $moduloValido && cb_cliente_puede_ver_pagina($modulo);
 
-$cbPageTitle = 'Módulo';
-foreach ($menu as $item) {
-    if ((string) ($item['codigo'] ?? '') === $modulo) {
-        $cbPageTitle = (string) ($item['titulo'] ?? 'Módulo');
-        break;
-    }
-}
+$cbPageTitle = $moduloValido ? cb_cliente_titulo_pagina($modulo) : 'Modulo';
 require_once __DIR__ . '/includes/layout_header.php';
 require_once __DIR__ . '/includes/layout_sidebar.php';
 
-if (!$moduloValido) {
+if (!$moduloValido || !$puedeVer) {
     ?>
     <div class="card card-danger card-outline">
       <div class="card-header">
-        <h3 class="card-title">Módulo no permitido</h3>
+        <h3 class="card-title">Acceso no permitido</h3>
       </div>
       <div class="card-body">
-        <p class="mb-0">El módulo solicitado no está disponible.</p>
+        <p class="mb-0">No tienes permiso para acceder a esta pagina.</p>
       </div>
     </div>
     <?php
@@ -37,10 +30,10 @@ if (!is_file($modulePath)) {
     ?>
     <div class="card card-warning card-outline">
       <div class="card-header">
-        <h3 class="card-title">Módulo no implementado</h3>
+        <h3 class="card-title">Pagina en construccion</h3>
       </div>
       <div class="card-body">
-        <p class="mb-0">El módulo existe en menú pero aún no tiene vista de inicio.</p>
+        <p class="mb-0">Esta pagina esta permitida para tu rol, pero todavia no tiene un modulo publicado.</p>
       </div>
     </div>
     <?php
