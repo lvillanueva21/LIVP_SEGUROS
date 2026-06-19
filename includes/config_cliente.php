@@ -112,7 +112,7 @@ if (!defined('CLIENTE_DB_ACTIVA')) {
     define('CLIENTE_DB_ACTIVA', true);
 }
 if (!defined('CLIENTE_DB_HOST')) {
-    define('CLIENTE_DB_HOST', 'root'); // COMPLETAR MANUALMENTE
+    define('CLIENTE_DB_HOST', 'localhost'); // COMPLETAR MANUALMENTE
 }
 if (!defined('CLIENTE_DB_NAME')) {
     define('CLIENTE_DB_NAME', 'u517204426_in5vRANce'); // COMPLETAR MANUALMENTE
