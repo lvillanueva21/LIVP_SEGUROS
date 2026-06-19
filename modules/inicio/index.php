@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/../../includes/module_guard.php';
+cb_require_module_context('inicio');
+
 $cbPageTitle = 'Inicio';
 $cbAuthInicio = cb_get_auth();
 $cbUsuarioInicio = is_array($cbAuthInicio['usuario'] ?? null) ? $cbAuthInicio['usuario'] : [];

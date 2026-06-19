@@ -41,5 +41,12 @@ if (!is_file($modulePath)) {
     exit;
 }
 
+if (!defined('CB_MODULE_CONTEXT')) {
+    define('CB_MODULE_CONTEXT', true);
+}
+if (!defined('CB_MODULE_CODIGO')) {
+    define('CB_MODULE_CODIGO', $modulo);
+}
+
 require $modulePath;
 require_once __DIR__ . '/includes/layout_footer.php';

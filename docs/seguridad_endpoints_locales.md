@@ -36,6 +36,18 @@ Los endpoints locales deben reutilizar estos helpers:
 
 `includes/session_guard.php` carga los helpers de autorizacion para endpoints privados. Si un endpoint necesita CSRF, payload o JSON uniforme, puede usar directamente los helpers disponibles desde esa carga.
 
+## Blindaje de modulos fisicos
+
+Todo archivo `modules/{codigo}/index.php` debe:
+
+- cargarse mediante `modulo.php?m={codigo}`,
+- incluir `includes/module_guard.php`,
+- llamar `cb_require_module_context('{codigo}')` antes de renderizar contenido.
+
+`modulo.php` es el unico punto que define el contexto seguro de carga. Ese contexto se define solo despues de validar sesion, codigo seguro, permiso `puede_ver` y existencia fisica del archivo.
+
+Si un usuario abre directamente `modules/{codigo}/index.php`, el modulo debe responder HTTP 403 con mensaje generico, sin redirigir al login y sin exponer rutas, secretos ni detalles internos.
+
 ## Permisos por accion
 
 - Listados y lecturas: requieren `puede_ver`.

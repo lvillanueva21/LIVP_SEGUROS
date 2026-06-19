@@ -16,7 +16,10 @@ Este checklist debe revisarse antes de marcar un modulo de negocio de LIVP_SEGUR
 - [ ] Carpeta fisica del modulo creada.
 - [ ] `modules/{codigo}/index.php` existe.
 - [ ] Acceso directo al archivo del modulo bloqueado o controlado.
+- [ ] El modulo incluye `includes/module_guard.php`.
+- [ ] El modulo llama `cb_require_module_context('{codigo}')`.
 - [ ] El modulo se carga desde `modulo.php?m={codigo}`.
+- [ ] Si se uso `modules/_plantilla`, se reemplazo `_plantilla` por el codigo real.
 - [ ] Endpoints locales creados solo si son necesarios.
 - [ ] Endpoints privados incluyen `includes/session_guard.php`.
 

@@ -27,6 +27,10 @@ Este documento define como debe nacer, publicarse y probarse un modulo de negoci
 
 - El modulo debe abrirse mediante `modulo.php?m={codigo}`.
 - El archivo `modules/{codigo}/index.php` no debe ser la puerta publica principal.
+- Todo archivo `modules/{codigo}/index.php` debe cargar `includes/module_guard.php`.
+- Todo modulo real debe llamar `cb_require_module_context('{codigo}')` al inicio.
+- `modulo.php` define el contexto seguro de carga despues de validar sesion, codigo, permiso `puede_ver` y existencia fisica del archivo.
+- El acceso directo a `modules/{codigo}/index.php` debe responder HTTP 403 sin revelar rutas ni detalles internos.
 - Si una pagina esta permitida pero el archivo fisico no existe, el router debe mostrar "Pagina en construccion".
 - Si la pagina no esta permitida, debe bloquearse el acceso.
 
@@ -41,6 +45,20 @@ LIVP_SEGUROS/api/{codigo}/toggle_state.php
 ```
 
 Esta estructura es adaptable. No todos los modulos necesitan todos los endpoints.
+
+## Plantilla interna
+
+Existe una plantilla tecnica en:
+
+```text
+LIVP_SEGUROS/modules/_plantilla/
+```
+
+La carpeta `_plantilla` no es un modulo real, no debe registrarse en el maestro, no aparece en menu y no usa BD.
+
+Para crear un modulo real, duplicar la carpeta, renombrarla con el `codigo_pagina` real y reemplazar el codigo esperado dentro de `index.php`.
+
+La plantilla es flexible: puede ampliarse con tabs, formularios, cards, dashboards, JS/CSS especifico, endpoints extra o flujos especiales si el requerimiento lo justifica.
 
 ## Recomendado
 
@@ -61,6 +79,7 @@ Los modulos futuros deben apoyarse en estos helpers:
 
 - `includes/autorizacion_cliente.php`: permisos locales por pagina y accion.
 - `includes/request_cliente.php`: metodo HTTP, payload, CSRF y respuestas JSON.
+- `includes/module_guard.php`: bloqueo de acceso directo a modulos fisicos.
 - `includes/conexion_cliente.php`: conexion PDO local y `cb_cliente_db_required()`.
 
 Patron recomendado para endpoints locales:
