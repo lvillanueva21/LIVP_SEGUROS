@@ -32,6 +32,9 @@ if (!defined('CLIENTE_BASE_URL')) {
 if (!defined('CLIENTE_TIMEZONE')) {
     define('CLIENTE_TIMEZONE', 'America/Lima');
 }
+if (!defined('CLIENTE_DB_TIMEZONE')) {
+    define('CLIENTE_DB_TIMEZONE', '-05:00');
+}
 if (!defined('CLIENTE_DEBUG')) {
     define('CLIENTE_DEBUG', false);
 }
@@ -103,21 +106,22 @@ if (!defined('CLIENTE_EMPTY_STATE_PATH')) {
     define('CLIENTE_EMPTY_STATE_PATH', 'assets/default/ui/empty_state.svg');
 }
 
-// Base de datos local opcional para módulos del cliente.
+// Base de datos local de Broker Seguros.
+// COMPLETAR MANUALMENTE host, nombre, usuario y clave antes de usar modulos con BD.
 if (!defined('CLIENTE_DB_ACTIVA')) {
-    define('CLIENTE_DB_ACTIVA', false);
+    define('CLIENTE_DB_ACTIVA', true);
 }
 if (!defined('CLIENTE_DB_HOST')) {
-    define('CLIENTE_DB_HOST', '127.0.0.1');
+    define('CLIENTE_DB_HOST', 'root'); // COMPLETAR MANUALMENTE
 }
 if (!defined('CLIENTE_DB_NAME')) {
-    define('CLIENTE_DB_NAME', 'cliente_db');
+    define('CLIENTE_DB_NAME', 'u517204426_in5vRANce'); // COMPLETAR MANUALMENTE
 }
 if (!defined('CLIENTE_DB_USER')) {
-    define('CLIENTE_DB_USER', 'cliente_user');
+    define('CLIENTE_DB_USER', 'u517204426_sal35MAN'); // COMPLETAR MANUALMENTE
 }
 if (!defined('CLIENTE_DB_PASS')) {
-    define('CLIENTE_DB_PASS', 'cliente_pass');
+    define('CLIENTE_DB_PASS', 'E@0hWJCp!yY'); // COMPLETAR MANUALMENTE
 }
 if (!defined('CLIENTE_DB_CHARSET')) {
     define('CLIENTE_DB_CHARSET', 'utf8mb4');

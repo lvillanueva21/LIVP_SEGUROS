@@ -31,6 +31,12 @@ function cb_cliente_db()
         PDO::ATTR_EMULATE_PREPARES => false,
     ]);
 
+    $dbTimezone = defined('CLIENTE_DB_TIMEZONE') ? trim((string) CLIENTE_DB_TIMEZONE) : '-05:00';
+    if ($dbTimezone === '') {
+        $dbTimezone = '-05:00';
+    }
+    $pdo->exec('SET time_zone = ' . $pdo->quote($dbTimezone));
+
     return $pdo;
 }
 

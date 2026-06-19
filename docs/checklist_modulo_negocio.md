@@ -19,7 +19,7 @@ Este checklist debe revisarse antes de marcar un modulo de negocio de LIVP_SEGUR
 - [ ] El modulo incluye `includes/module_guard.php`.
 - [ ] El modulo llama `cb_require_module_context('{codigo}')`.
 - [ ] El modulo se carga desde `modulo.php?m={codigo}`.
-- [ ] Si se uso `modules/_plantilla`, se reemplazo `_plantilla` por el codigo real.
+- [ ] Si se uso `modules/_plantilla/`, se copio como `modules/{codigo}` y se reemplazo `_plantilla` por el codigo real.
 - [ ] Endpoints locales creados solo si son necesarios.
 - [ ] Endpoints privados incluyen `includes/session_guard.php`.
 
@@ -44,6 +44,7 @@ Este checklist debe revisarse antes de marcar un modulo de negocio de LIVP_SEGUR
 - [ ] Indices y unique revisados.
 - [ ] Foreign keys revisadas cuando aplica.
 - [ ] Auditoria definida cuando aplica.
+- [ ] Hora de auditoria validada con PHP `America/Lima` y sesion PDO `-05:00`.
 - [ ] Regla de estado/desactivacion definida.
 
 ## UX y frontend

@@ -36,6 +36,8 @@ Los endpoints locales deben reutilizar estos helpers:
 
 `includes/session_guard.php` carga los helpers de autorizacion para endpoints privados. Si un endpoint necesita CSRF, payload o JSON uniforme, puede usar directamente los helpers disponibles desde esa carga.
 
+La hora oficial para respuestas, auditoria y persistencia local es Lima, Peru. PHP debe trabajar con `America/Lima` y la conexion PDO local debe fijar la sesion MySQL/MariaDB en `-05:00`.
+
 ## Blindaje de modulos fisicos
 
 Todo archivo `modules/{codigo}/index.php` debe:

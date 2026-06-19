@@ -1,15 +1,16 @@
 # Plantilla de modulo local
 
-Esta carpeta es una plantilla tecnica interna. No es un modulo real, no debe registrarse en LIVP_LSISTEMAS, no aparece en el menu y no usa base de datos.
+Esta carpeta es la plantilla tecnica oficial para crear modulos de negocio en LIVP_SEGUROS.
+
+No es un modulo real, no debe registrarse en LIVP_LSISTEMAS, no aparece en el menu y no usa base de datos.
 
 ## Como crear un modulo real
 
 1. Crear la pagina logica en LIVP_LSISTEMAS.
-2. Usar como `codigo_pagina` el mismo nombre de carpeta local.
-3. Asignar permisos al rol que corresponda.
-4. Duplicar `modules/_plantilla/` como `modules/{codigo}/`.
-5. En `modules/{codigo}/index.php`, reemplazar `_plantilla` por el codigo real.
-6. Acceder mediante `modulo.php?m={codigo}`.
+2. Asignar permisos al rol que corresponda.
+3. Copiar esta carpeta como `modules/{codigo}`.
+4. En `modules/{codigo}/index.php`, reemplazar `_plantilla` por el codigo real en `cb_require_module_context()`.
+5. Acceder mediante `modulo.php?m={codigo}`.
 
 ## Seguridad obligatoria
 
@@ -20,7 +21,7 @@ Esta carpeta es una plantilla tecnica interna. No es un modulo real, no debe reg
 
 ## Endpoints locales
 
-Crear `api/{codigo}/` solo cuando el modulo necesite lectura o cambios dinamicos.
+Crear `api/{codigo}` solo cuando el modulo necesite lectura o cambios dinamicos.
 
 Endpoints comunes:
 
@@ -43,6 +44,10 @@ Cuando exista cambio de BD:
 - no crear archivos `.sql`,
 - no ejecutar SQL automaticamente,
 - actualizar `docs/tablas_livp_seguros.md`.
+
+## Checklist antes de publicar
+
+Antes de cerrar un modulo real, ejecutar `docs/checklist_modulo_negocio.md`.
 
 ## Flexibilidad
 

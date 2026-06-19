@@ -54,9 +54,9 @@ Existe una plantilla tecnica en:
 LIVP_SEGUROS/modules/_plantilla/
 ```
 
-La carpeta `_plantilla` no es un modulo real, no debe registrarse en el maestro, no aparece en menu y no usa BD.
+La carpeta `modules/_plantilla/` no es un modulo real, no debe registrarse en el maestro, no aparece en menu y no usa BD.
 
-Para crear un modulo real, duplicar la carpeta, renombrarla con el `codigo_pagina` real y reemplazar el codigo esperado dentro de `index.php`.
+Para crear un modulo real, copiar la carpeta como `modules/{codigo}`, usar el `codigo_pagina` real y reemplazar el codigo esperado dentro de `index.php`.
 
 La plantilla es flexible: puede ampliarse con tabs, formularios, cards, dashboards, JS/CSS especifico, endpoints extra o flujos especiales si el requerimiento lo justifica.
 
@@ -93,6 +93,8 @@ Patron recomendado para endpoints locales:
 7. Responder con `cb_json_success(...)` o `cb_json_error(...)`.
 
 Para auditoria local, usar `cb_cliente_usuario_externo_id()` y guardar ese ID en las columnas de auditoria definidas para la tabla.
+
+La hora estandar para auditoria y operaciones del esclavo es Lima, Peru. PHP usa `America/Lima` y cada conexion PDO local debe fijar la sesion MySQL/MariaDB en `-05:00`.
 
 ## Flexible
 

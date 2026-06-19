@@ -50,6 +50,7 @@ Un requerimiento puntual del desarrollador puede ampliar funcionalidades, campos
 - Toda tabla local de negocio debe documentarse en `LIVP_SEGUROS/docs/tablas_livp_seguros.md`.
 - La BD local de LIVP_SEGUROS es exclusiva de Broker Seguros; no usar `id_servicio` salvo decision explicita de convertir el sistema a multicliente.
 - No crear tablas locales de autenticacion.
+- La hora estandar de aplicacion y auditoria es Lima, Peru: PHP `America/Lima` y sesion MySQL/MariaDB `-05:00`.
 
 ### UX y visual
 
@@ -61,6 +62,7 @@ Un requerimiento puntual del desarrollador puede ampliar funcionalidades, campos
 - Las tablas deben paginar en 10 registros cuando aplique.
 - Los botones de acciones en tablas deben ser icon-only, apilados verticalmente, con `title` y `aria-label`.
 - No tocar `pizzarra/`, `dist/`, `plugins/` ni `includes/config_cliente.php` sin justificacion explicita.
+- La plantilla tecnica oficial de modulos vive en `modules/_plantilla/`.
 
 ## B. Reglas flexibles
 

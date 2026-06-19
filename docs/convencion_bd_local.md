@@ -44,6 +44,14 @@ actualizado_en
 
 Los IDs de auditoria vienen de la sesion autorizada por el maestro. No implican crear tabla local de usuarios.
 
+La hora de auditoria debe tomarse desde la aplicacion/BD local configurada en hora de Lima, Peru:
+
+- PHP: `America/Lima`.
+- Sesion MySQL/MariaDB por conexion PDO: `-05:00`.
+
+No usar la hora del navegador como fuente de auditoria.
+No modificar la zona global del servidor de base de datos.
+
 ## Recomendado
 
 - Crear foreign keys para relaciones reales entre tablas locales.
