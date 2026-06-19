@@ -80,3 +80,19 @@ Este checklist debe revisarse antes de marcar un modulo de negocio de LIVP_SEGUR
 - [ ] No se modifico `plugins/` sin justificacion.
 - [ ] No se modifico `includes/config_cliente.php` sin justificacion.
 - [ ] No se copiaron usuarios, roles internos, permisos internos ni paginas internas del maestro.
+
+## Referencia de Catalogos V1
+
+Para el primer modulo real `catalogos`, revisar adicionalmente:
+
+- `docs/diseno_catalogos_v1.md`
+- `docs/referencia_demo_catalogos.md`
+- `modules/catalogos/index.php`
+- `api/catalogos/`
+
+Validaciones especificas:
+
+- [ ] Aseguradora no se inactiva si tiene productos activos.
+- [ ] Ramo no se inactiva si tiene productos activos.
+- [ ] Producto no se crea, edita ni reactiva con aseguradora o ramo inactivo.
+- [ ] No existe accion de borrado fisico.

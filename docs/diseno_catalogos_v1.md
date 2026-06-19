@@ -1,8 +1,8 @@
 # Diseno Catalogos V1
 
-Este documento define el diseno inicial del modulo futuro `catalogos` para LIVP_SEGUROS.
+Este documento define el diseno inicial del modulo `catalogos` para LIVP_SEGUROS.
 
-Las tablas descritas aqui todavia no existen hasta que el desarrollador ejecute manualmente los queries en phpMyAdmin.
+Las tablas descritas aqui ya fueron creadas manualmente por el desarrollador en phpMyAdmin y se registran en `LIVP_SEGUROS/docs/tablas_livp_seguros.md`.
 
 ## Alcance funcional
 
@@ -18,7 +18,7 @@ El codigo de pagina esperado en el maestro es:
 catalogos
 ```
 
-La ruta fisica futura sera:
+La ruta fisica del modulo es:
 
 ```text
 LIVP_SEGUROS/modules/catalogos/index.php
@@ -147,12 +147,19 @@ Indices propuestos:
 - Indices en claves foraneas locales.
 - UNIQUE para codigos y reglas principales de duplicidad.
 
-## Pendiente antes de implementar interfaz
+## Implementacion funcional
 
-- Ejecutar manualmente los queries en phpMyAdmin.
-- Confirmar las tablas creadas.
-- Actualizar `LIVP_SEGUROS/docs/tablas_livp_seguros.md` en la fase posterior de confirmacion.
-- Crear pagina logica `catalogos` en el maestro.
-- Asignar permisos al rol correspondiente.
-- Crear `LIVP_SEGUROS/modules/catalogos/`.
-- Crear endpoints locales solo cuando se implemente CRUD.
+Catalogos V1 se implementa con:
+
+- `LIVP_SEGUROS/modules/catalogos/index.php`
+- `LIVP_SEGUROS/api/catalogos/resumen.php`
+- `LIVP_SEGUROS/api/catalogos/aseguradoras.php`
+- `LIVP_SEGUROS/api/catalogos/ramos.php`
+- `LIVP_SEGUROS/api/catalogos/productos.php`
+
+Los endpoints validan sesion, permisos por accion, metodo HTTP, CSRF en cambios, PDO con prepared statements y auditoria con usuario externo de sesion.
+
+## Pendientes futuros
+
+- Crear modulos de polizas, cuotas, cobranzas, siniestros y reportes cuando el desarrollador lo solicite.
+- Bloquear nuevas reglas de inactivacion cuando productos, aseguradoras o ramos ya esten asociados a polizas reales.

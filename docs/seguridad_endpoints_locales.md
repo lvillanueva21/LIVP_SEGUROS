@@ -149,3 +149,22 @@ No incluir:
 - SQL crudo.
 - Stack traces.
 - Rutas fisicas del servidor.
+
+## Aplicacion en Catalogos V1
+
+El modulo `catalogos` implementa endpoints locales bajo:
+
+```text
+LIVP_SEGUROS/api/catalogos/
+```
+
+Reglas aplicadas:
+
+- `GET` de listados, lectura y opciones requiere `puede_ver`.
+- Crear requiere `puede_crear`.
+- Editar requiere `puede_editar`.
+- Activar o inactivar requiere `puede_eliminar`.
+- No existe borrado fisico.
+- Las operaciones `POST` exigen CSRF local con scope `catalogos`.
+- Las respuestas usan `cb_json_success(...)` y `cb_json_error(...)`.
+- Los errores de base de datos se responden de forma generica sin SQL interno.

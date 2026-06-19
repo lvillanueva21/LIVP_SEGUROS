@@ -96,6 +96,20 @@ Para auditoria local, usar `cb_cliente_usuario_externo_id()` y guardar ese ID en
 
 La hora estandar para auditoria y operaciones del esclavo es Lima, Peru. PHP usa `America/Lima` y cada conexion PDO local debe fijar la sesion MySQL/MariaDB en `-05:00`.
 
+## Primer modulo real implementado
+
+El primer modulo real de negocio es `catalogos`:
+
+```text
+LIVP_SEGUROS/modules/catalogos/index.php
+LIVP_SEGUROS/api/catalogos/resumen.php
+LIVP_SEGUROS/api/catalogos/aseguradoras.php
+LIVP_SEGUROS/api/catalogos/ramos.php
+LIVP_SEGUROS/api/catalogos/productos.php
+```
+
+Este modulo usa la arquitectura estandar: carga mediante `modulo.php?m=catalogos`, bloqueo con `module_guard.php`, permisos locales recibidos desde el maestro, endpoints JSON protegidos, CSRF en cambios y PDO local.
+
 ## Flexible
 
 - Un modulo puede tener subcarpetas si maneja pantallas internas complejas.
