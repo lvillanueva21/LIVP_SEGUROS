@@ -92,7 +92,20 @@ Para el primer modulo real `catalogos`, revisar adicionalmente:
 
 Validaciones especificas:
 
-- [ ] Aseguradora no se inactiva si tiene productos activos.
-- [ ] Ramo no se inactiva si tiene productos activos.
-- [ ] Producto no se crea, edita ni reactiva con aseguradora o ramo inactivo.
+- [ ] Aseguradora no se desactiva si tiene productos activos.
+- [ ] Ramo no se desactiva si tiene productos activos.
+- [ ] Producto no se crea, edita ni reactiva con aseguradora o ramo desactivado.
 - [ ] No existe accion de borrado fisico.
+
+Validaciones de logos:
+
+- [ ] Crear aseguradora sin logo.
+- [ ] Crear aseguradora con PNG.
+- [ ] Subir JPEG y WEBP validos.
+- [ ] Vista previa local antes de guardar.
+- [ ] Barra de progreso durante subida.
+- [ ] Reemplazar logo y confirmar cache bust.
+- [ ] Quitar logo y confirmar fallback visual.
+- [ ] Validar formato invalido, MIME falso, archivo mayor de 2 MiB y dimensiones fuera de rango.
+- [ ] Confirmar que la imagen no viaja por JSON.
+- [ ] Confirmar que la imagen se guarda fisicamente y la BD solo guarda metadatos.

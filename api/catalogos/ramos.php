@@ -58,6 +58,16 @@ function ramo_validar(PDO $pdo, array $payload, $id = 0)
     $estado = cat_estado_value($payload['estado'] ?? 1, 1);
     $errors = [];
 
+    foreach ([
+        'codigo' => $payload['codigo'] ?? '',
+        'nombre' => $payload['nombre'] ?? '',
+        'descripcion' => $payload['descripcion'] ?? '',
+    ] as $field => $value) {
+        cat_validate_utf8_value($value, $field, $errors);
+    }
+    cat_validate_max($codigo, 'codigo', 40, $errors);
+    cat_validate_max($nombre, 'nombre', 120, $errors);
+
     if ($codigo === '') {
         $errors['codigo'] = 'Ingrese un codigo valido.';
     }
@@ -151,7 +161,7 @@ function ramo_cambiar_estado(PDO $pdo)
         $stmt = $pdo->prepare('SELECT COUNT(*) FROM seg_productos WHERE ramo_id = :id AND estado = 1');
         $stmt->execute([':id' => $id]);
         if ((int) $stmt->fetchColumn() > 0) {
-            cb_json_error('dependencia_activa', 'No se puede inactivar un ramo con productos activos.', 409);
+            cb_json_error('dependencia_activa', 'No se puede desactivar un ramo con productos activos.', 409);
         }
     }
 
@@ -162,7 +172,7 @@ function ramo_cambiar_estado(PDO $pdo)
         ':fecha' => cat_now_lima(),
         ':id' => $id,
     ]);
-    cb_json_success($nuevoEstado === 1 ? 'Ramo activado correctamente.' : 'Ramo inactivado correctamente.', ['id' => $id, 'estado' => $nuevoEstado]);
+    cb_json_success($nuevoEstado === 1 ? 'Ramo activado correctamente.' : 'Ramo desactivado correctamente.', ['id' => $id, 'estado' => $nuevoEstado]);
 }
 
 try {

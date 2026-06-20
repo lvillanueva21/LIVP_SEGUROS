@@ -45,10 +45,10 @@ Indices y unique:
 - Indices de busqueda y estado segun estructura creada manualmente.
 
 Reglas de estado o eliminacion:
-- `estado = 1` activo.
-- `estado = 0` inactivo.
+- `estado = 1` Activo.
+- `estado = 0` Desactivado.
 - No hay borrado fisico en Catalogos V1.
-- No se permite inactivar una aseguradora con productos activos.
+- No se permite desactivar una aseguradora con productos activos.
 
 Motivo del cambio:
 - Primera base de datos local de negocio para Catalogos V1.
@@ -81,10 +81,10 @@ Indices y unique:
 - Indices de busqueda y estado segun estructura creada manualmente.
 
 Reglas de estado o eliminacion:
-- `estado = 1` activo.
-- `estado = 0` inactivo.
+- `estado = 1` Activo.
+- `estado = 0` Desactivado.
 - No hay borrado fisico en Catalogos V1.
-- No se permite inactivar un ramo con productos activos.
+- No se permite desactivar un ramo con productos activos.
 
 Motivo del cambio:
 - Primera base de datos local de negocio para Catalogos V1.
@@ -121,8 +121,8 @@ Indices y unique:
 - Indices en claves foraneas y estado segun estructura creada manualmente.
 
 Reglas de estado o eliminacion:
-- `estado = 1` activo.
-- `estado = 0` inactivo.
+- `estado = 1` Activo.
+- `estado = 0` Desactivado.
 - No hay borrado fisico en Catalogos V1.
 - Para crear, editar o reactivar un producto, la aseguradora y el ramo deben estar activos.
 

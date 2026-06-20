@@ -33,6 +33,26 @@ function cat_nullable($value)
     return $value === '' ? null : $value;
 }
 
+function cat_is_valid_utf8($value)
+{
+    return preg_match('//u', (string) $value) === 1;
+}
+
+function cat_validate_utf8_value($value, $field, array &$errors)
+{
+    if (!cat_is_valid_utf8($value)) {
+        $errors[$field] = 'El texto contiene caracteres no validos.';
+    }
+}
+
+function cat_validate_max($value, $field, $max, array &$errors)
+{
+    $value = (string) $value;
+    if (strlen($value) > (int) $max) {
+        $errors[$field] = 'Maximo ' . (int) $max . ' caracteres.';
+    }
+}
+
 function cat_codigo($value)
 {
     $value = strtoupper(cat_trim($value));
@@ -50,7 +70,7 @@ function cat_estado_value($value, $default = 1)
 function cat_estado_filter()
 {
     $estado = strtolower(cat_trim($_GET['estado'] ?? 'todos'));
-    return in_array($estado, ['todos', 'activo', 'inactivo'], true) ? $estado : 'todos';
+    return in_array($estado, ['todos', 'activo', 'desactivado'], true) ? $estado : 'todos';
 }
 
 function cat_search()
@@ -187,4 +207,255 @@ function cat_abort_if_errors(array $errors)
     if ($errors) {
         cb_json_error('validacion', 'Revise los campos marcados.', 422, $errors);
     }
+}
+
+function cat_logo_table_exists(PDO $pdo)
+{
+    static $exists = null;
+    if ($exists !== null) {
+        return $exists;
+    }
+
+    try {
+        $stmt = $pdo->query("SHOW TABLES LIKE 'seg_aseguradora_logo_archivos'");
+        $exists = $stmt && $stmt->fetchColumn() !== false;
+    } catch (Throwable $e) {
+        $exists = false;
+    }
+
+    return $exists;
+}
+
+function cat_require_logo_table(PDO $pdo)
+{
+    if (!cat_logo_table_exists($pdo)) {
+        cb_json_error('tabla_logo_pendiente', 'La tabla de logos de aseguradoras todavia no existe. Ejecute el query de esta fase en phpMyAdmin.', 409);
+    }
+}
+
+function cat_validate_logo_upload($fieldName = 'logo_archivo')
+{
+    if (!isset($_FILES[$fieldName]) || !is_array($_FILES[$fieldName])) {
+        return null;
+    }
+
+    $file = $_FILES[$fieldName];
+    $error = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
+    if ($error === UPLOAD_ERR_NO_FILE) {
+        return null;
+    }
+    if ($error !== UPLOAD_ERR_OK) {
+        cb_json_error('logo_invalido', 'No se pudo recibir el archivo de logo.', 422, [$fieldName => 'Archivo no recibido correctamente.']);
+    }
+
+    $tmpName = (string) ($file['tmp_name'] ?? '');
+    if ($tmpName === '' || !is_uploaded_file($tmpName)) {
+        cb_json_error('logo_invalido', 'El archivo de logo no es valido.', 422, [$fieldName => 'Archivo no valido.']);
+    }
+
+    $size = (int) ($file['size'] ?? 0);
+    if ($size <= 0) {
+        cb_json_error('logo_tamanio_invalido', 'El archivo de logo esta vacio.', 422, [$fieldName => 'Archivo vacio.']);
+    }
+
+    $info = @getimagesize($tmpName);
+    if (!is_array($info) || empty($info[0]) || empty($info[1])) {
+        cb_json_error('logo_imagen_invalida', 'El archivo no es una imagen valida.', 422, [$fieldName => 'Imagen no valida.']);
+    }
+
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime = (string) $finfo->file($tmpName);
+    $allowed = [
+        'image/png' => 'png',
+        'image/jpeg' => 'jpg',
+        'image/webp' => 'webp',
+    ];
+    if (empty($allowed[$mime]) || empty($allowed[(string) ($info['mime'] ?? '')]) || $mime !== (string) $info['mime']) {
+        cb_json_error('logo_tipo_invalido', 'Tipo de imagen no permitido.', 422, [$fieldName => 'Tipo de imagen no permitido.']);
+    }
+
+    return [
+        'nombre_original' => substr(basename((string) ($file['name'] ?? 'logo')), 0, 255),
+        'tmp_name' => $tmpName,
+        'extension' => $allowed[$mime],
+        'mime_type' => $mime,
+        'tamanio_bytes' => $size,
+        'ancho_px' => (int) $info[0],
+        'alto_px' => (int) $info[1],
+    ];
+}
+
+function cat_storage_rel_base()
+{
+    return 'storage';
+}
+
+function cat_storage_abs_base()
+{
+    return rtrim(dirname(dirname(__DIR__)), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . cat_storage_rel_base();
+}
+
+function cat_slug($value)
+{
+    $value = strtolower(trim((string) $value));
+    $value = preg_replace('/[^a-z0-9_]+/', '_', $value);
+    $value = preg_replace('/_+/', '_', (string) $value);
+    return trim((string) $value, '_');
+}
+
+function cat_random_hex($bytes = 8)
+{
+    try {
+        return bin2hex(random_bytes((int) $bytes));
+    } catch (Throwable $e) {
+        return substr(md5(uniqid((string) mt_rand(), true)), 0, (int) $bytes * 2);
+    }
+}
+
+function cat_logo_rel_dir()
+{
+    return cat_storage_rel_base() . '/imagenes/aseguradoras/logos/' . date('Y') . '/' . date('m') . '/' . date('d');
+}
+
+function cat_abs_from_rel($rutaRelativa)
+{
+    $rutaRelativa = trim((string) $rutaRelativa);
+    $rutaRelativa = ltrim($rutaRelativa, '/\\');
+    $rutaRelativa = str_replace(['..\\', '../'], '', $rutaRelativa);
+    return rtrim(dirname(dirname(__DIR__)), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $rutaRelativa);
+}
+
+function cat_is_safe_storage_path($absolutePath)
+{
+    $base = realpath(cat_storage_abs_base());
+    $target = realpath($absolutePath);
+    if ($base === false || $target === false) {
+        return false;
+    }
+    return strpos($target, rtrim($base, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR) === 0;
+}
+
+function cat_logo_store_file(array $logo)
+{
+    $relDir = cat_logo_rel_dir();
+    $absDir = cat_abs_from_rel($relDir);
+    if (!is_dir($absDir)) {
+        @mkdir($absDir, 0775, true);
+    }
+    if (!is_dir($absDir) || !is_writable($absDir)) {
+        cb_json_error('storage_no_disponible', 'No se pudo preparar la carpeta de logos.', 500);
+    }
+
+    $baseName = cat_slug(pathinfo((string) $logo['nombre_original'], PATHINFO_FILENAME));
+    if ($baseName === '') {
+        $baseName = 'logo';
+    }
+    $nombreInterno = date('Ymd_His') . '_' . $baseName . '_' . cat_random_hex(8) . '.' . $logo['extension'];
+    if (strlen($nombreInterno) > 255) {
+        $nombreInterno = substr($nombreInterno, 0, 255);
+    }
+
+    $absPath = rtrim($absDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $nombreInterno;
+    if (!@move_uploaded_file($logo['tmp_name'], $absPath)) {
+        cb_json_error('storage_error', 'No se pudo guardar el logo en el servidor.', 500);
+    }
+
+    $checksum = @hash_file('sha256', $absPath);
+    if (!is_string($checksum) || strlen($checksum) !== 64) {
+        @unlink($absPath);
+        cb_json_error('storage_error', 'No se pudo validar el logo guardado.', 500);
+    }
+
+    return [
+        'nombre_original' => $logo['nombre_original'],
+        'nombre_interno' => $nombreInterno,
+        'extension' => $logo['extension'],
+        'mime_type' => $logo['mime_type'],
+        'tamanio_bytes' => (int) $logo['tamanio_bytes'],
+        'ancho_px' => (int) $logo['ancho_px'],
+        'alto_px' => (int) $logo['alto_px'],
+        'checksum_sha256' => $checksum,
+        'ruta_relativa' => $relDir . '/' . $nombreInterno,
+        'absolute_path' => $absPath,
+    ];
+}
+
+function cat_logo_delete_file($rutaRelativa)
+{
+    $rutaRelativa = trim((string) $rutaRelativa);
+    if ($rutaRelativa === '') {
+        return;
+    }
+    $absPath = cat_abs_from_rel($rutaRelativa);
+    if (is_file($absPath) && cat_is_safe_storage_path($absPath)) {
+        @unlink($absPath);
+    }
+}
+
+function cat_logo_current(PDO $pdo, $aseguradoraId)
+{
+    if (!cat_logo_table_exists($pdo)) {
+        return null;
+    }
+    return cat_fetch_one($pdo, 'SELECT * FROM seg_aseguradora_logo_archivos WHERE aseguradora_id = :id LIMIT 1', [':id' => (int) $aseguradoraId]);
+}
+
+function cat_save_logo(PDO $pdo, $aseguradoraId, array $logoFile, $userId, $now)
+{
+    cat_require_logo_table($pdo);
+    $stored = cat_logo_store_file($logoFile);
+    $previous = cat_logo_current($pdo, $aseguradoraId);
+
+    try {
+        $stmt = $pdo->prepare('INSERT INTO seg_aseguradora_logo_archivos
+        (aseguradora_id, ruta_relativa, nombre_original, nombre_interno, extension, mime_type, tamanio_bytes, ancho_px, alto_px, checksum_sha256, creado_por_usuario_externo_id, actualizado_por_usuario_externo_id, creado_en, actualizado_en)
+        VALUES
+        (:aseguradora_id, :ruta_relativa, :nombre_original, :nombre_interno, :extension, :mime_type, :tamanio_bytes, :ancho_px, :alto_px, :checksum_sha256, :creado_por, :actualizado_por, :creado_en, :actualizado_en)
+        ON DUPLICATE KEY UPDATE
+            ruta_relativa = VALUES(ruta_relativa),
+            nombre_original = VALUES(nombre_original),
+            nombre_interno = VALUES(nombre_interno),
+            extension = VALUES(extension),
+            mime_type = VALUES(mime_type),
+            tamanio_bytes = VALUES(tamanio_bytes),
+            ancho_px = VALUES(ancho_px),
+            alto_px = VALUES(alto_px),
+            checksum_sha256 = VALUES(checksum_sha256),
+            actualizado_por_usuario_externo_id = VALUES(actualizado_por_usuario_externo_id),
+            actualizado_en = VALUES(actualizado_en)');
+        $stmt->execute([
+            ':aseguradora_id' => (int) $aseguradoraId,
+            ':ruta_relativa' => $stored['ruta_relativa'],
+            ':nombre_original' => $stored['nombre_original'],
+            ':nombre_interno' => $stored['nombre_interno'],
+            ':extension' => $stored['extension'],
+            ':mime_type' => $stored['mime_type'],
+            ':tamanio_bytes' => $stored['tamanio_bytes'],
+            ':ancho_px' => $stored['ancho_px'],
+            ':alto_px' => $stored['alto_px'],
+            ':checksum_sha256' => $stored['checksum_sha256'],
+            ':creado_por' => (int) $userId,
+            ':actualizado_por' => (int) $userId,
+            ':creado_en' => $now,
+            ':actualizado_en' => $now,
+        ]);
+    } catch (Throwable $e) {
+        @unlink($stored['absolute_path']);
+        throw $e;
+    }
+
+    return [
+        'ruta_relativa' => $stored['ruta_relativa'],
+        'absolute_path' => $stored['absolute_path'],
+        'previous_ruta_relativa' => is_array($previous ?? null) ? (string) ($previous['ruta_relativa'] ?? '') : '',
+    ];
+}
+
+function cat_delete_logo(PDO $pdo, $aseguradoraId)
+{
+    cat_require_logo_table($pdo);
+    $previous = cat_logo_current($pdo, $aseguradoraId);
+    $stmt = $pdo->prepare('DELETE FROM seg_aseguradora_logo_archivos WHERE aseguradora_id = :aseguradora_id');
+    $stmt->execute([':aseguradora_id' => (int) $aseguradoraId]);
+    return is_array($previous ?? null) ? (string) ($previous['ruta_relativa'] ?? '') : '';
 }

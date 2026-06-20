@@ -931,7 +931,7 @@ function cb_normalize_remote_visual_config($data)
 function cb_get_remote_visual_config()
 {
     if (!defined('CLIENTE_VISUAL_REMOTO_ACTIVO') || !CLIENTE_VISUAL_REMOTO_ACTIVO) {
-        return ['ok' => false, 'code' => 'remoto_inactivo', 'visual' => null];
+        return ['ok' => false, 'code' => 'remoto_desactivado', 'visual' => null];
     }
     if (!function_exists('cb_api_config_visual')) {
         return ['ok' => false, 'code' => 'cliente_api_no_disponible', 'visual' => null];

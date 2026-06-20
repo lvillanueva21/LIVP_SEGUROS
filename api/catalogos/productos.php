@@ -56,7 +56,7 @@ function prod_dependencias_activas(PDO $pdo, $aseguradoraId, $ramoId)
         cb_json_error('aseguradora_no_encontrada', 'Seleccione una aseguradora valida.', 422, ['aseguradora_id' => 'Aseguradora no encontrada.']);
     }
     if ((int) ($aseguradora['estado'] ?? 0) !== 1) {
-        cb_json_error('aseguradora_inactiva', 'La aseguradora seleccionada debe estar activa.', 409);
+        cb_json_error('aseguradora_desactivada', 'La aseguradora seleccionada debe estar activa.', 409);
     }
 
     $ramo = cat_fetch_one($pdo, 'SELECT id, estado FROM seg_ramos WHERE id = :id LIMIT 1', [':id' => (int) $ramoId]);
@@ -64,7 +64,7 @@ function prod_dependencias_activas(PDO $pdo, $aseguradoraId, $ramoId)
         cb_json_error('ramo_no_encontrado', 'Seleccione un ramo valido.', 422, ['ramo_id' => 'Ramo no encontrado.']);
     }
     if ((int) ($ramo['estado'] ?? 0) !== 1) {
-        cb_json_error('ramo_inactivo', 'El ramo seleccionado debe estar activo.', 409);
+        cb_json_error('ramo_desactivado', 'El ramo seleccionado debe estar activo.', 409);
     }
 }
 
@@ -100,6 +100,18 @@ function prod_validar(PDO $pdo, array $payload, $id = 0)
     $descripcion = cat_nullable($payload['descripcion'] ?? '');
     $estado = cat_estado_value($payload['estado'] ?? 1, 1);
     $errors = [];
+
+    foreach ([
+        'codigo' => $payload['codigo'] ?? '',
+        'nombre_producto' => $payload['nombre_producto'] ?? '',
+        'nombre_plan' => $payload['nombre_plan'] ?? '',
+        'descripcion' => $payload['descripcion'] ?? '',
+    ] as $field => $value) {
+        cat_validate_utf8_value($value, $field, $errors);
+    }
+    cat_validate_max($codigo, 'codigo', 40, $errors);
+    cat_validate_max($nombreProducto, 'nombre_producto', 160, $errors);
+    cat_validate_max($nombrePlan, 'nombre_plan', 160, $errors);
 
     if ($aseguradoraId <= 0) {
         $errors['aseguradora_id'] = 'Seleccione una aseguradora.';
@@ -215,7 +227,7 @@ function prod_cambiar_estado(PDO $pdo)
         ':fecha' => cat_now_lima(),
         ':id' => $id,
     ]);
-    cb_json_success($nuevoEstado === 1 ? 'Producto o plan activado correctamente.' : 'Producto o plan inactivado correctamente.', ['id' => $id, 'estado' => $nuevoEstado]);
+    cb_json_success($nuevoEstado === 1 ? 'Producto o plan activado correctamente.' : 'Producto o plan desactivado correctamente.', ['id' => $id, 'estado' => $nuevoEstado]);
 }
 
 try {

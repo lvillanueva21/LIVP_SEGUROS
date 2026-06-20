@@ -20,7 +20,7 @@ Este documento registra la revision funcional del repositorio `BROKERSEGUROS_DEM
 - Estados vacios cuando no existan registros.
 - Modales para crear y editar.
 - Mensajes tipo toast para resultado de acciones.
-- Activar e inactivar registros sin borrado fisico.
+- Activar y Desactivar registros sin borrado fisico.
 
 ## Patrones descartados
 

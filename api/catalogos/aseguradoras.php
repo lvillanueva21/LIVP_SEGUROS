@@ -16,21 +16,27 @@ function aseg_listar(PDO $pdo)
     $params = [];
 
     if ($estado !== 'todos') {
-        $where[] = 'estado = :estado';
+        $where[] = 'a.estado = :estado';
         $params[':estado'] = $estado === 'activo' ? 1 : 0;
     }
     if ($q !== '') {
-        $where[] = "(codigo LIKE :q ESCAPE '\\\\' OR razon_social LIKE :q ESCAPE '\\\\' OR nombre_comercial LIKE :q ESCAPE '\\\\' OR ruc LIKE :q ESCAPE '\\\\')";
+        $where[] = "(a.codigo LIKE :q ESCAPE '\\\\' OR a.razon_social LIKE :q ESCAPE '\\\\' OR a.nombre_comercial LIKE :q ESCAPE '\\\\' OR a.ruc LIKE :q ESCAPE '\\\\')";
         $params[':q'] = cat_bind_like($q);
     }
 
     $whereSql = $where ? ' WHERE ' . implode(' AND ', $where) : '';
-    $count = $pdo->prepare('SELECT COUNT(*) FROM seg_aseguradoras' . $whereSql);
+    $hasLogoTable = cat_logo_table_exists($pdo);
+    $logoJoin = $hasLogoTable ? ' LEFT JOIN seg_aseguradora_logo_archivos l ON l.aseguradora_id = a.id' : '';
+    $logoSelect = $hasLogoTable
+        ? ", l.id AS logo_id, l.mime_type AS logo_mime_type, l.tamanio_bytes AS logo_tamanio_bytes, l.ruta_relativa AS logo_ruta_relativa, DATE_FORMAT(l.actualizado_en, '%Y%m%d%H%i%s') AS logo_version"
+        : ", NULL AS logo_id, NULL AS logo_mime_type, NULL AS logo_tamanio_bytes, NULL AS logo_ruta_relativa, NULL AS logo_version";
+
+    $count = $pdo->prepare('SELECT COUNT(*) FROM seg_aseguradoras a' . $whereSql);
     $count->execute($params);
 
-    $sql = 'SELECT id, codigo, razon_social, nombre_comercial, ruc, contacto_nombre, contacto_email, contacto_telefono, sitio_web, observaciones, estado
-            FROM seg_aseguradoras' . $whereSql . '
-            ORDER BY razon_social ASC, id ASC
+    $sql = 'SELECT a.id, a.codigo, a.razon_social, a.nombre_comercial, a.ruc, a.contacto_nombre, a.contacto_email, a.contacto_telefono, a.sitio_web, a.observaciones, a.estado' . $logoSelect . '
+            FROM seg_aseguradoras a' . $logoJoin . $whereSql . '
+            ORDER BY a.razon_social ASC, a.id ASC
             LIMIT ' . (int) $perPage . ' OFFSET ' . (int) $offset;
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
@@ -42,7 +48,23 @@ function aseg_obtener(PDO $pdo)
 {
     cat_require_catalogos('puede_ver');
     $id = (int) ($_GET['id'] ?? 0);
-    cb_json_success('Aseguradora cargada correctamente.', ['record' => cat_require_record($pdo, 'seg_aseguradoras', $id)]);
+    $record = cat_require_record($pdo, 'seg_aseguradoras', $id);
+    $record['logo_id'] = null;
+    $record['logo_mime_type'] = null;
+    $record['logo_tamanio_bytes'] = null;
+    $record['logo_ruta_relativa'] = null;
+    $record['logo_version'] = null;
+    if (cat_logo_table_exists($pdo)) {
+        $logo = cat_fetch_one($pdo, "SELECT id, mime_type, tamanio_bytes, ruta_relativa, DATE_FORMAT(actualizado_en, '%Y%m%d%H%i%s') AS version FROM seg_aseguradora_logo_archivos WHERE aseguradora_id = :id LIMIT 1", [':id' => $id]);
+        if ($logo) {
+            $record['logo_id'] = (int) $logo['id'];
+            $record['logo_mime_type'] = $logo['mime_type'];
+            $record['logo_tamanio_bytes'] = (int) $logo['tamanio_bytes'];
+            $record['logo_ruta_relativa'] = (string) $logo['ruta_relativa'];
+            $record['logo_version'] = $logo['version'];
+        }
+    }
+    cb_json_success('Aseguradora cargada correctamente.', ['record' => $record]);
 }
 
 function aseg_opciones(PDO $pdo)
@@ -65,6 +87,28 @@ function aseg_validar(PDO $pdo, array $payload, $id = 0)
     $observaciones = cat_nullable($payload['observaciones'] ?? '');
     $estado = cat_estado_value($payload['estado'] ?? 1, 1);
     $errors = [];
+
+    foreach ([
+        'codigo' => $payload['codigo'] ?? '',
+        'razon_social' => $payload['razon_social'] ?? '',
+        'nombre_comercial' => $payload['nombre_comercial'] ?? '',
+        'ruc' => $payload['ruc'] ?? '',
+        'contacto_nombre' => $payload['contacto_nombre'] ?? '',
+        'contacto_email' => $payload['contacto_email'] ?? '',
+        'contacto_telefono' => $payload['contacto_telefono'] ?? '',
+        'sitio_web' => $payload['sitio_web'] ?? '',
+        'observaciones' => $payload['observaciones'] ?? '',
+    ] as $field => $value) {
+        cat_validate_utf8_value($value, $field, $errors);
+    }
+    cat_validate_max($codigo, 'codigo', 40, $errors);
+    cat_validate_max($razonSocial, 'razon_social', 180, $errors);
+    cat_validate_max((string) $nombreComercial, 'nombre_comercial', 180, $errors);
+    cat_validate_max((string) $ruc, 'ruc', 20, $errors);
+    cat_validate_max((string) $contactoNombre, 'contacto_nombre', 120, $errors);
+    cat_validate_max((string) $contactoEmail, 'contacto_email', 160, $errors);
+    cat_validate_max((string) $contactoTelefono, 'contacto_telefono', 40, $errors);
+    cat_validate_max((string) $sitioWeb, 'sitio_web', 200, $errors);
 
     if ($codigo === '') {
         $errors['codigo'] = 'Ingrese un codigo valido.';
@@ -103,11 +147,15 @@ function aseg_validar(PDO $pdo, array $payload, $id = 0)
 function aseg_crear(PDO $pdo)
 {
     cat_require_post_change('puede_crear');
-    $data = aseg_validar($pdo, cat_payload());
+    $payload = cat_payload();
+    $data = aseg_validar($pdo, $payload);
+    $logo = cat_validate_logo_upload('logo_archivo');
     $userId = cat_user_id();
     $now = cat_now_lima();
+    $logoGuardado = null;
 
     try {
+        $pdo->beginTransaction();
         $stmt = $pdo->prepare('INSERT INTO seg_aseguradoras
             (codigo, razon_social, nombre_comercial, ruc, contacto_nombre, contacto_email, contacto_telefono, sitio_web, observaciones, estado, creado_por_usuario_externo_id, actualizado_por_usuario_externo_id, creado_en, actualizado_en)
             VALUES
@@ -118,8 +166,19 @@ function aseg_crear(PDO $pdo)
             'creado_en' => $now,
             'actualizado_en' => $now,
         ]);
-        cb_json_success('Aseguradora creada correctamente.', ['id' => (int) $pdo->lastInsertId()], 201);
+        $id = (int) $pdo->lastInsertId();
+        if ($logo !== null) {
+            $logoGuardado = cat_save_logo($pdo, $id, $logo, $userId, $now);
+        }
+        $pdo->commit();
+        cb_json_success('Aseguradora creada correctamente.', ['id' => $id], 201);
     } catch (PDOException $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        if (is_array($logoGuardado) && !empty($logoGuardado['absolute_path'])) {
+            @unlink((string) $logoGuardado['absolute_path']);
+        }
         if ($e->getCode() === '23000') {
             cat_duplicate_error();
         }
@@ -134,8 +193,13 @@ function aseg_actualizar(PDO $pdo)
     $id = (int) ($payload['id'] ?? 0);
     cat_require_record($pdo, 'seg_aseguradoras', $id);
     $data = aseg_validar($pdo, $payload, $id);
+    $logo = cat_validate_logo_upload('logo_archivo');
+    $quitarLogo = (int) ($payload['logo_quitar'] ?? 0) === 1;
+    $logoGuardado = null;
+    $logoAnteriorParaBorrar = '';
 
     try {
+        $pdo->beginTransaction();
         $stmt = $pdo->prepare('UPDATE seg_aseguradoras
             SET codigo = :codigo,
                 razon_social = :razon_social,
@@ -155,8 +219,25 @@ function aseg_actualizar(PDO $pdo)
             'actualizado_en' => cat_now_lima(),
             'id' => $id,
         ]);
+        if ($logo !== null) {
+            $now = cat_now_lima();
+            $logoGuardado = cat_save_logo($pdo, $id, $logo, cat_user_id(), $now);
+            $logoAnteriorParaBorrar = (string) ($logoGuardado['previous_ruta_relativa'] ?? '');
+        } elseif ($quitarLogo) {
+            $logoAnteriorParaBorrar = cat_delete_logo($pdo, $id);
+        }
+        $pdo->commit();
+        if ($logoAnteriorParaBorrar !== '') {
+            cat_logo_delete_file($logoAnteriorParaBorrar);
+        }
         cb_json_success('Aseguradora actualizada correctamente.', ['id' => $id]);
     } catch (PDOException $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        if (is_array($logoGuardado) && !empty($logoGuardado['absolute_path'])) {
+            @unlink((string) $logoGuardado['absolute_path']);
+        }
         if ($e->getCode() === '23000') {
             cat_duplicate_error();
         }
@@ -176,7 +257,7 @@ function aseg_cambiar_estado(PDO $pdo)
         $stmt = $pdo->prepare('SELECT COUNT(*) FROM seg_productos WHERE aseguradora_id = :id AND estado = 1');
         $stmt->execute([':id' => $id]);
         if ((int) $stmt->fetchColumn() > 0) {
-            cb_json_error('dependencia_activa', 'No se puede inactivar una aseguradora con productos activos.', 409);
+            cb_json_error('dependencia_activa', 'No se puede desactivar una aseguradora con productos activos.', 409);
         }
     }
 
@@ -187,7 +268,7 @@ function aseg_cambiar_estado(PDO $pdo)
         ':fecha' => cat_now_lima(),
         ':id' => $id,
     ]);
-    cb_json_success($nuevoEstado === 1 ? 'Aseguradora activada correctamente.' : 'Aseguradora inactivada correctamente.', ['id' => $id, 'estado' => $nuevoEstado]);
+    cb_json_success($nuevoEstado === 1 ? 'Aseguradora activada correctamente.' : 'Aseguradora desactivada correctamente.', ['id' => $id, 'estado' => $nuevoEstado]);
 }
 
 try {

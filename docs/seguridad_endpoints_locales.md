@@ -163,8 +163,10 @@ Reglas aplicadas:
 - `GET` de listados, lectura y opciones requiere `puede_ver`.
 - Crear requiere `puede_crear`.
 - Editar requiere `puede_editar`.
-- Activar o inactivar requiere `puede_eliminar`.
+- Activar o Desactivar requiere `puede_eliminar`.
 - No existe borrado fisico.
 - Las operaciones `POST` exigen CSRF local con scope `catalogos`.
 - Las respuestas usan `cb_json_success(...)` y `cb_json_error(...)`.
 - Los errores de base de datos se responden de forma generica sin SQL interno.
+- El endpoint `aseguradora_logo.php` entrega el archivo fisico solo con sesion y `puede_ver`, usando `X-Content-Type-Options: nosniff`.
+- Las imagenes no se guardan como BLOB, Base64 ni contenido binario en BD.

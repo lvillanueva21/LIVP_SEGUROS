@@ -36,7 +36,7 @@ LIVP_SEGUROS/modules/catalogos/index.php
 - Los IDs de auditoria son escalares tomados de `$_SESSION['cliente_auth']['usuario']['id']`.
 - La hora de auditoria debe generarse desde PHP usando `America/Lima`.
 - No usar `CURRENT_TIMESTAMP` ni la hora global del servidor como fuente principal de auditoria.
-- Estado activo/inactivo mediante campo `estado`.
+- Estado activo/desactivado mediante campo `estado`.
 - En Catalogos V1 no hay eliminacion fisica.
 - Las relaciones locales usan `ON DELETE RESTRICT` y `ON UPDATE RESTRICT`.
 
@@ -68,7 +68,7 @@ Reglas de duplicidad:
 - `ruc` no se repite cuando se informa.
 - `razon_social` no se repite.
 
-Reglas de inactivacion:
+Reglas de desactivacion:
 
 - Una aseguradora puede desactivarse con `estado = 0`.
 - En fases futuras, si una aseguradora tiene productos, polizas u otros datos relacionados, no debe eliminarse fisicamente.
@@ -94,7 +94,7 @@ Reglas de duplicidad:
 - `codigo` no se repite.
 - `nombre` no se repite.
 
-Reglas de inactivacion:
+Reglas de desactivacion:
 
 - Un ramo puede desactivarse con `estado = 0`.
 - En fases futuras, si un ramo tiene productos o polizas relacionadas, no debe eliminarse fisicamente.
@@ -129,7 +129,7 @@ Reglas de duplicidad:
 - `codigo` no se repite.
 - No se repite la combinacion `aseguradora_id + ramo_id + nombre_producto + nombre_plan`.
 
-Reglas de inactivacion:
+Reglas de desactivacion:
 
 - Un producto puede desactivarse con `estado = 0`.
 - En fases futuras, si un producto ya esta relacionado con polizas, cuotas, cobranzas o siniestros, no debe eliminarse fisicamente.
@@ -154,12 +154,19 @@ Catalogos V1 se implementa con:
 - `LIVP_SEGUROS/modules/catalogos/index.php`
 - `LIVP_SEGUROS/api/catalogos/resumen.php`
 - `LIVP_SEGUROS/api/catalogos/aseguradoras.php`
+- `LIVP_SEGUROS/api/catalogos/aseguradora_logo.php`
 - `LIVP_SEGUROS/api/catalogos/ramos.php`
 - `LIVP_SEGUROS/api/catalogos/productos.php`
 
 Los endpoints validan sesion, permisos por accion, metodo HTTP, CSRF en cambios, PDO con prepared statements y auditoria con usuario externo de sesion.
 
+## Logos de aseguradoras
+
+La emergencia E-01 corrige el soporte de logos mediante tabla nueva propuesta `seg_aseguradora_logo_archivos`, documentada en `LIVP_SEGUROS/docs/diseno_logos_aseguradoras_v1.md`.
+
+Los logos se guardan como archivos fisicos en `storage/imagenes/aseguradoras/logos/YYYY/MM/DD/`. La BD solo guarda metadatos y ruta relativa segura. El listado de aseguradoras solo recibe metadatos y version; nunca recibe contenido de imagen.
+
 ## Pendientes futuros
 
 - Crear modulos de polizas, cuotas, cobranzas, siniestros y reportes cuando el desarrollador lo solicite.
-- Bloquear nuevas reglas de inactivacion cuando productos, aseguradoras o ramos ya esten asociados a polizas reales.
+- Bloquear nuevas reglas de desactivacion cuando productos, aseguradoras o ramos ya esten asociados a polizas reales.

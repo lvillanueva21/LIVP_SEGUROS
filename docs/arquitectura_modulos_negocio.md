@@ -104,11 +104,14 @@ El primer modulo real de negocio es `catalogos`:
 LIVP_SEGUROS/modules/catalogos/index.php
 LIVP_SEGUROS/api/catalogos/resumen.php
 LIVP_SEGUROS/api/catalogos/aseguradoras.php
+LIVP_SEGUROS/api/catalogos/aseguradora_logo.php
 LIVP_SEGUROS/api/catalogos/ramos.php
 LIVP_SEGUROS/api/catalogos/productos.php
 ```
 
 Este modulo usa la arquitectura estandar: carga mediante `modulo.php?m=catalogos`, bloqueo con `module_guard.php`, permisos locales recibidos desde el maestro, endpoints JSON protegidos, CSRF en cambios y PDO local.
+
+Los logos de aseguradoras se almacenan como archivos fisicos en el servidor y se sirven desde un endpoint privado separado. La BD guarda solo metadatos y ruta relativa segura. Cuando un modulo necesite archivos de negocio, debe documentar la decision de persistencia y evitar rutas controladas por usuario.
 
 ## Flexible
 
