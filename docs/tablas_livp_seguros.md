@@ -212,6 +212,111 @@ Reglas de estado o eliminacion:
 Motivo del cambio:
 - Ampliar Catalogos con una base configurable para futuros modulos de expedientes.
 
+### 2026-06-20 - seg_clientes
+
+Tabla: `seg_clientes`
+Tipo de cambio: modificada
+Modulo relacionado: `clientes`
+Proposito: ampliar el cliente comercial para soportar empresas y consorcios sin romper las empresas ya registradas.
+
+Columnas principales agregadas o ajustadas:
+- `tipo_cliente`
+- `ruc` pasa a permitir `NULL` para consorcios con operador tributario.
+
+Relaciones:
+- Sera referenciada por `seg_cliente_consorcios.cliente_id`.
+- Sera referenciada por `seg_cliente_consorcios.operador_cliente_id`.
+- Sera referenciada por `seg_cliente_consorcio_integrantes.consorcio_cliente_id`.
+- Sera referenciada por `seg_cliente_consorcio_integrantes.empresa_cliente_id`.
+
+Indices y unique:
+- Se mantiene `codigo` unico.
+- Se mantiene `ruc` unico; MySQL/MariaDB permite varios `NULL`, lo que habilita consorcios sin RUC propio.
+- Indice recomendado en `tipo_cliente` y `estado`.
+
+Reglas de estado o eliminacion:
+- `estado = 1` Activo.
+- `estado = 0` Desactivado.
+- No hay borrado fisico.
+- Empresas y consorcios con RUC propio deben tener RUC valido de 11 digitos.
+- Consorcios con operador tributario deben tener `ruc = NULL`.
+
+Motivo del cambio:
+- Permitir el registro de consorcios con RUC propio o con operador tributario sin crear una pagina nueva.
+
+### 2026-06-20 - seg_cliente_consorcios
+
+Tabla: `seg_cliente_consorcios`
+Tipo de cambio: creada
+Modulo relacionado: `clientes`
+Proposito: almacenar la configuracion 1 a 1 de un cliente comercial tipo consorcio.
+
+Columnas principales:
+- `id`
+- `cliente_id`
+- `modalidad`
+- `operador_cliente_id`
+- `estado`
+- `creado_por_usuario_externo_id`
+- `actualizado_por_usuario_externo_id`
+- `creado_en`
+- `actualizado_en`
+
+Relaciones:
+- `cliente_id` referencia `seg_clientes.id` y debe corresponder a un cliente tipo `consorcio`.
+- `operador_cliente_id` referencia `seg_clientes.id` y debe corresponder a una empresa activa cuando la modalidad sea operador tributario.
+
+Indices y unique:
+- Llave primaria `id`.
+- `cliente_id` unico para asegurar relacion 1 a 1.
+- Indices en `modalidad`, `operador_cliente_id` y `estado`.
+
+Reglas de estado o eliminacion:
+- `estado = 1` Activo.
+- `estado = 0` Desactivado.
+- No hay borrado fisico.
+
+Motivo del cambio:
+- Separar reglas especificas de consorcios sin contaminar los campos generales del cliente comercial.
+
+### 2026-06-20 - seg_cliente_consorcio_integrantes
+
+Tabla: `seg_cliente_consorcio_integrantes`
+Tipo de cambio: creada
+Modulo relacionado: `clientes`
+Proposito: registrar las empresas integrantes de cada consorcio.
+
+Columnas principales:
+- `id`
+- `consorcio_cliente_id`
+- `empresa_cliente_id`
+- `participacion_porcentaje`
+- `rol_descripcion`
+- `estado`
+- `creado_por_usuario_externo_id`
+- `actualizado_por_usuario_externo_id`
+- `creado_en`
+- `actualizado_en`
+
+Relaciones:
+- `consorcio_cliente_id` referencia `seg_clientes.id`.
+- `empresa_cliente_id` referencia `seg_clientes.id`.
+
+Indices y unique:
+- Llave primaria `id`.
+- Combinacion unica `consorcio_cliente_id` + `empresa_cliente_id`.
+- Indices en consorcio, empresa y estado.
+
+Reglas de estado o eliminacion:
+- `estado = 1` Activo.
+- `estado = 0` Desactivado.
+- No hay borrado fisico.
+- No se permite repetir una empresa dentro del mismo consorcio.
+- Un consorcio requiere al menos dos integrantes activos.
+
+Motivo del cambio:
+- Permitir modelar consorcios con multiples empresas integrantes y operador tributario vinculado.
+
 ## Plantilla obligatoria para registros futuros
 
 Copiar esta plantilla cada vez que se cree, modifique o elimine una tabla local.

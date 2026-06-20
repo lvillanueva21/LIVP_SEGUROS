@@ -218,6 +218,7 @@ function cli_validate_empresa(array $payload, bool $isUpdate = false): array
 
     return [
         'id' => $id,
+        'tipo_cliente' => 'empresa',
         'ruc' => $ruc,
         'razon_social' => $razonSocial,
         'nombre_comercial' => $nombreComercial,
@@ -238,9 +239,141 @@ function cli_validate_empresa(array $payload, bool $isUpdate = false): array
     ];
 }
 
-function cli_codigo_cliente(string $ruc): string
+function cli_codigo_cliente(PDO $pdo, string $tipoCliente, ?string $ruc = null): string
 {
-    return 'CLI-' . $ruc;
+    $prefix = $tipoCliente === 'consorcio' ? 'CON' : 'EMP';
+
+    for ($i = 0; $i < 12; $i++) {
+        try {
+            $random = strtoupper(bin2hex(random_bytes(3)));
+        } catch (Throwable $e) {
+            $random = strtoupper(substr(md5(uniqid((string) mt_rand(), true)), 0, 6));
+        }
+        $codigo = $prefix . '-' . date('YmdHis') . '-' . $random;
+        $stmt = $pdo->prepare('SELECT id FROM seg_clientes WHERE codigo = :codigo LIMIT 1');
+        $stmt->execute([':codigo' => $codigo]);
+        if (!$stmt->fetchColumn()) {
+            return $codigo;
+        }
+    }
+
+    cli_json_error('No se pudo generar un codigo unico para el cliente.', 409);
+}
+
+function cli_validate_consorcio(array $payload, bool $isUpdate = false): array
+{
+    $errors = [];
+
+    $id = isset($payload['id']) && is_numeric($payload['id']) ? (int)$payload['id'] : 0;
+    if ($isUpdate && $id <= 0) {
+        $errors['id'] = 'Registro no valido.';
+    }
+
+    $modalidad = strtolower(trim((string)($payload['modalidad'] ?? '')));
+    if (!in_array($modalidad, ['con_ruc_propio', 'con_operador_tributario'], true)) {
+        $errors['modalidad'] = 'Seleccione una modalidad valida.';
+    }
+
+    $ruc = cli_digits((string)($payload['ruc'] ?? ''), 11);
+    if ($modalidad === 'con_ruc_propio' && ($ruc === null || strlen($ruc) !== 11)) {
+        $errors['ruc'] = 'El RUC es obligatorio para consorcios con RUC propio.';
+    }
+    if ($modalidad === 'con_operador_tributario' && $ruc !== null) {
+        $errors['ruc'] = 'Deja el RUC vacio cuando el consorcio usa operador tributario.';
+    }
+
+    $razonSocial = cli_required_str($payload, 'razon_social', 'La razon social', 180, $errors);
+    $nombreComercial = cli_str($payload, 'nombre_comercial', 180);
+    $direccion = cli_str($payload, 'direccion', 255);
+    $telefonoPrincipal = cli_digits((string)($payload['telefono_principal'] ?? ''), 40);
+    $correoPrincipal = cli_validate_email(cli_str($payload, 'correo_principal', 160), 'correo_principal', $errors);
+    $observaciones = cli_str($payload, 'observaciones', 3000);
+    $estado = cli_estado($payload);
+
+    $operadorId = isset($payload['operador_cliente_id']) && is_numeric($payload['operador_cliente_id'])
+        ? (int)$payload['operador_cliente_id']
+        : 0;
+    if ($modalidad === 'con_operador_tributario' && $operadorId <= 0) {
+        $errors['operador_cliente_id'] = 'Seleccione el operador tributario.';
+    }
+    if ($modalidad === 'con_ruc_propio') {
+        $operadorId = 0;
+    }
+
+    $empresaIds = $payload['integrante_empresa_id'] ?? [];
+    $participaciones = $payload['integrante_participacion'] ?? [];
+    $roles = $payload['integrante_rol'] ?? [];
+    if (!is_array($empresaIds)) {
+        $empresaIds = [];
+    }
+    if (!is_array($participaciones)) {
+        $participaciones = [];
+    }
+    if (!is_array($roles)) {
+        $roles = [];
+    }
+
+    $integrantes = [];
+    $seen = [];
+    $suma = 0.0;
+    foreach ($empresaIds as $idx => $empresaIdRaw) {
+        $empresaId = is_numeric($empresaIdRaw) ? (int)$empresaIdRaw : 0;
+        if ($empresaId <= 0) {
+            continue;
+        }
+        if (isset($seen[$empresaId])) {
+            $errors['integrantes'] = 'No repitas una empresa dentro del mismo consorcio.';
+            continue;
+        }
+        $seen[$empresaId] = true;
+
+        $participacionRaw = trim((string)($participaciones[$idx] ?? ''));
+        $participacion = null;
+        if ($participacionRaw !== '') {
+            $participacion = (float)str_replace(',', '.', $participacionRaw);
+            if ($participacion <= 0 || $participacion > 100) {
+                $errors['integrante_participacion'] = 'La participacion debe ser mayor que 0 y maximo 100.';
+            } else {
+                $suma += $participacion;
+            }
+        }
+
+        $integrantes[] = [
+            'empresa_cliente_id' => $empresaId,
+            'participacion_porcentaje' => $participacion,
+            'rol_descripcion' => cli_str(['rol' => $roles[$idx] ?? ''], 'rol', 160),
+        ];
+    }
+
+    if (count($integrantes) < 2) {
+        $errors['integrantes'] = 'Agrega al menos dos empresas integrantes.';
+    }
+    if ($suma > 100.0) {
+        $errors['integrante_participacion'] = 'La suma de participaciones no puede superar 100%.';
+    }
+    if ($modalidad === 'con_operador_tributario' && $operadorId > 0 && !isset($seen[$operadorId])) {
+        $errors['operador_cliente_id'] = 'El operador tributario debe formar parte de los integrantes activos.';
+    }
+
+    if ($errors !== []) {
+        cli_json_error('Revisa los campos marcados.', 422, $errors);
+    }
+
+    return [
+        'id' => $id,
+        'tipo_cliente' => 'consorcio',
+        'modalidad' => $modalidad,
+        'operador_cliente_id' => $operadorId > 0 ? $operadorId : null,
+        'ruc' => $ruc,
+        'razon_social' => $razonSocial,
+        'nombre_comercial' => $nombreComercial,
+        'direccion' => $direccion,
+        'telefono_principal' => $telefonoPrincipal,
+        'correo_principal' => $correoPrincipal,
+        'observaciones' => $observaciones,
+        'estado' => $estado,
+        'integrantes' => $integrantes,
+    ];
 }
 
 function cli_page_params(): array

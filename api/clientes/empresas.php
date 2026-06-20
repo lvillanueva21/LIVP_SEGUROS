@@ -57,7 +57,7 @@ function clientes_listar(): void
         $q = substr($q, 0, 120);
     }
 
-    $where = [];
+    $where = ["c.tipo_cliente = 'empresa'"];
     $params = [];
 
     if ($estado === 'activo') {
@@ -87,6 +87,7 @@ function clientes_listar(): void
     $sql = "SELECT
             c.id,
             c.codigo,
+            c.tipo_cliente,
             c.ruc,
             c.razon_social,
             c.nombre_comercial,
@@ -166,11 +167,12 @@ function clientes_crear(): void
         $pdo->beginTransaction();
 
         $stmt = $pdo->prepare('INSERT INTO seg_clientes
-            (codigo, ruc, razon_social, nombre_comercial, direccion, telefono_principal, correo_principal, observaciones, estado, creado_por_usuario_externo_id, actualizado_por_usuario_externo_id, creado_en, actualizado_en)
+            (codigo, tipo_cliente, ruc, razon_social, nombre_comercial, direccion, telefono_principal, correo_principal, observaciones, estado, creado_por_usuario_externo_id, actualizado_por_usuario_externo_id, creado_en, actualizado_en)
             VALUES
-            (:codigo, :ruc, :razon_social, :nombre_comercial, :direccion, :telefono_principal, :correo_principal, :observaciones, :estado, :creado_por, :actualizado_por, :creado_en, :actualizado_en)');
+            (:codigo, :tipo_cliente, :ruc, :razon_social, :nombre_comercial, :direccion, :telefono_principal, :correo_principal, :observaciones, :estado, :creado_por, :actualizado_por, :creado_en, :actualizado_en)');
         $stmt->execute([
-            ':codigo' => cli_codigo_cliente($data['ruc']),
+            ':codigo' => cli_codigo_cliente($pdo, 'empresa', $data['ruc']),
+            ':tipo_cliente' => 'empresa',
             ':ruc' => $data['ruc'],
             ':razon_social' => $data['razon_social'],
             ':nombre_comercial' => $data['nombre_comercial'],
@@ -286,7 +288,7 @@ function clientes_cambiar_estado(): void
 
 function clientes_fetch_empresa(PDO $pdo, int $id): ?array
 {
-    $stmt = $pdo->prepare('SELECT * FROM seg_clientes WHERE id = :id LIMIT 1');
+    $stmt = $pdo->prepare("SELECT * FROM seg_clientes WHERE id = :id AND tipo_cliente = 'empresa' LIMIT 1");
     $stmt->execute([':id' => $id]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     return is_array($row) ? $row : null;
