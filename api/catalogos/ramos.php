@@ -163,6 +163,12 @@ function ramo_cambiar_estado(PDO $pdo)
         if ((int) $stmt->fetchColumn() > 0) {
             cb_json_error('dependencia_activa', 'No se puede desactivar un ramo con productos activos.', 409);
         }
+
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM seg_tipos_seguro WHERE ramo_id = :id AND estado = 1');
+        $stmt->execute([':id' => $id]);
+        if ((int) $stmt->fetchColumn() > 0) {
+            cb_json_error('dependencia_activa', 'No se puede desactivar un ramo con tipos de seguro activos.', 409);
+        }
     }
 
     $stmt = $pdo->prepare('UPDATE seg_ramos SET estado = :estado, actualizado_por_usuario_externo_id = :usuario, actualizado_en = :fecha WHERE id = :id');

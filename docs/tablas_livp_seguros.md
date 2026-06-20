@@ -129,6 +129,89 @@ Reglas de estado o eliminacion:
 Motivo del cambio:
 - Primera base de datos local de negocio para Catalogos V1.
 
+### 2026-06-20 - seg_tipos_seguro
+
+Tabla: `seg_tipos_seguro`
+Tipo de cambio: propuesta para creacion manual
+Modulo relacionado: `catalogos`
+Proposito: almacenar tipos de seguro configurables que se usaran como base para futuros expedientes, cotizaciones y polizas.
+
+Columnas principales:
+- `id`
+- `ramo_id`
+- `codigo`
+- `nombre`
+- `descripcion`
+- `ejemplo_uso`
+- `orden_visual`
+- `estado`
+- `creado_por_usuario_externo_id`
+- `actualizado_por_usuario_externo_id`
+- `creado_en`
+- `actualizado_en`
+
+Relaciones:
+- `ramo_id` referencia `seg_ramos.id`.
+
+Indices y unique:
+- Llave primaria `id`.
+- Codigo tecnico unico.
+- Combinacion unica de ramo y nombre.
+- Indices en `ramo_id`, `estado` y `orden_visual`.
+
+Reglas de estado o eliminacion:
+- `estado = 1` Activo.
+- `estado = 0` Desactivado.
+- No hay borrado fisico.
+- Para crear, editar o reactivar, el ramo asociado debe estar activo.
+- El codigo se genera al crear y no cambia cuando se edita el nombre.
+
+Motivo del cambio:
+- Ampliar Catalogos con una base configurable para futuros modulos de expedientes.
+
+### 2026-06-20 - seg_estados_expediente
+
+Tabla: `seg_estados_expediente`
+Tipo de cambio: propuesta para creacion manual
+Modulo relacionado: `catalogos`
+Proposito: almacenar estados configurables para el ciclo futuro de expedientes.
+
+Columnas principales:
+- `id`
+- `codigo`
+- `nombre`
+- `descripcion`
+- `ejemplo_uso`
+- `color_etiqueta`
+- `orden_visual`
+- `es_inicial`
+- `estado`
+- `creado_por_usuario_externo_id`
+- `actualizado_por_usuario_externo_id`
+- `creado_en`
+- `actualizado_en`
+
+Relaciones:
+- No tiene relaciones directas en esta fase.
+
+Indices y unique:
+- Llave primaria `id`.
+- Codigo tecnico unico.
+- Nombre unico.
+- Indices en `estado`, `es_inicial` + `estado` y `orden_visual`.
+
+Reglas de estado o eliminacion:
+- `estado = 1` Activo.
+- `estado = 0` Desactivado.
+- No hay borrado fisico.
+- Debe existir como maximo un estado inicial activo.
+- Al marcar un estado inicial activo, los anteriores dejan de ser iniciales mediante transaccion.
+- No se permite desactivar el unico estado inicial activo.
+- El codigo se genera al crear y no cambia cuando se edita el nombre.
+
+Motivo del cambio:
+- Ampliar Catalogos con una base configurable para futuros modulos de expedientes.
+
 ## Plantilla obligatoria para registros futuros
 
 Copiar esta plantilla cada vez que se cree, modifique o elimine una tabla local.

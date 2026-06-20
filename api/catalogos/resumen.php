@@ -11,6 +11,8 @@ try {
         'aseguradoras_activas' => (int) $pdo->query('SELECT COUNT(*) FROM seg_aseguradoras WHERE estado = 1')->fetchColumn(),
         'ramos_activos' => (int) $pdo->query('SELECT COUNT(*) FROM seg_ramos WHERE estado = 1')->fetchColumn(),
         'productos_activos' => (int) $pdo->query('SELECT COUNT(*) FROM seg_productos WHERE estado = 1')->fetchColumn(),
+        'tipos_seguro_activos' => (int) $pdo->query('SELECT COUNT(*) FROM seg_tipos_seguro WHERE estado = 1')->fetchColumn(),
+        'estados_expediente_activos' => (int) $pdo->query('SELECT COUNT(*) FROM seg_estados_expediente WHERE estado = 1')->fetchColumn(),
     ];
     cb_json_success('Resumen cargado correctamente.', $data);
 } catch (Throwable $e) {

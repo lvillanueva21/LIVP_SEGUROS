@@ -60,6 +60,45 @@ function cat_codigo($value)
     return preg_match('/^[A-Z0-9_-]{2,40}$/', $value) === 1 ? $value : '';
 }
 
+function cat_codigo_from_nombre($value)
+{
+    $value = strtoupper(cat_trim($value));
+    $value = strtr($value, [
+        'Á' => 'A', 'É' => 'E', 'Í' => 'I', 'Ó' => 'O', 'Ú' => 'U',
+        'Ä' => 'A', 'Ë' => 'E', 'Ï' => 'I', 'Ö' => 'O', 'Ü' => 'U',
+        'À' => 'A', 'È' => 'E', 'Ì' => 'I', 'Ò' => 'O', 'Ù' => 'U',
+        'Ñ' => 'N', 'Ç' => 'C',
+        'á' => 'A', 'é' => 'E', 'í' => 'I', 'ó' => 'O', 'ú' => 'U',
+        'ä' => 'A', 'ë' => 'E', 'ï' => 'I', 'ö' => 'O', 'ü' => 'U',
+        'à' => 'A', 'è' => 'E', 'ì' => 'I', 'ò' => 'O', 'ù' => 'U',
+        'ñ' => 'N', 'ç' => 'C',
+    ]);
+    $value = preg_replace('/[^A-Z0-9]+/', '_', $value);
+    $value = trim((string) preg_replace('/_+/', '_', (string) $value), '_');
+    if ($value === '') {
+        $value = 'CATALOGO';
+    }
+    return substr($value, 0, 40);
+}
+
+function cat_codigo_unico_desde_nombre(PDO $pdo, $table, $nombre)
+{
+    $base = cat_codigo_from_nombre($nombre);
+    $codigo = $base;
+    $suffix = 2;
+
+    while (cat_value_exists($pdo, $table, 'codigo', $codigo)) {
+        $tail = '_' . $suffix;
+        $codigo = substr($base, 0, 40 - strlen($tail)) . $tail;
+        $suffix++;
+        if ($suffix > 999) {
+            cb_json_error('codigo_no_disponible', 'No se pudo generar un codigo tecnico unico.', 409);
+        }
+    }
+
+    return $codigo;
+}
+
 function cat_estado_value($value, $default = 1)
 {
     if ($value === null || $value === '') {
@@ -207,6 +246,37 @@ function cat_abort_if_errors(array $errors)
 {
     if ($errors) {
         cb_json_error('validacion', 'Revise los campos marcados.', 422, $errors);
+    }
+}
+
+function cat_int_range($value, $default, $min, $max)
+{
+    if ($value === null || $value === '') {
+        return (int) $default;
+    }
+    $value = (int) $value;
+    if ($value < (int) $min) {
+        return (int) $min;
+    }
+    if ($value > (int) $max) {
+        return (int) $max;
+    }
+    return $value;
+}
+
+function cat_bool_value($value, $default = 0)
+{
+    if ($value === null || $value === '') {
+        return (int) $default;
+    }
+    return in_array((string) $value, ['1', 'true', 'on', 'yes'], true) ? 1 : 0;
+}
+
+function cat_validate_hex_color($value, $field, array &$errors)
+{
+    $value = cat_trim($value);
+    if ($value !== '' && preg_match('/^#[0-9A-Fa-f]{6}$/', $value) !== 1) {
+        $errors[$field] = 'Seleccione un color valido.';
     }
 }
 
