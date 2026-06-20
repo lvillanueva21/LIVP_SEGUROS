@@ -51,10 +51,10 @@ if ($cbUbicacionVisible === '') {
 
 $cbCurrentScript = strtolower((string) basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')));
 $cbCurrentModule = strtolower(trim((string) ($_GET['m'] ?? '')));
-$cbInicioDashboardActivo = $cbCurrentScript === 'dashboard.php';
+$cbInicioUrl = cb_cliente_puede_ver_pagina('inicio') ? 'modulo.php?m=inicio' : 'dashboard.php';
 ?>
   <aside id="lsis-main-sidebar" class="main-sidebar sidebar-dark-primary elevation-4 cliente-sidebar">
-    <a href="<?php echo cb_e(cb_url('dashboard.php')); ?>" class="brand-link cliente-brand-link">
+    <a href="<?php echo cb_e(cb_url($cbInicioUrl)); ?>" class="brand-link cliente-brand-link">
       <img src="<?php echo cb_e($cbLogo); ?>" alt="Logo cliente" class="brand-image img-circle elevation-3 cliente-brand-image" style="opacity:.8" onerror="this.onerror=null;this.src='<?php echo cb_e($cbLogoFallback); ?>';">
       <span id="lsis-brand-text" class="brand-text font-weight-light"><?php echo cb_e($cbTituloSistema); ?></span>
     </a>
@@ -97,13 +97,6 @@ $cbInicioDashboardActivo = $cbCurrentScript === 'dashboard.php';
 
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-          <li class="nav-item">
-            <a href="<?php echo cb_e(cb_url('dashboard.php')); ?>" class="nav-link<?php echo $cbInicioDashboardActivo ? ' active' : ''; ?>">
-              <i class="nav-icon fas fa-home"></i>
-              <p>Inicio</p>
-            </a>
-          </li>
-
           <?php foreach ($cbMenu as $item): ?>
             <?php
               $icono = (string) ($item['icono'] ?? 'fas fa-circle');

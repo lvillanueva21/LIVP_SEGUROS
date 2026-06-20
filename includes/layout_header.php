@@ -27,6 +27,7 @@ $cbTituloSistema = trim((string) ($cbVisual['titulo_sistema_cliente'] ?? ''));
 if ($cbTituloSistema === '') {
     $cbTituloSistema = $cbServicioNombre !== '' ? $cbServicioNombre : CLIENTE_NOMBRE;
 }
+$cbInicioUrl = cb_cliente_puede_ver_pagina('inicio') ? 'modulo.php?m=inicio' : 'dashboard.php';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -67,7 +68,7 @@ if ($cbTituloSistema === '') {
         </a>
       </li>
       <li class="nav-item d-none d-sm-inline-block">
-        <a href="<?php echo cb_e(cb_url('dashboard.php')); ?>" class="nav-link">Inicio</a>
+        <a href="<?php echo cb_e(cb_url($cbInicioUrl)); ?>" class="nav-link">Inicio</a>
       </li>
     </ul>
 
