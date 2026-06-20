@@ -36,9 +36,12 @@ function cb_almacen_table_exists(PDO $pdo, $table)
     }
 
     try {
-        $stmt = $pdo->prepare('SHOW TABLES LIKE :table_name');
+        $stmt = $pdo->prepare('SELECT COUNT(*)
+            FROM information_schema.TABLES
+            WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = :table_name');
         $stmt->execute([':table_name' => $table]);
-        return $stmt->fetchColumn() !== false;
+        return (int) $stmt->fetchColumn() > 0;
     } catch (Throwable $e) {
         return false;
     }
