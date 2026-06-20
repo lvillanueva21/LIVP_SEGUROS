@@ -164,7 +164,7 @@ Los endpoints validan sesion, permisos por accion, metodo HTTP, CSRF en cambios,
 
 La emergencia E-01 corrige el soporte de logos mediante tabla nueva propuesta `seg_aseguradora_logo_archivos`, documentada en `LIVP_SEGUROS/docs/diseno_logos_aseguradoras_v1.md`.
 
-Los logos se guardan como archivos fisicos en `storage/imagenes/aseguradoras/logos/YYYY/MM/DD/`. La BD solo guarda metadatos y ruta relativa segura. El listado de aseguradoras solo recibe metadatos y version; nunca recibe contenido de imagen.
+Los logos se guardan como archivos fisicos en `almacen/aseguradoras/logos/YYYY/MM/DD/` usando `includes/almacen_core.php`. La BD solo guarda metadatos y ruta relativa segura. El listado de aseguradoras solo recibe metadatos y version; nunca recibe contenido de imagen.
 
 ## Pendientes futuros
 

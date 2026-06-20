@@ -34,7 +34,7 @@
 
 - No queda codigo activo de BLOB, Base64 ni contenido binario para logos.
 - No se devuelve imagen por JSON.
-- No hay almacenamiento fisico persistente fuera de `storage/imagenes/aseguradoras/logos/`.
+- No hay almacenamiento fisico persistente fuera de `almacen/aseguradoras/logos/` para nuevas cargas.
 - No existen rutas de archivo controladas por usuario.
 - No se usa nombre original como ruta fisica.
 - Solo existe un logo vigente por aseguradora.

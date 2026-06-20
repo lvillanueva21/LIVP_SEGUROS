@@ -170,6 +170,7 @@ Reglas aplicadas:
 - Los errores de base de datos se responden de forma generica sin SQL interno.
 - El endpoint `aseguradora_logo.php` entrega el archivo fisico solo con sesion y `puede_ver`, usando `X-Content-Type-Options: nosniff`.
 - Las imagenes no se guardan como BLOB, Base64 ni contenido binario en BD.
+- Las nuevas cargas de archivos de negocio deben usar `includes/almacen_core.php` y persistir en `almacen/{carpeta}/YYYY/MM/DD/`.
 
 ## Aplicacion en Usuarios
 

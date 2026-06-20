@@ -6,6 +6,8 @@ Este documento reemplaza el diseno incorrecto anterior basado en BLOB.
 
 Las imagenes, logos, fotos y archivos de LIVP_SEGUROS se almacenan como archivos fisicos en el servidor. La BD local solo guarda metadatos y una ruta relativa segura.
 
+Desde Almacen V1, toda carga nueva debe pasar por `includes/almacen_core.php` y guardarse bajo `almacen/`.
+
 Prohibido:
 
 - guardar imagenes como BLOB, MEDIUMBLOB o LONGBLOB;
@@ -19,10 +21,10 @@ Prohibido:
 El maestro usa almacenamiento fisico con ruta relativa, nombre interno aleatorio y metadatos en BD. Para LIVP_SEGUROS se adapta asi:
 
 ```text
-storage/imagenes/aseguradoras/logos/YYYY/MM/DD/
+almacen/aseguradoras/logos/YYYY/MM/DD/
 ```
 
-La carpeta es propia de LIVP_SEGUROS y no depende de LIVP_LSISTEMAS.
+La carpeta es propia de LIVP_SEGUROS y no depende de LIVP_LSISTEMAS. El patron se inspira en el maestro, pero la persistencia es local del esclavo.
 
 ## Tabla propuesta
 
@@ -48,6 +50,13 @@ Campos:
 
 La tabla guarda solo un logo vigente por aseguradora mediante UNIQUE `aseguradora_id`.
 
+Adicionalmente, el archivo se registra en:
+
+- `seg_archivos`
+- `seg_archivos_vinculos`
+
+El vinculo recomendado para este caso es `codigo_uso = aseguradora_logo`, `entidad_tipo = seg_aseguradoras`, `slot = logo`.
+
 ## Reemplazo seguro
 
 1. Validar el archivo recibido por HTTP.
@@ -66,7 +75,7 @@ Quitar logo elimina el archivo fisico asociado y borra el metadato del logo. No 
 - MIME real mediante `finfo`.
 - Contenido real mediante `getimagesize`.
 - Permitidos para este flujo: PNG, JPEG y WEBP.
-- Rechazados: SVG, GIF, PDF y archivos renombrados con MIME falso.
+- Rechazados para este flujo: SVG, GIF, PDF y archivos renombrados con MIME falso.
 - Sin limite de tamano impuesto por la aplicacion; se respetan limites reales del servidor.
 - No se confia en extension ni nombre original.
 

@@ -80,7 +80,7 @@ Puedes personalizar desde `includes/config_cliente.php`:
 - Nunca guardar `API_SECRET` en caché local.
 - No subir `config_cliente.php` con credenciales reales a repositorios públicos.
 - Mantener `includes/.htaccess` activo para bloquear acceso directo a configuración/helpers.
-- Mantener `storage/.htaccess` y `storage/cache/.htaccess` activos.
+- Mantener `storage/.htaccess`, `storage/cache/.htaccess` y `almacen/.htaccess` activos.
 - No guardar usuarios de login ni claves en BD local.
 - `login.php` usa CSRF local y `session_regenerate_id(true)` al autenticar correctamente.
 
@@ -112,6 +112,7 @@ No llevar a cliente_base:
 - Truncar textos largos con criterio y dejar valor completo en `title` o `data-*`.
 - No usar `alert()`, `confirm()` ni `prompt()`.
 - Inputs de clave deben tener botón ojo (`fas fa-eye` / `fas fa-eye-slash`).
+- Las subidas nuevas de archivos de negocio deben usar `includes/almacen_core.php` y persistir bajo `almacen/{carpeta}/YYYY/MM/DD/`.
 
 ## 10) Estrategia de despliegue de assets de AdminLTE
 Para evitar duplicar miles de archivos en cada proyecto:
@@ -148,4 +149,4 @@ El código del cliente está preparado para rutas relativas; solo ajusta configu
   - esperar al TTL configurado.
 - Un cambio visual en LSISTEMAS puede tardar hasta el TTL en verse en cliente.
 - En pruebas, puedes borrar caché manualmente para refrescar de inmediato.
-- No desactivar `.htaccess` en `storage/` ni `storage/cache/`.
+- No desactivar `.htaccess` en `storage/`, `storage/cache/` ni `almacen/`.

@@ -34,6 +34,7 @@ Este checklist debe revisarse antes de marcar un modulo de negocio de LIVP_SEGUR
 - [ ] No hay SQL crudo concatenado con datos de usuario.
 - [ ] No se exponen secretos en HTML, JS, JSON, logs ni errores.
 - [ ] No se exponen rutas fisicas del servidor.
+- [ ] Si hay subida de archivos, usa `includes/almacen_core.php` y guarda bajo `almacen/{carpeta}/YYYY/MM/DD/`.
 
 ## Base de datos local
 
@@ -109,6 +110,7 @@ Validaciones de logos:
 - [ ] Validar formato invalido, MIME falso, archivo mayor de 2 MiB y dimensiones fuera de rango.
 - [ ] Confirmar que la imagen no viaja por JSON.
 - [ ] Confirmar que la imagen se guarda fisicamente y la BD solo guarda metadatos.
+- [ ] Confirmar que nuevas cargas usan `almacen/aseguradoras/logos/`.
 
 ## Checklist adicional para proxy maestro
 
