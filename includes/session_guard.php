@@ -55,6 +55,9 @@ function cb_auth_has_authorization_payload(array $auth)
     if (!$permisos) {
         return false;
     }
+    if (trim((string) ($auth['token_sesion_servicio'] ?? '')) === '') {
+        return false;
+    }
 
     return is_array($menu);
 }

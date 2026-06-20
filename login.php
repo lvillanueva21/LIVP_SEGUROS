@@ -58,10 +58,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 $rol = is_array($data['rol'] ?? null) ? $data['rol'] : [];
                 $menu = is_array($data['menu'] ?? null) ? $data['menu'] : [];
                 $permisos = is_array($data['permisos'] ?? null) ? $data['permisos'] : [];
+                $tokenSesionServicio = trim((string) ($data['token_sesion_servicio'] ?? ''));
                 $rolCodigo = trim((string) ($rol['codigo_rol'] ?? ''));
                 $rolNombre = trim((string) ($rol['nombre'] ?? ''));
 
-                if ($rolCodigo === '' || $rolNombre === '' || !$permisos) {
+                if ($rolCodigo === '' || $rolNombre === '' || !$permisos || $tokenSesionServicio === '') {
                     $errorMsg = 'Usuario sin rol asignado para este servicio. Consulte a soporte informatico.';
                 } else {
 
@@ -112,6 +113,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                     ],
                     'menu' => $menu,
                     'permisos' => $permisos,
+                    'token_sesion_servicio' => $tokenSesionServicio,
                     'login_at' => time(),
                     'last_activity_at' => time(),
                 ];

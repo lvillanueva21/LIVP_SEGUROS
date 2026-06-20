@@ -109,3 +109,11 @@ Validaciones de logos:
 - [ ] Validar formato invalido, MIME falso, archivo mayor de 2 MiB y dimensiones fuera de rango.
 - [ ] Confirmar que la imagen no viaja por JSON.
 - [ ] Confirmar que la imagen se guarda fisicamente y la BD solo guarda metadatos.
+
+## Checklist adicional para proxy maestro
+
+- [ ] El navegador no recibe secretos ni token del maestro.
+- [ ] Los endpoints locales validan sesion y permiso.
+- [ ] Los endpoints locales llaman al maestro solo desde PHP.
+- [ ] El maestro valida nuevamente token, rol y permisos.
+- [ ] La sesion local se cierra si el maestro indica token vencido o revocado.

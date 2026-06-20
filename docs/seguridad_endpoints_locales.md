@@ -170,3 +170,21 @@ Reglas aplicadas:
 - Los errores de base de datos se responden de forma generica sin SQL interno.
 - El endpoint `aseguradora_logo.php` entrega el archivo fisico solo con sesion y `puede_ver`, usando `X-Content-Type-Options: nosniff`.
 - Las imagenes no se guardan como BLOB, Base64 ni contenido binario en BD.
+
+## Aplicacion en Usuarios
+
+El modulo `usuarios` implementa endpoints locales bajo:
+
+```text
+LIVP_SEGUROS/api/usuarios/
+```
+
+Reglas aplicadas:
+
+- Contexto y listado requieren `puede_ver`.
+- Crear requiere `puede_crear`.
+- Editar requiere `puede_editar`.
+- Activar o Desactivar requiere `puede_eliminar`.
+- Las operaciones `POST` exigen CSRF local con scope `usuarios`.
+- Los endpoints locales llaman al maestro desde PHP y nunca exponen `API_KEY`, `API_SECRET` ni `token_sesion_servicio`.
+- Si el maestro rechaza el token, LIVP_SEGUROS cierra la sesion local de forma controlada.
