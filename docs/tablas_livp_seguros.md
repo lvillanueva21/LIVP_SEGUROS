@@ -317,6 +317,48 @@ Reglas de estado o eliminacion:
 Motivo del cambio:
 - Permitir modelar consorcios con multiples empresas integrantes y operador tributario vinculado.
 
+### 2026-06-20 - seg_expedientes
+
+Tabla: `seg_expedientes`
+Tipo de cambio: creada
+Modulo relacionado: `expedientes`
+Proposito: almacenar el expediente comercial base de una solicitud de seguro para un cliente activo.
+
+Columnas principales:
+- `id`
+- `codigo`
+- `cliente_id`
+- `tipo_seguro_id`
+- `estado_expediente_id`
+- `descripcion`
+- `observaciones`
+- `fecha_apertura`
+- `estado`
+- `creado_por_usuario_externo_id`
+- `actualizado_por_usuario_externo_id`
+- `creado_en`
+- `actualizado_en`
+
+Relaciones:
+- `cliente_id` referencia `seg_clientes.id`.
+- `tipo_seguro_id` referencia `seg_tipos_seguro.id`.
+- `estado_expediente_id` referencia `seg_estados_expediente.id`.
+
+Indices y unique:
+- Llave primaria `id`.
+- `codigo` unico con formato `EXP-AAAA-000001`.
+- Indices en cliente, tipo de seguro, estado de expediente, fecha de apertura y estado activo/inactivo.
+
+Reglas de estado o eliminacion:
+- `estado = 1` Activo.
+- `estado = 0` Desactivado.
+- No hay borrado fisico.
+- Al crear, el estado de expediente se toma del unico estado inicial activo configurado.
+- No se permite crear si no existe exactamente un estado inicial activo.
+
+Motivo del cambio:
+- Crear la primera base operativa para futuros flujos de cotizaciones, polizas, requisitos y documentos sin implementar todavia esos modulos.
+
 ## Plantilla obligatoria para registros futuros
 
 Copiar esta plantilla cada vez que se cree, modifique o elimine una tabla local.
