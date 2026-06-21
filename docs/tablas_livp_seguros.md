@@ -359,6 +359,87 @@ Reglas de estado o eliminacion:
 Motivo del cambio:
 - Crear la primera base operativa para futuros flujos de cotizaciones, polizas, requisitos y documentos sin implementar todavia esos modulos.
 
+### 2026-06-20 - uso de seg_archivos_vinculos para expedientes
+
+Tabla: `seg_archivos_vinculos`
+Tipo de cambio: uso documentado
+Modulo relacionado: `expedientes`
+Proposito: vincular archivos historicos almacenados en `seg_archivos` con expedientes comerciales sin crear un almacenamiento paralelo.
+
+Columnas principales usadas:
+- `archivo_id`
+- `codigo_uso`
+- `entidad_tipo`
+- `entidad_id`
+- `slot`
+- `metadata_json`
+- `estado`
+- `creado_por_usuario_externo_id`
+- `actualizado_por_usuario_externo_id`
+- `creado_en`
+- `actualizado_en`
+
+Relaciones:
+- `archivo_id` referencia `seg_archivos.id`.
+- `entidad_tipo = expediente` y `entidad_id` apunta a `seg_expedientes.id`.
+
+Valores operativos:
+- `codigo_uso = expediente_documento`
+- `entidad_tipo = expediente`
+- `slot` guarda el codigo del tipo de documento: `documento_general`, `cotizacion`, `poliza`, `constancia`, `endoso`, `carta_fianza`, `voucher` o `garantia`.
+
+Reglas de estado o eliminacion:
+- `estado = 1` Activo.
+- `estado = 0` Archivado o desvinculado.
+- No hay borrado fisico desde Expedientes.
+- La descarga debe pasar por endpoint protegido y no exponer rutas fisicas de `almacen/`.
+
+Motivo del cambio:
+- Permitir adjuntar, listar, descargar y archivar documentos del expediente reutilizando `almacen_core.php`, `seg_archivos` y `seg_archivos_vinculos`.
+
+### 2026-06-20 - seg_timeline_eventos
+
+Tabla: `seg_timeline_eventos`
+Tipo de cambio: creada
+Modulo relacionado: `expedientes`
+Proposito: registrar eventos inmutables de actividad sobre entidades de negocio, iniciando con expedientes.
+
+Columnas principales:
+- `id`
+- `entidad_tipo`
+- `entidad_id`
+- `codigo_evento`
+- `descripcion`
+- `actor_usuario_externo_id`
+- `fecha_evento`
+- `metadata_json`
+
+Relaciones:
+- `entidad_tipo` y `entidad_id` identifican la entidad afectada. Para esta fase se usa `entidad_tipo = expediente` y `entidad_id = seg_expedientes.id`.
+- `actor_usuario_externo_id` guarda el ID del usuario autenticado proveniente del maestro. No referencia una tabla local de usuarios.
+
+Indices y unique:
+- Llave primaria `id`.
+- Indice compuesto en `entidad_tipo`, `entidad_id` y `fecha_evento`.
+- Indices en `codigo_evento`, `actor_usuario_externo_id` y `fecha_evento`.
+
+Reglas de estado o eliminacion:
+- Los eventos son inmutables.
+- No hay edicion ni borrado de eventos desde el sistema.
+- La fecha y hora se registran con la hora Lima usada por la aplicacion.
+
+Eventos iniciales:
+- `expediente_creado`
+- `expediente_editado`
+- `estado_comercial_modificado`
+- `expediente_activado`
+- `expediente_desactivado`
+- `documento_cargado`
+- `documento_archivado`
+
+Motivo del cambio:
+- Dar trazabilidad basica a expedientes, documentos y cambios comerciales sin implementar todavia un timeline avanzado.
+
 ## Plantilla obligatoria para registros futuros
 
 Copiar esta plantilla cada vez que se cree, modifique o elimine una tabla local.

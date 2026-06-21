@@ -5,6 +5,7 @@ require_once __DIR__ . '/../../includes/session_guard.php';
 require_once __DIR__ . '/../../includes/conexion_cliente.php';
 require_once __DIR__ . '/../../includes/request_cliente.php';
 require_once __DIR__ . '/../../includes/autorizacion_cliente.php';
+require_once __DIR__ . '/../../includes/almacen_core.php';
 
 if (!headers_sent()) {
     header('Content-Type: application/json; charset=utf-8');
@@ -241,4 +242,54 @@ function exp_db_error(Throwable $e): void
 {
     error_log('[expedientes] ' . $e->getMessage());
     exp_json_error('No se pudo completar la operacion solicitada.', 500);
+}
+
+function exp_timeline_add(PDO $pdo, string $entidadTipo, int $entidadId, string $codigoEvento, string $descripcion, ?array $metadata = null, ?int $actorId = null, ?string $fecha = null): void
+{
+    $entidadTipo = trim($entidadTipo);
+    $codigoEvento = trim($codigoEvento);
+    $descripcion = trim($descripcion);
+    if ($entidadTipo === '' || $entidadId <= 0 || $codigoEvento === '' || $descripcion === '') {
+        throw new RuntimeException('Evento de timeline invalido.');
+    }
+
+    $metadataJson = null;
+    if (is_array($metadata) && $metadata !== []) {
+        $encoded = json_encode($metadata, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $metadataJson = is_string($encoded) && $encoded !== '' ? $encoded : null;
+    }
+
+    $stmt = $pdo->prepare('INSERT INTO seg_timeline_eventos
+        (entidad_tipo, entidad_id, codigo_evento, descripcion, actor_usuario_externo_id, fecha_evento, metadata_json)
+        VALUES
+        (:entidad_tipo, :entidad_id, :codigo_evento, :descripcion, :actor_usuario, :fecha_evento, :metadata_json)');
+    $stmt->execute([
+        ':entidad_tipo' => $entidadTipo,
+        ':entidad_id' => $entidadId,
+        ':codigo_evento' => $codigoEvento,
+        ':descripcion' => $descripcion,
+        ':actor_usuario' => $actorId ?? exp_user_id(),
+        ':fecha_evento' => $fecha ?? exp_now(),
+        ':metadata_json' => $metadataJson,
+    ]);
+}
+
+function exp_tipo_documento_options(): array
+{
+    return [
+        'documento_general' => 'Documento general',
+        'cotizacion' => 'Cotizacion',
+        'poliza' => 'Poliza',
+        'constancia' => 'Constancia',
+        'endoso' => 'Endoso',
+        'carta_fianza' => 'Carta fianza',
+        'voucher' => 'Voucher',
+        'garantia' => 'Garantia',
+    ];
+}
+
+function exp_tipo_documento_label(string $codigo): string
+{
+    $options = exp_tipo_documento_options();
+    return $options[$codigo] ?? $codigo;
 }

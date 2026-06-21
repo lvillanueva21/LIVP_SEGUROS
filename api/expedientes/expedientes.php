@@ -203,6 +203,12 @@ function exp_crear(): void
                 ':actualizado_en' => $now,
             ]);
             $id = (int) $pdo->lastInsertId();
+            exp_timeline_add($pdo, 'expediente', $id, 'expediente_creado', 'Expediente creado.', [
+                'codigo' => $codigo,
+                'cliente_id' => $data['cliente_id'],
+                'tipo_seguro_id' => $data['tipo_seguro_id'],
+                'estado_expediente_id' => $data['estado_expediente_id'],
+            ], $userId, $now);
             $pdo->commit();
             exp_json_success(['id' => $id, 'codigo' => $codigo], 'Expediente registrado correctamente.');
         } catch (PDOException $e) {
@@ -229,29 +235,49 @@ function exp_actualizar(): void
         exp_json_error('Expediente no encontrado.', 404);
     }
 
-    $stmt = $pdo->prepare('UPDATE seg_expedientes SET
-            cliente_id = :cliente_id,
-            tipo_seguro_id = :tipo_seguro_id,
-            estado_expediente_id = :estado_expediente_id,
-            descripcion = :descripcion,
-            observaciones = :observaciones,
-            fecha_apertura = :fecha_apertura,
-            estado = :estado,
-            actualizado_por_usuario_externo_id = :actualizado_por,
-            actualizado_en = :actualizado_en
-        WHERE id = :id');
-    $stmt->execute([
-        ':id' => $data['id'],
-        ':cliente_id' => $data['cliente_id'],
-        ':tipo_seguro_id' => $data['tipo_seguro_id'],
-        ':estado_expediente_id' => $data['estado_expediente_id'],
-        ':descripcion' => $data['descripcion'],
-        ':observaciones' => $data['observaciones'],
-        ':fecha_apertura' => $data['fecha_apertura'],
-        ':estado' => $data['estado'],
-        ':actualizado_por' => exp_user_id(),
-        ':actualizado_en' => exp_now(),
-    ]);
+    $userId = exp_user_id();
+    $now = exp_now();
+    try {
+        $pdo->beginTransaction();
+        $stmt = $pdo->prepare('UPDATE seg_expedientes SET
+                cliente_id = :cliente_id,
+                tipo_seguro_id = :tipo_seguro_id,
+                estado_expediente_id = :estado_expediente_id,
+                descripcion = :descripcion,
+                observaciones = :observaciones,
+                fecha_apertura = :fecha_apertura,
+                estado = :estado,
+                actualizado_por_usuario_externo_id = :actualizado_por,
+                actualizado_en = :actualizado_en
+            WHERE id = :id');
+        $stmt->execute([
+            ':id' => $data['id'],
+            ':cliente_id' => $data['cliente_id'],
+            ':tipo_seguro_id' => $data['tipo_seguro_id'],
+            ':estado_expediente_id' => $data['estado_expediente_id'],
+            ':descripcion' => $data['descripcion'],
+            ':observaciones' => $data['observaciones'],
+            ':fecha_apertura' => $data['fecha_apertura'],
+            ':estado' => $data['estado'],
+            ':actualizado_por' => $userId,
+            ':actualizado_en' => $now,
+        ]);
+        exp_timeline_add($pdo, 'expediente', $data['id'], 'expediente_editado', 'Expediente editado.', [
+            'codigo' => $record['codigo'],
+        ], $userId, $now);
+        if ((int) $record['estado_expediente_id'] !== (int) $data['estado_expediente_id']) {
+            exp_timeline_add($pdo, 'expediente', $data['id'], 'estado_comercial_modificado', 'Estado comercial modificado.', [
+                'estado_anterior_id' => (int) $record['estado_expediente_id'],
+                'estado_nuevo_id' => (int) $data['estado_expediente_id'],
+            ], $userId, $now);
+        }
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $e;
+    }
 
     exp_json_success(['id' => $data['id']], 'Expediente actualizado correctamente.');
 }
@@ -271,17 +297,32 @@ function exp_cambiar_estado(): void
     }
 
     $nuevoEstado = (int) $record['estado'] === 1 ? 0 : 1;
-    $stmt = $pdo->prepare('UPDATE seg_expedientes
-        SET estado = :estado,
-            actualizado_por_usuario_externo_id = :usuario,
-            actualizado_en = :fecha
-        WHERE id = :id');
-    $stmt->execute([
-        ':estado' => $nuevoEstado,
-        ':usuario' => exp_user_id(),
-        ':fecha' => exp_now(),
-        ':id' => $id,
-    ]);
+    $userId = exp_user_id();
+    $now = exp_now();
+    try {
+        $pdo->beginTransaction();
+        $stmt = $pdo->prepare('UPDATE seg_expedientes
+            SET estado = :estado,
+                actualizado_por_usuario_externo_id = :usuario,
+                actualizado_en = :fecha
+            WHERE id = :id');
+        $stmt->execute([
+            ':estado' => $nuevoEstado,
+            ':usuario' => $userId,
+            ':fecha' => $now,
+            ':id' => $id,
+        ]);
+        exp_timeline_add($pdo, 'expediente', $id, $nuevoEstado === 1 ? 'expediente_activado' : 'expediente_desactivado', $nuevoEstado === 1 ? 'Expediente activado.' : 'Expediente desactivado.', [
+            'codigo' => $record['codigo'],
+            'estado' => $nuevoEstado,
+        ], $userId, $now);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $e;
+    }
 
     exp_json_success(['id' => $id, 'estado' => $nuevoEstado], $nuevoEstado === 1 ? 'Expediente activado.' : 'Expediente desactivado.');
 }
