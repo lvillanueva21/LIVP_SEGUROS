@@ -823,6 +823,50 @@ Timeline:
 Motivo del cambio:
 - Permitir cotizaciones comerciales completas, comparables y descargables en PDF sin implementar todavia aceptacion formal vinculada a polizas, pagos, vouchers ni garantias.
 
+### 2026-06-21 - seg_poliza_extracciones
+
+Tabla: `seg_poliza_extracciones`
+Tipo de cambio: creada
+Modulo relacionado: `expedientes`
+Proposito: guardar evidencia auxiliar del analisis de PDF usado para prellenar una poliza, sin reemplazar los campos estructurados de `seg_polizas`.
+
+Columnas principales:
+- `id`
+- `poliza_id`
+- `expediente_id`
+- `archivo_id`
+- `metodo_extraccion`
+- `estado_extraccion`
+- `confianza_global`
+- `campos_extraidos_json`
+- `texto_extraido`
+- `observaciones`
+- `estado`
+- `creado_por_usuario_externo_id`
+- `actualizado_por_usuario_externo_id`
+- `creado_en`
+- `actualizado_en`
+
+Relaciones:
+- `poliza_id` referencia `seg_polizas.id`.
+- `expediente_id` referencia `seg_expedientes.id`.
+- `archivo_id` referencia opcionalmente `seg_archivos.id`.
+
+Indices y unique:
+- Llave primaria `id`.
+- Indices en poliza, expediente, archivo, metodo, estado de extraccion y estado activo/inactivo.
+
+Reglas de estado o eliminacion:
+- `estado = 1` Activo.
+- `estado = 0` Inactivo.
+- No hay borrado fisico.
+- Estados de extraccion: `pendiente`, `extraida`, `revisada`, `guardada`, `fallida`, `ocr_requerido`.
+- Metodos de extraccion: `manual`, `texto_pdf`, `ocr`, `mixto`, `ocr_pendiente`.
+- La extraccion no reemplaza la revision humana: el usuario decide que datos guardar en `seg_polizas`.
+
+Motivo del cambio:
+- Permitir trazabilidad de campos y texto extraido al subir una poliza en PDF, preparando una base para OCR completo futuro sin crear almacenamiento paralelo.
+
 ## Plantilla obligatoria para registros futuros
 
 Copiar esta plantilla cada vez que se cree, modifique o elimine una tabla local.

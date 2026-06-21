@@ -232,6 +232,7 @@ function pol_crear(): void
                 'vinculo_id' => (int) (($stored['vinculo']['id'] ?? 0)),
             ], $userId, $now);
         }
+        pol_guardar_extraccion_si_existe($pdo, $id, $expedienteId, isset($stored['id']) ? (int) $stored['id'] : null, $payload, $userId, $now);
         $pdo->commit();
         exp_json_success(['id' => $id, 'codigo' => $codigo], 'Poliza registrada correctamente.');
     } catch (Throwable $e) {
@@ -752,6 +753,59 @@ function pol_guardar_pdf(PDO $pdo, int $polizaId, string $codigo, ?int $userId, 
         return null;
     }
     return $stored;
+}
+
+function pol_guardar_extraccion_si_existe(PDO $pdo, int $polizaId, int $expedienteId, ?int $archivoId, array $payload, ?int $userId, string $now): void
+{
+    $texto = trim((string) ($payload['texto_extraido'] ?? ''));
+    $camposJson = trim((string) ($payload['campos_extraidos_json'] ?? ''));
+    $metodo = strtolower(trim((string) ($payload['metodo_extraccion'] ?? 'manual')));
+    if ($texto === '' && $camposJson === '') {
+        return;
+    }
+    if (!exp_table_exists($pdo, 'seg_poliza_extracciones')) {
+        return;
+    }
+    $allowedMetodo = ['manual', 'texto_pdf', 'ocr', 'mixto', 'ocr_pendiente'];
+    if (!in_array($metodo, $allowedMetodo, true)) {
+        $metodo = 'manual';
+    }
+    $estadoExtraccion = strtolower(trim((string) ($payload['estado_extraccion'] ?? 'revisada')));
+    $allowedEstado = ['pendiente', 'extraida', 'revisada', 'guardada', 'fallida', 'ocr_requerido'];
+    if (!in_array($estadoExtraccion, $allowedEstado, true)) {
+        $estadoExtraccion = 'revisada';
+    }
+    $confianza = trim((string) ($payload['confianza_global'] ?? ''));
+    $confianzaDecimal = is_numeric($confianza) ? max(0, min(100, (float) $confianza)) : null;
+    $campos = json_decode($camposJson, true);
+    $camposJsonDb = is_array($campos) ? json_encode($campos, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : null;
+
+    $stmt = $pdo->prepare('INSERT INTO seg_poliza_extracciones
+        (poliza_id, expediente_id, archivo_id, metodo_extraccion, estado_extraccion, confianza_global, campos_extraidos_json, texto_extraido, observaciones, estado, creado_por_usuario_externo_id, actualizado_por_usuario_externo_id, creado_en, actualizado_en)
+        VALUES
+        (:poliza_id, :expediente_id, :archivo_id, :metodo_extraccion, :estado_extraccion, :confianza_global, :campos_extraidos_json, :texto_extraido, :observaciones, 1, :creado_por, :actualizado_por, :creado_en, :actualizado_en)');
+    $stmt->execute([
+        ':poliza_id' => $polizaId,
+        ':expediente_id' => $expedienteId,
+        ':archivo_id' => $archivoId,
+        ':metodo_extraccion' => $metodo,
+        ':estado_extraccion' => $estadoExtraccion,
+        ':confianza_global' => $confianzaDecimal,
+        ':campos_extraidos_json' => $camposJsonDb,
+        ':texto_extraido' => $texto !== '' ? $texto : null,
+        ':observaciones' => exp_str($payload, 'observaciones_extraccion', 1000, true),
+        ':creado_por' => $userId,
+        ':actualizado_por' => $userId,
+        ':creado_en' => $now,
+        ':actualizado_en' => $now,
+    ]);
+    exp_timeline_add($pdo, 'expediente', $expedienteId, 'poliza_extraccion_guardada', 'Datos extraidos de poliza guardados.', [
+        'poliza_id' => $polizaId,
+        'archivo_id' => $archivoId,
+        'metodo_extraccion' => $metodo,
+        'estado_extraccion' => $estadoExtraccion,
+        'confianza_global' => $confianzaDecimal,
+    ], $userId, $now);
 }
 
 function pol_validate_pdf_upload(array $fileInfo): void
