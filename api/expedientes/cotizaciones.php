@@ -102,12 +102,16 @@ function cot_contexto(): void
         WHERE estado = 1
         ORDER BY nombre_comercial ASC, razon_social ASC, id ASC")->fetchAll(PDO::FETCH_ASSOC);
 
-    $stmtProd = $pdo->prepare('SELECT id, aseguradora_id, ramo_id, codigo, nombre_producto, nombre_plan
-        FROM seg_productos
-        WHERE estado = 1
-          AND ramo_id = :ramo_id
-        ORDER BY aseguradora_id ASC, nombre_producto ASC, nombre_plan ASC, id ASC');
-    $stmtProd->execute([':ramo_id' => $ramoId]);
+    $productos = [];
+    if (exp_table_exists($pdo, 'seg_productos')) {
+        $stmtProd = $pdo->prepare('SELECT id, aseguradora_id, ramo_id, codigo, nombre_producto, nombre_plan
+            FROM seg_productos
+            WHERE estado = 1
+              AND ramo_id = :ramo_id
+            ORDER BY aseguradora_id ASC, nombre_producto ASC, nombre_plan ASC, id ASC');
+        $stmtProd->execute([':ramo_id' => $ramoId]);
+        $productos = $stmtProd->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     $estados = [];
     foreach (cot_estados() as $codigo => $nombre) {
@@ -129,7 +133,7 @@ function cot_contexto(): void
     exp_json_success([
         'expediente' => $expediente,
         'aseguradoras' => $aseguradoras,
-        'productos' => $stmtProd->fetchAll(PDO::FETCH_ASSOC),
+        'productos' => $productos,
         'estados' => $estados,
         'gps' => $gps,
         'modalidades' => $modalidades,
@@ -146,6 +150,9 @@ function cot_listar(): void
     $expedienteId = (int) ($_GET['expediente_id'] ?? 0);
     cot_require_expediente($pdo, $expedienteId);
     [$page, $perPage, $offset] = exp_page_params();
+    if (!exp_tables_exist($pdo, ['seg_cotizaciones', 'seg_cotizacion_alternativas'])) {
+        exp_json_success(exp_empty_page($page, $perPage));
+    }
 
     $where = ['c.expediente_id = :expediente_id'];
     $params = [':expediente_id' => $expedienteId];
@@ -773,6 +780,9 @@ function cot_seccion_val(string $value): string
 function cot_fetch(PDO $pdo, int $id, int $expedienteId): ?array
 {
     if ($id <= 0 || $expedienteId <= 0) {
+        return null;
+    }
+    if (!exp_table_exists($pdo, 'seg_cotizaciones')) {
         return null;
     }
     $stmt = $pdo->prepare('SELECT * FROM seg_cotizaciones WHERE id = :id AND expediente_id = :expediente_id LIMIT 1');

@@ -81,6 +81,9 @@ function pol_listar(): void
     $pdo = exp_db();
     pol_require_expediente($pdo, $expedienteId, false);
     [$page, $perPage, $offset] = exp_page_params();
+    if (!exp_table_exists($pdo, 'seg_polizas')) {
+        exp_json_success(exp_empty_page($page, $perPage));
+    }
 
     $where = ['p.expediente_id = :expediente_id'];
     $params = [':expediente_id' => $expedienteId];
@@ -125,11 +128,9 @@ function pol_listar(): void
     $stmtTotal->execute($params);
     $total = (int) $stmtTotal->fetchColumn();
 
-    $stmt = $pdo->prepare("SELECT
-            p.*,
-            a.razon_social AS aseguradora_razon_social,
-            a.nombre_comercial AS aseguradora_nombre_comercial,
-            (
+    $pdfVinculoSql = 'NULL';
+    if (exp_tables_exist($pdo, ['seg_archivos', 'seg_archivos_vinculos'])) {
+        $pdfVinculoSql = "(
                 SELECT v.id
                 FROM seg_archivos_vinculos v
                 INNER JOIN seg_archivos ar ON ar.id = v.archivo_id
@@ -141,7 +142,14 @@ function pol_listar(): void
                   AND ar.estado = 1
                 ORDER BY v.id DESC
                 LIMIT 1
-            ) AS pdf_vinculo_id
+            )";
+    }
+
+    $stmt = $pdo->prepare("SELECT
+            p.*,
+            a.razon_social AS aseguradora_razon_social,
+            a.nombre_comercial AS aseguradora_nombre_comercial,
+            " . $pdfVinculoSql . " AS pdf_vinculo_id
         " . $fromSql . $whereSql . '
         ORDER BY p.fecha_emision DESC, p.id DESC
         LIMIT ' . (int) $perPage . ' OFFSET ' . (int) $offset);
@@ -670,6 +678,9 @@ function pol_fetch(PDO $pdo, int $id, int $expedienteId): ?array
     if ($id <= 0 || $expedienteId <= 0) {
         return null;
     }
+    if (!exp_table_exists($pdo, 'seg_polizas')) {
+        return null;
+    }
     $stmt = $pdo->prepare('SELECT
             p.*,
             a.razon_social AS aseguradora_razon_social,
@@ -690,6 +701,9 @@ function pol_fetch(PDO $pdo, int $id, int $expedienteId): ?array
 
 function pol_pdf_activo(PDO $pdo, int $polizaId): ?array
 {
+    if (!exp_tables_exist($pdo, ['seg_archivos', 'seg_archivos_vinculos'])) {
+        return null;
+    }
     $stmt = $pdo->prepare("SELECT
             v.id AS vinculo_id,
             v.archivo_id,

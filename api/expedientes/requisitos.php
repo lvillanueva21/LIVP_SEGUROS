@@ -59,6 +59,14 @@ function reqexp_listar(): void
     $estado = strtolower(trim((string) ($_GET['estado'] ?? 'todos')));
     $pdo = exp_db();
     reqexp_require_expediente($pdo, $expedienteId);
+    if (!exp_table_exists($pdo, 'seg_expediente_requisitos')) {
+        exp_json_success([
+            'rows' => [],
+            'total' => 0,
+            'tiene_requisitos' => false,
+            'schema_ready' => false,
+        ]);
+    }
     $stmtAll = $pdo->prepare('SELECT COUNT(*) FROM seg_expediente_requisitos WHERE expediente_id = :id');
     $stmtAll->execute([':id' => $expedienteId]);
     $totalExpediente = (int) $stmtAll->fetchColumn();
@@ -70,18 +78,23 @@ function reqexp_listar(): void
         $params[':estado'] = $estado;
     }
 
-    $stmt = $pdo->prepare('SELECT
-            er.*,
-            (
+    $documentosActivosSql = '0';
+    if (exp_tables_exist($pdo, ['seg_archivos', 'seg_archivos_vinculos'])) {
+        $documentosActivosSql = "(
                 SELECT COUNT(*)
                 FROM seg_archivos_vinculos v
                 INNER JOIN seg_archivos a ON a.id = v.archivo_id
-                WHERE v.codigo_uso = \'expediente_requisito_documento\'
-                  AND v.entidad_tipo = \'expediente_requisito\'
+                WHERE v.codigo_uso = 'expediente_requisito_documento'
+                  AND v.entidad_tipo = 'expediente_requisito'
                   AND v.entidad_id = er.id
                   AND v.estado = 1
                   AND a.estado = 1
-            ) AS documentos_activos
+            )";
+    }
+
+    $stmt = $pdo->prepare('SELECT
+            er.*,
+            ' . $documentosActivosSql . ' AS documentos_activos
         FROM seg_expediente_requisitos er
         WHERE ' . implode(' AND ', $where) . '
         ORDER BY er.orden_visual_snapshot ASC, er.nombre_snapshot ASC, er.id ASC');
@@ -428,6 +441,9 @@ function reqexp_documentos_por_requisitos(PDO $pdo, array $ids): array
 {
     $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
     if (!$ids) {
+        return [];
+    }
+    if (!exp_tables_exist($pdo, ['seg_archivos', 'seg_archivos_vinculos'])) {
         return [];
     }
     $placeholders = implode(',', array_fill(0, count($ids), '?'));

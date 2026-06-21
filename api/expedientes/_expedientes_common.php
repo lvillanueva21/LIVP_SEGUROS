@@ -240,8 +240,9 @@ function exp_next_codigo(PDO $pdo, string $year): string
 
 function exp_db_error(Throwable $e): void
 {
-    error_log('[expedientes] ' . $e->getMessage());
-    exp_json_error('No se pudo completar la operacion solicitada.', 500);
+    $ref = 'EXP-' . date('YmdHis') . '-' . substr(bin2hex(random_bytes(3)), 0, 6);
+    error_log('[expedientes][' . $ref . '] ' . get_class($e) . ' ' . $e->getCode() . ': ' . $e->getMessage() . ' en ' . $e->getFile() . ':' . $e->getLine());
+    exp_json_error('No se pudo completar la operacion solicitada. Referencia: ' . $ref, 500);
 }
 
 function exp_timeline_add(PDO $pdo, string $entidadTipo, int $entidadId, string $codigoEvento, string $descripcion, ?array $metadata = null, ?int $actorId = null, ?string $fecha = null): void
@@ -326,8 +327,13 @@ function exp_expediente_tiene_requisitos(PDO $pdo, int $expedienteId): bool
 
 function exp_table_exists(PDO $pdo, string $table): bool
 {
+    static $cache = [];
+
     if (preg_match('/^[A-Za-z0-9_]{2,80}$/', $table) !== 1) {
         return false;
+    }
+    if (array_key_exists($table, $cache)) {
+        return $cache[$table];
     }
     try {
         $stmt = $pdo->prepare('SELECT COUNT(*)
@@ -335,10 +341,36 @@ function exp_table_exists(PDO $pdo, string $table): bool
             WHERE TABLE_SCHEMA = DATABASE()
               AND TABLE_NAME = :table');
         $stmt->execute([':table' => $table]);
-        return (int) $stmt->fetchColumn() > 0;
+        $cache[$table] = (int) $stmt->fetchColumn() > 0;
     } catch (Throwable $e) {
-        return false;
+        $cache[$table] = false;
     }
+
+    return $cache[$table];
+}
+
+function exp_tables_exist(PDO $pdo, array $tables): bool
+{
+    foreach ($tables as $table) {
+        if (!exp_table_exists($pdo, (string) $table)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function exp_empty_page(int $page, int $perPage): array
+{
+    return [
+        'rows' => [],
+        'pagination' => [
+            'page' => $page,
+            'per_page' => $perPage,
+            'total' => 0,
+            'last_page' => 1,
+        ],
+        'schema_ready' => false,
+    ];
 }
 
 function exp_expediente_tiene_polizas(PDO $pdo, int $expedienteId): bool

@@ -35,6 +35,9 @@ function expfmt_listar(): void
     if (!$expediente) {
         exp_json_error('Expediente no encontrado.', 404);
     }
+    if (!exp_tables_exist($pdo, ['seg_formatos_tipo_seguro', 'seg_archivos', 'seg_archivos_vinculos'])) {
+        exp_json_success(['rows' => [], 'schema_ready' => false]);
+    }
 
     $stmt = $pdo->prepare("SELECT
             f.id,

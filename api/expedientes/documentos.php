@@ -52,6 +52,9 @@ function doc_listar(): void
     }
     $pdo = exp_db();
     doc_require_expediente($pdo, $expedienteId);
+    if (!exp_tables_exist($pdo, ['seg_archivos', 'seg_archivos_vinculos'])) {
+        exp_json_success(['rows' => [], 'schema_ready' => false]);
+    }
 
     $stmt = $pdo->prepare("SELECT
             v.id AS vinculo_id,

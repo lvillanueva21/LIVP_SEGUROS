@@ -18,6 +18,9 @@ try {
     if (!$stmtExp->fetchColumn()) {
         exp_json_error('Expediente no encontrado.', 404);
     }
+    if (!exp_table_exists($pdo, 'seg_timeline_eventos')) {
+        exp_json_success(['rows' => [], 'schema_ready' => false]);
+    }
 
     $stmt = $pdo->prepare("SELECT
             id,
