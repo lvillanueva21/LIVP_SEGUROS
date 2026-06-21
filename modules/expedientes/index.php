@@ -42,15 +42,16 @@ $permExpedientes = [
 
       <div class="text-muted small mb-2" id="exp-counter">0 registros</div>
       <div class="table-responsive">
-        <table class="table table-bordered table-hover table-sm">
+        <table class="table table-bordered table-hover table-sm exp-table">
           <thead>
             <tr>
-              <th>Codigo</th>
-              <th>Cliente</th>
-              <th>Tipo de seguro</th>
-              <th>Estado expediente</th>
-              <th>Fecha apertura</th>
-              <th>Activo</th>
+              <th class="exp-col-codigo">Codigo</th>
+              <th class="exp-col-cliente">Cliente</th>
+              <th class="exp-col-tipo">Tipo de seguro</th>
+              <th class="exp-col-descripcion">Descripcion</th>
+              <th class="exp-col-estado">Estado expediente</th>
+              <th class="exp-col-fecha">Fecha apertura</th>
+              <th class="exp-col-activo">Activo</th>
               <th class="text-center" style="width:86px;">Acciones</th>
             </tr>
           </thead>
@@ -119,7 +120,7 @@ $permExpedientes = [
 </div>
 
 <div class="modal fade" id="modalDetalleExpediente" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
+  <div class="modal-dialog modal-xl exp-detail-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Detalle de expediente</h5>
@@ -131,7 +132,7 @@ $permExpedientes = [
           <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#exp-tab-documentos" role="tab">Documentos</a></li>
           <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#exp-tab-actividad" role="tab">Actividad</a></li>
         </ul>
-        <div class="tab-content border-left border-right border-bottom p-3">
+        <div class="tab-content border-left border-right border-bottom p-3 exp-detail-content">
           <div class="tab-pane fade show active" id="exp-tab-resumen" role="tabpanel">
             <div id="exp-detalle-resumen"></div>
           </div>
@@ -140,26 +141,26 @@ $permExpedientes = [
               <form id="formExpDocumento" class="mb-3" enctype="multipart/form-data" novalidate>
                 <input type="hidden" name="expediente_id">
                 <div class="form-row align-items-end">
-                  <div class="form-group col-md-3">
+                  <div class="form-group col-lg-3 col-md-6">
                     <label>Tipo</label>
                     <select class="form-control form-control-sm" name="tipo_documento" required></select>
                   </div>
-                  <div class="form-group col-md-3">
+                  <div class="form-group col-lg-3 col-md-6">
                     <label>Descripcion</label>
                     <input class="form-control form-control-sm" name="descripcion" maxlength="255">
                   </div>
-                  <div class="form-group col-md-4">
+                  <div class="form-group col-lg-4 col-md-8">
                     <label>Archivo</label>
                     <input class="form-control form-control-sm" name="archivo" type="file" required>
                   </div>
-                  <div class="form-group col-md-2">
+                  <div class="form-group col-lg-2 col-md-4">
                     <button class="btn btn-primary btn-sm btn-block" type="submit"><i class="fas fa-upload"></i> Cargar</button>
                   </div>
                 </div>
               </form>
             <?php endif; ?>
             <div class="table-responsive">
-              <table class="table table-bordered table-sm mb-0">
+              <table class="table table-bordered table-sm mb-0 exp-doc-table">
                 <thead>
                   <tr>
                     <th>Tipo</th>
@@ -203,10 +204,27 @@ $permExpedientes = [
 
 <style>
   .exp-toolbar{display:grid;gap:.5rem;grid-template-columns:minmax(220px,1fr) 190px 170px 170px 120px auto auto;align-items:center;margin-bottom:.75rem}
+  .expedientes-module .table-responsive{overflow-x:auto}
+  .exp-table{min-width:1180px;table-layout:auto}
+  .exp-table th,.exp-table td{vertical-align:middle}
+  .exp-col-codigo{width:135px}
+  .exp-col-cliente{min-width:260px}
+  .exp-col-tipo{min-width:230px}
+  .exp-col-descripcion{min-width:260px}
+  .exp-col-estado{width:170px}
+  .exp-col-fecha{width:130px}
+  .exp-col-activo{width:100px}
+  .exp-text-clip{display:block;max-width:360px;white-space:normal;line-height:1.25}
+  .exp-detail-dialog{max-width:min(1320px,calc(100vw - 2rem))}
+  .exp-detail-dialog .modal-content{max-height:calc(100vh - 2rem)}
+  .exp-detail-dialog .modal-body{overflow-y:auto}
+  .exp-detail-content{min-height:360px}
+  .exp-doc-table{min-width:1000px}
   .exp-loading,.exp-empty{display:none;padding:1rem;border:1px dashed #ced4da;border-radius:.25rem;text-align:center;color:#6c757d;background:#f8f9fa}
   .exp-actions{display:inline-flex;flex-direction:column;gap:.25rem}
   .exp-pagination .btn{min-width:36px}
   .exp-toast-zone{position:fixed;right:1rem;bottom:1rem;z-index:1080;width:min(360px,calc(100vw - 2rem))}
+  @media(max-width:575.98px){.exp-detail-dialog{max-width:calc(100vw - .5rem);margin:.25rem}.exp-detail-dialog .modal-content{max-height:calc(100vh - .5rem)}}
   @media(max-width:1199.98px){.exp-toolbar{grid-template-columns:1fr 1fr}}
   @media(max-width:767.98px){.exp-toolbar{grid-template-columns:1fr}}
 </style>
@@ -230,6 +248,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function badgeActivo(v){return Number(v)===1?'<span class="badge badge-success">Activo</span>':'<span class="badge badge-secondary">Inactivo</span>';}
   function badgeEstado(row){var color=row.color_etiqueta||'#6c757d';return '<span class="badge" style="background:'+esc(color)+';color:#fff">'+esc(row.estado_expediente_nombre||'-')+'</span>';}
   function bytes(v){var n=Number(v||0);if(n<1024)return n+' B';if(n<1048576)return (n/1024).toFixed(1)+' KB';return (n/1048576).toFixed(1)+' MB';}
+  function resumen(v,max){v=String(v==null?'':v);return v.length>max?v.slice(0,max-1)+'...':v;}
   function params(){var p=new URLSearchParams();p.set('accion','listar');p.set('page',page);p.set('q',document.getElementById('exp-search').value||'');p.set('cliente_id',document.getElementById('exp-filtro-cliente').value||'0');p.set('tipo_seguro_id',document.getElementById('exp-filtro-tipo').value||'0');p.set('estado_expediente_id',document.getElementById('exp-filtro-estado-exp').value||'0');p.set('estado',document.getElementById('exp-filtro-activo').value||'todos');return p;}
   function optionClientes(selected){var h='<option value="">Seleccione cliente</option>';clientes.forEach(function(c){var tipo=c.tipo_cliente==='consorcio'?'Consorcio':'Empresa';var ruc=c.ruc?c.ruc+' - ':'';h+='<option value="'+c.id+'" '+(Number(selected)===Number(c.id)?'selected':'')+'>'+esc(ruc+c.razon_social+' ('+tipo+')')+'</option>';});return h;}
   function optionTipos(selected){var h='<option value="">Seleccione tipo</option>';tipos.forEach(function(t){h+='<option value="'+t.id+'" '+(Number(selected)===Number(t.id)?'selected':'')+'>'+esc((t.ramo_nombre?t.ramo_nombre+' / ':'')+t.nombre)+'</option>';});return h;}
@@ -239,7 +258,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function loadDocTipos(){return fetchJson(documentosEndpoint+'?accion=tipos').then(function(r){docTipos=(r.data||{}).rows||[];fillDocTipos();}).catch(function(e){toast(e.message||'No se pudo cargar tipos de documento.','danger');});}
   function loadContext(){return fetchJson(endpoint+'?accion=contexto').then(function(r){var d=r.data||{};clientes=d.clientes||[];tipos=d.tipos_seguro||[];estados=d.estados_expediente||[];estadoInicial=d.estado_inicial||null;csrf=d.csrf||csrf;fillOptions();}).catch(function(e){toast(e.message||'No se pudo cargar contexto.','danger');});}
   function load(){document.getElementById('exp-loading').style.display='block';fetchJson(endpoint+'?'+params().toString()).then(function(r){var d=r.data||{};rows=d.rows||[];renderRows();renderPagination(d.pagination||{});}).catch(function(e){toast(e.message||'No se pudo cargar expedientes.','danger');}).finally(function(){document.getElementById('exp-loading').style.display='none';});}
-  function renderRows(){var h='';rows.forEach(function(r){var cliente='<strong>'+esc(r.cliente_razon_social)+'</strong><div class="text-muted small">'+esc((r.cliente_ruc||'Sin RUC')+' / '+(r.tipo_cliente||''))+'</div>';h+='<tr><td><strong>'+esc(r.codigo)+'</strong></td><td>'+cliente+'</td><td>'+esc(r.tipo_seguro_nombre)+'</td><td>'+badgeEstado(r)+'</td><td>'+esc(r.fecha_apertura)+'</td><td>'+badgeActivo(r.estado)+'</td><td class="text-center">'+actions(r)+'</td></tr>';});document.getElementById('exp-body').innerHTML=h;document.getElementById('exp-empty').style.display=rows.length?'none':'block';}
+  function renderRows(){var h='';rows.forEach(function(r){var cliente='<strong class="exp-text-clip" title="'+esc(r.cliente_razon_social||'')+'">'+esc(resumen(r.cliente_razon_social,90))+'</strong><div class="text-muted small">'+esc((r.cliente_ruc||'Sin RUC')+' / '+(r.tipo_cliente||''))+'</div>';var tipo='<span class="exp-text-clip" title="'+esc(r.tipo_seguro_nombre||'')+'">'+esc(resumen(r.tipo_seguro_nombre,90))+'</span>';var descripcion='<span class="exp-text-clip" title="'+esc(r.descripcion||'')+'">'+esc(resumen(r.descripcion||'-',110))+'</span>';h+='<tr><td><strong>'+esc(r.codigo)+'</strong></td><td>'+cliente+'</td><td>'+tipo+'</td><td>'+descripcion+'</td><td>'+badgeEstado(r)+'</td><td>'+esc(r.fecha_apertura)+'</td><td>'+badgeActivo(r.estado)+'</td><td class="text-center">'+actions(r)+'</td></tr>';});document.getElementById('exp-body').innerHTML=h;document.getElementById('exp-empty').style.display=rows.length?'none':'block';}
   function actions(row){var h='<span class="exp-actions"><button type="button" class="btn btn-xs btn-outline-info" data-action="view" data-id="'+row.id+'" title="Ver detalle" aria-label="Ver detalle"><i class="fas fa-eye"></i></button>';if(permisos.puede_editar)h+='<button type="button" class="btn btn-xs btn-outline-primary" data-action="edit" data-id="'+row.id+'" title="Editar" aria-label="Editar"><i class="fas fa-edit"></i></button>';if(permisos.puede_eliminar){var title=Number(row.estado)===1?'Desactivar':'Activar';h+='<button type="button" class="btn btn-xs btn-outline-secondary" data-action="toggle" data-id="'+row.id+'" data-state="'+row.estado+'" title="'+title+'" aria-label="'+title+'"><i class="fas '+(Number(row.estado)===1?'fa-toggle-on':'fa-toggle-off')+'"></i></button>';}return h+'</span>';}
   function renderPagination(pag){var total=Number(pag.total||0), cur=Number(pag.page||1), last=Number(pag.last_page||1), wrap=document.getElementById('exp-pagination');document.getElementById('exp-counter').textContent=total+(total===1?' registro':' registros');if(last<=1){wrap.innerHTML='';return;}wrap.innerHTML='<div class="btn-group btn-group-sm"><button type="button" class="btn btn-outline-secondary" data-page="'+(cur-1)+'" '+(cur<=1?'disabled':'')+' title="Anterior" aria-label="Anterior"><i class="fas fa-chevron-left"></i></button><button type="button" class="btn btn-outline-secondary" disabled>'+cur+' / '+last+'</button><button type="button" class="btn btn-outline-secondary" data-page="'+(cur+1)+'" '+(cur>=last?'disabled':'')+' title="Siguiente" aria-label="Siguiente"><i class="fas fa-chevron-right"></i></button></div>';}
   function clearValidation(form){form.classList.remove('was-validated');Array.prototype.forEach.call(form.querySelectorAll('.is-invalid'),function(el){el.classList.remove('is-invalid');});Array.prototype.forEach.call(form.querySelectorAll('.invalid-feedback.dynamic'),function(el){el.remove();});}

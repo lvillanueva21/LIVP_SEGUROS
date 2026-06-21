@@ -440,6 +440,46 @@ Eventos iniciales:
 Motivo del cambio:
 - Dar trazabilidad basica a expedientes, documentos y cambios comerciales sin implementar todavia un timeline avanzado.
 
+### 2026-06-21 - seg_requisitos_tipo_seguro
+
+Tabla: `seg_requisitos_tipo_seguro`
+Tipo de cambio: creada
+Modulo relacionado: `requisitos_tipo`
+Proposito: administrar requisitos reutilizables que aplican a cada tipo de seguro activo.
+
+Columnas principales:
+- `id`
+- `tipo_seguro_id`
+- `codigo`
+- `nombre`
+- `descripcion`
+- `es_obligatorio`
+- `orden_visual`
+- `estado`
+- `creado_por_usuario_externo_id`
+- `actualizado_por_usuario_externo_id`
+- `creado_en`
+- `actualizado_en`
+
+Relaciones:
+- `tipo_seguro_id` referencia `seg_tipos_seguro.id`.
+
+Indices y unique:
+- Llave primaria `id`.
+- `codigo` unico generado por backend.
+- Indices en tipo de seguro, estado, orden visual y busqueda por nombre.
+- La duplicidad de requisitos activos por tipo de seguro y nombre se controla en backend porque MySQL/MariaDB no ofrece indice unico parcial portable para `estado = 1`.
+
+Reglas de estado o eliminacion:
+- `estado = 1` Activo.
+- `estado = 0` Inactivo.
+- No hay borrado fisico.
+- Solo se permite asociar requisitos a tipos de seguro activos desde el backend.
+- No se permite el mismo requisito activo repetido para el mismo tipo de seguro.
+
+Motivo del cambio:
+- Preparar la configuracion base de requisitos por tipo de seguro antes de implementarlos dentro de expedientes.
+
 ## Plantilla obligatoria para registros futuros
 
 Copiar esta plantilla cada vez que se cree, modifique o elimine una tabla local.
