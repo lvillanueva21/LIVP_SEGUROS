@@ -203,11 +203,15 @@ function exp_crear(): void
                 ':actualizado_en' => $now,
             ]);
             $id = (int) $pdo->lastInsertId();
+            $created = exp_fetch($pdo, $id) ?: [];
             exp_timeline_add($pdo, 'expediente', $id, 'expediente_creado', 'Expediente creado.', [
-                'codigo' => $codigo,
-                'cliente_id' => $data['cliente_id'],
-                'tipo_seguro_id' => $data['tipo_seguro_id'],
-                'estado_expediente_id' => $data['estado_expediente_id'],
+                'codigo' => (string) ($created['codigo'] ?? $codigo),
+                'cliente_id' => (int) $data['cliente_id'],
+                'cliente' => (string) ($created['cliente_razon_social'] ?? ''),
+                'tipo_seguro_id' => (int) $data['tipo_seguro_id'],
+                'tipo_seguro' => (string) ($created['tipo_seguro_nombre'] ?? ''),
+                'estado_expediente_id' => (int) $data['estado_expediente_id'],
+                'estado_expediente' => (string) ($created['estado_expediente_nombre'] ?? ''),
             ], $userId, $now);
             $pdo->commit();
             exp_json_success(['id' => $id, 'codigo' => $codigo], 'Expediente registrado correctamente.');
@@ -233,6 +237,11 @@ function exp_actualizar(): void
     $record = exp_fetch($pdo, $data['id']);
     if (!$record) {
         exp_json_error('Expediente no encontrado.', 404);
+    }
+
+    $changes = exp_detect_changes($record, $data);
+    if ($changes === []) {
+        exp_json_success(['id' => $data['id']], 'No hubo cambios para guardar.');
     }
 
     $userId = exp_user_id();
@@ -264,11 +273,16 @@ function exp_actualizar(): void
         ]);
         exp_timeline_add($pdo, 'expediente', $data['id'], 'expediente_editado', 'Expediente editado.', [
             'codigo' => $record['codigo'],
+            'campos_cambiados' => $changes,
         ], $userId, $now);
-        if ((int) $record['estado_expediente_id'] !== (int) $data['estado_expediente_id']) {
-            exp_timeline_add($pdo, 'expediente', $data['id'], 'estado_comercial_modificado', 'Estado comercial modificado.', [
+
+        $updated = exp_fetch($pdo, $data['id']) ?: [];
+        if (isset($changes['estado_expediente_id'])) {
+            exp_timeline_add($pdo, 'expediente', $data['id'], 'estado_expediente_modificado', 'Estado de expediente modificado.', [
                 'estado_anterior_id' => (int) $record['estado_expediente_id'],
+                'estado_anterior' => (string) ($record['estado_expediente_nombre'] ?? ''),
                 'estado_nuevo_id' => (int) $data['estado_expediente_id'],
+                'estado_nuevo' => (string) ($updated['estado_expediente_nombre'] ?? ''),
             ], $userId, $now);
         }
         $pdo->commit();
@@ -314,7 +328,8 @@ function exp_cambiar_estado(): void
         ]);
         exp_timeline_add($pdo, 'expediente', $id, $nuevoEstado === 1 ? 'expediente_activado' : 'expediente_desactivado', $nuevoEstado === 1 ? 'Expediente activado.' : 'Expediente desactivado.', [
             'codigo' => $record['codigo'],
-            'estado' => $nuevoEstado,
+            'estado_anterior' => (int) $record['estado'],
+            'estado_nuevo' => $nuevoEstado,
         ], $userId, $now);
         $pdo->commit();
     } catch (Throwable $e) {
@@ -347,4 +362,42 @@ function exp_fetch(PDO $pdo, int $id): ?array
     $stmt->execute([':id' => $id]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     return is_array($row) ? $row : null;
+}
+
+function exp_detect_changes(array $record, array $data): array
+{
+    $fields = [
+        'cliente_id' => 'int',
+        'tipo_seguro_id' => 'int',
+        'estado_expediente_id' => 'int',
+        'descripcion' => 'string',
+        'observaciones' => 'string',
+        'fecha_apertura' => 'string',
+        'estado' => 'int',
+    ];
+
+    $changes = [];
+    foreach ($fields as $field => $type) {
+        $old = exp_compare_value($record[$field] ?? null, $type);
+        $new = exp_compare_value($data[$field] ?? null, $type);
+        if ($old === $new) {
+            continue;
+        }
+        $changes[$field] = [
+            'anterior' => $old,
+            'nuevo' => $new,
+        ];
+    }
+
+    return $changes;
+}
+
+function exp_compare_value($value, string $type)
+{
+    if ($type === 'int') {
+        return (int) $value;
+    }
+
+    $value = trim((string) ($value ?? ''));
+    return $value === '' ? null : $value;
 }
