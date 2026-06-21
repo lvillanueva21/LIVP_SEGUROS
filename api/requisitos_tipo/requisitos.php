@@ -77,11 +77,11 @@ function requisitos_listar(): void
     $q = trim((string) ($_GET['q'] ?? ''));
     $q = function_exists('mb_substr') ? mb_substr($q, 0, 120, 'UTF-8') : substr($q, 0, 120);
     if ($q !== '') {
-        $where[] = "(rt.codigo LIKE :q ESCAPE '\\\\'
-            OR rt.nombre LIKE :q ESCAPE '\\\\'
-            OR rt.descripcion LIKE :q ESCAPE '\\\\'
-            OR ts.nombre LIKE :q ESCAPE '\\\\'
-            OR r.nombre LIKE :q ESCAPE '\\\\')";
+        $where[] = "(rt.codigo LIKE :q
+            OR rt.nombre LIKE :q
+            OR rt.descripcion LIKE :q
+            OR ts.nombre LIKE :q
+            OR r.nombre LIKE :q)";
         $params[':q'] = req_bind_like($q);
     }
 

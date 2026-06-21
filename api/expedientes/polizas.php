@@ -104,11 +104,11 @@ function pol_listar(): void
     $q = trim((string) ($_GET['q'] ?? ''));
     $q = function_exists('mb_substr') ? mb_substr($q, 0, 120, 'UTF-8') : substr($q, 0, 120);
     if ($q !== '') {
-        $where[] = "(p.codigo LIKE :q ESCAPE '\\\\'
-            OR p.numero_documento LIKE :q ESCAPE '\\\\'
-            OR p.contratante_nombre_snapshot LIKE :q ESCAPE '\\\\'
-            OR a.razon_social LIKE :q ESCAPE '\\\\'
-            OR a.nombre_comercial LIKE :q ESCAPE '\\\\')";
+        $where[] = "(p.codigo LIKE :q
+            OR p.numero_documento LIKE :q
+            OR p.contratante_nombre_snapshot LIKE :q
+            OR a.razon_social LIKE :q
+            OR a.nombre_comercial LIKE :q)";
         $params[':q'] = exp_bind_like($q);
     }
 

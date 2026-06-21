@@ -125,7 +125,7 @@ function exp_page_params(): array
 
 function exp_bind_like(string $value): string
 {
-    return '%' . str_replace(['%', '_'], ['\\%', '\\_'], $value) . '%';
+    return '%' . trim($value) . '%';
 }
 
 function exp_initial_estado(PDO $pdo): array

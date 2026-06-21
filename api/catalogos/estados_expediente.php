@@ -20,7 +20,7 @@ function estado_exp_listar(PDO $pdo)
         $params[':estado'] = $estado === 'activo' ? 1 : 0;
     }
     if ($q !== '') {
-        $where[] = "(codigo LIKE :q ESCAPE '\\\\' OR nombre LIKE :q ESCAPE '\\\\' OR descripcion LIKE :q ESCAPE '\\\\' OR ejemplo_uso LIKE :q ESCAPE '\\\\')";
+        $where[] = "(codigo LIKE :q OR nombre LIKE :q OR descripcion LIKE :q OR ejemplo_uso LIKE :q)";
         $params[':q'] = cat_bind_like($q);
     }
 

@@ -107,7 +107,7 @@ function fmt_page_params(): array
 
 function fmt_bind_like(string $value): string
 {
-    return '%' . str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $value) . '%';
+    return '%' . trim($value) . '%';
 }
 
 function fmt_require_active_tipo(PDO $pdo, int $id): array

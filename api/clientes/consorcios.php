@@ -62,7 +62,7 @@ function consorcios_listar(): void
     }
     if ($q !== '') {
         $where[] = '(c.ruc LIKE :q OR c.razon_social LIKE :q OR c.nombre_comercial LIKE :q OR op.razon_social LIKE :q OR op.ruc LIKE :q)';
-        $params[':q'] = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $q) . '%';
+        $params[':q'] = '%' . $q . '%';
     }
     $whereSql = 'WHERE ' . implode(' AND ', $where);
 

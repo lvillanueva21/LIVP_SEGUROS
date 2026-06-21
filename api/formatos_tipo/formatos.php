@@ -90,11 +90,11 @@ function formatos_listar(): void
     $q = trim((string) ($_GET['q'] ?? ''));
     $q = function_exists('mb_substr') ? mb_substr($q, 0, 120, 'UTF-8') : substr($q, 0, 120);
     if ($q !== '') {
-        $where[] = "(f.codigo LIKE :q ESCAPE '\\\\'
-            OR f.nombre LIKE :q ESCAPE '\\\\'
-            OR f.descripcion LIKE :q ESCAPE '\\\\'
-            OR ts.nombre LIKE :q ESCAPE '\\\\'
-            OR rt.nombre LIKE :q ESCAPE '\\\\')";
+        $where[] = "(f.codigo LIKE :q
+            OR f.nombre LIKE :q
+            OR f.descripcion LIKE :q
+            OR ts.nombre LIKE :q
+            OR rt.nombre LIKE :q)";
         $params[':q'] = fmt_bind_like($q);
     }
 

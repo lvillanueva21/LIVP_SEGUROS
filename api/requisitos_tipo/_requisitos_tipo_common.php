@@ -117,7 +117,7 @@ function req_page_params(): array
 
 function req_bind_like(string $value): string
 {
-    return '%' . str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $value) . '%';
+    return '%' . trim($value) . '%';
 }
 
 function req_validate(PDO $pdo, array $payload, bool $isUpdate = false): array

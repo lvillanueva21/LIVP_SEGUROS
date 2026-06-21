@@ -164,7 +164,7 @@ function cat_require_post_change($accion)
 
 function cat_bind_like($value)
 {
-    return '%' . str_replace(['%', '_'], ['\\%', '\\_'], $value) . '%';
+    return '%' . trim((string) $value) . '%';
 }
 
 function cat_db_error()

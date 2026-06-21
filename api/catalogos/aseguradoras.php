@@ -20,7 +20,7 @@ function aseg_listar(PDO $pdo)
         $params[':estado'] = $estado === 'activo' ? 1 : 0;
     }
     if ($q !== '') {
-        $where[] = "(a.codigo LIKE :q ESCAPE '\\\\' OR a.razon_social LIKE :q ESCAPE '\\\\' OR a.nombre_comercial LIKE :q ESCAPE '\\\\' OR a.ruc LIKE :q ESCAPE '\\\\')";
+        $where[] = "(a.codigo LIKE :q OR a.razon_social LIKE :q OR a.nombre_comercial LIKE :q OR a.ruc LIKE :q)";
         $params[':q'] = cat_bind_like($q);
     }
 

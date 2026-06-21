@@ -72,7 +72,7 @@ function clientes_listar(): void
             WHERE cc.cliente_id = c.id
               AND (cc.nombre_completo LIKE :q OR cc.telefono LIKE :q OR cc.correo LIKE :q)
         ))';
-        $params[':q'] = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $q) . '%';
+        $params[':q'] = '%' . $q . '%';
     }
 
     $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';

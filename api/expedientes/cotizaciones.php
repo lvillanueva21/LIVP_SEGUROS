@@ -163,12 +163,12 @@ function cot_listar(): void
     $q = trim((string) ($_GET['q'] ?? ''));
     $q = function_exists('mb_substr') ? mb_substr($q, 0, 120, 'UTF-8') : substr($q, 0, 120);
     if ($q !== '') {
-        $where[] = "(c.codigo LIKE :q ESCAPE '\\\\'
-            OR c.titulo LIKE :q ESCAPE '\\\\'
-            OR c.descripcion LIKE :q ESCAPE '\\\\'
-            OR cli.razon_social LIKE :q ESCAPE '\\\\'
-            OR a.razon_social LIKE :q ESCAPE '\\\\'
-            OR a.nombre_comercial LIKE :q ESCAPE '\\\\')";
+        $where[] = "(c.codigo LIKE :q
+            OR c.titulo LIKE :q
+            OR c.descripcion LIKE :q
+            OR cli.razon_social LIKE :q
+            OR a.razon_social LIKE :q
+            OR a.nombre_comercial LIKE :q)";
         $params[':q'] = exp_bind_like($q);
     }
     $whereSql = ' WHERE ' . implode(' AND ', $where);

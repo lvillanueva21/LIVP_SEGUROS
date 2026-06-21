@@ -20,7 +20,7 @@ function tipo_listar(PDO $pdo)
         $params[':estado'] = $estado === 'activo' ? 1 : 0;
     }
     if ($q !== '') {
-        $where[] = "(t.codigo LIKE :q ESCAPE '\\\\' OR t.nombre LIKE :q ESCAPE '\\\\' OR t.descripcion LIKE :q ESCAPE '\\\\' OR t.ejemplo_uso LIKE :q ESCAPE '\\\\' OR r.nombre LIKE :q ESCAPE '\\\\')";
+        $where[] = "(t.codigo LIKE :q OR t.nombre LIKE :q OR t.descripcion LIKE :q OR t.ejemplo_uso LIKE :q OR r.nombre LIKE :q)";
         $params[':q'] = cat_bind_like($q);
     }
 

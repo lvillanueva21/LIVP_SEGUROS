@@ -20,7 +20,7 @@ function prod_listar(PDO $pdo)
         $params[':estado'] = $estado === 'activo' ? 1 : 0;
     }
     if ($q !== '') {
-        $where[] = "(p.codigo LIKE :q ESCAPE '\\\\' OR p.nombre_producto LIKE :q ESCAPE '\\\\' OR p.nombre_plan LIKE :q ESCAPE '\\\\' OR a.razon_social LIKE :q ESCAPE '\\\\' OR r.nombre LIKE :q ESCAPE '\\\\')";
+        $where[] = "(p.codigo LIKE :q OR p.nombre_producto LIKE :q OR p.nombre_plan LIKE :q OR a.razon_social LIKE :q OR r.nombre LIKE :q)";
         $params[':q'] = cat_bind_like($q);
     }
 
