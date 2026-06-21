@@ -131,6 +131,7 @@ $permExpedientes = [
           <li class="nav-item"><a class="nav-link active" data-toggle="pill" href="#exp-tab-resumen" role="tab">Resumen</a></li>
           <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#exp-tab-documentos" role="tab">Documentos</a></li>
           <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#exp-tab-requisitos" role="tab">Requisitos</a></li>
+          <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#exp-tab-cotizaciones" role="tab">Cotizaciones</a></li>
           <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#exp-tab-polizas" role="tab">Polizas</a></li>
           <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#exp-tab-actividad" role="tab">Actividad</a></li>
         </ul>
@@ -230,6 +231,45 @@ $permExpedientes = [
               </table>
             </div>
             <div class="exp-empty mt-2" id="exp-req-empty">Este expediente no tiene requisitos generados.</div>
+          </div>
+          <div class="tab-pane fade" id="exp-tab-cotizaciones" role="tabpanel">
+            <div class="cot-toolbar-detail mb-2">
+              <div class="input-group input-group-sm">
+                <input type="search" class="form-control" id="cot-search" placeholder="Buscar por codigo, titulo, cliente, aseguradora o descripcion">
+                <div class="input-group-append">
+                  <button class="btn btn-outline-secondary" type="button" id="cot-btn-buscar" title="Buscar" aria-label="Buscar"><i class="fas fa-search"></i></button>
+                </div>
+              </div>
+              <select class="form-control form-control-sm" id="cot-filtro-estado"><option value="todos">Todos los estados</option></select>
+              <select class="form-control form-control-sm" id="cot-filtro-activo">
+                <option value="todos">Todos</option>
+                <option value="activo">Activas</option>
+                <option value="inactivo">Inactivas</option>
+              </select>
+              <?php if ($permExpedientes['puede_crear']): ?>
+                <button class="btn btn-primary btn-sm" type="button" id="cot-btn-nuevo"><i class="fas fa-plus"></i> Registrar cotizacion</button>
+              <?php endif; ?>
+            </div>
+            <div class="text-muted small mb-2" id="cot-counter">0 registros</div>
+            <div class="table-responsive">
+              <table class="table table-bordered table-sm mb-0 exp-cot-table">
+                <thead>
+                  <tr>
+                    <th>Codigo</th>
+                    <th>Titulo</th>
+                    <th>Fechas</th>
+                    <th>Estado</th>
+                    <th>Alternativas</th>
+                    <th>Aceptada</th>
+                    <th>Activo</th>
+                    <th class="text-center" style="width:110px;">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="cot-body"></tbody>
+              </table>
+            </div>
+            <div class="exp-empty mt-2" id="cot-empty">No hay cotizaciones registradas para este expediente.</div>
+            <div class="exp-pagination" id="cot-pagination"></div>
           </div>
           <div class="tab-pane fade" id="exp-tab-polizas" role="tabpanel">
             <div class="pol-toolbar-detail mb-2">
@@ -340,6 +380,135 @@ $permExpedientes = [
       <div class="modal-footer">
         <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button>
         <button type="submit" class="btn btn-primary"><i class="fas fa-upload"></i> Cargar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal fade" id="modalCotizacionExp" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-xl cot-modal-dialog" role="document">
+    <form class="modal-content" id="formCotizacionExp" autocomplete="off" novalidate>
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalCotizacionExpTitle">Cotizacion</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" name="id">
+        <input type="hidden" name="expediente_id">
+        <input type="hidden" name="riesgos_json">
+        <input type="hidden" name="alternativas_json">
+        <input type="hidden" name="comparativos_json">
+
+        <ul class="nav nav-tabs mb-3" role="tablist">
+          <li class="nav-item"><a class="nav-link active" data-toggle="pill" href="#cot-form-general" role="tab">General</a></li>
+          <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#cot-form-riesgo" role="tab">Riesgo</a></li>
+          <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#cot-form-alternativas" role="tab">Alternativas</a></li>
+          <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#cot-form-comparativo" role="tab">Comparativo</a></li>
+          <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#cot-form-preview" role="tab">Vista previa</a></li>
+        </ul>
+
+        <div class="tab-content">
+          <div class="tab-pane fade show active" id="cot-form-general" role="tabpanel">
+            <div class="row">
+              <div class="col-lg-5">
+                <div class="card card-light">
+                  <div class="card-header py-2"><strong>Datos del expediente</strong></div>
+                  <div class="card-body py-2" id="cot-exp-info"></div>
+                </div>
+              </div>
+              <div class="col-lg-7">
+                <div class="form-row">
+                  <div class="form-group col-md-6">
+                    <label>Fecha cotizacion</label>
+                    <input class="form-control" name="fecha_cotizacion" type="date" required>
+                  </div>
+                  <div class="form-group col-md-6">
+                    <label>Fecha vencimiento</label>
+                    <input class="form-control" name="fecha_vencimiento" type="date" required>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group col-md-8">
+                    <label>Titulo</label>
+                    <input class="form-control" name="titulo" maxlength="180">
+                  </div>
+                  <div class="form-group col-md-4">
+                    <label>Estado cotizacion</label>
+                    <select class="form-control" name="estado_cotizacion" required></select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Descripcion u objeto</label>
+                  <textarea class="form-control" name="descripcion" rows="2" maxlength="1000"></textarea>
+                </div>
+                <div class="form-row">
+                  <div class="form-group col-md-8">
+                    <label>Observaciones</label>
+                    <textarea class="form-control" name="observaciones" rows="2" maxlength="3000"></textarea>
+                  </div>
+                  <div class="form-group col-md-4">
+                    <label>Activo</label>
+                    <select class="form-control" name="estado">
+                      <option value="1">Activo</option>
+                      <option value="0">Inactivo</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group mb-0">
+                  <label>Nota PDF</label>
+                  <textarea class="form-control" name="nota_pdf" rows="2" maxlength="1000"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="cot-form-riesgo" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="mb-0">Datos del riesgo</h6>
+              <button class="btn btn-outline-primary btn-sm" type="button" id="cot-add-riesgo"><i class="fas fa-plus"></i> Agregar dato</button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-bordered table-sm cot-dyn-table">
+                <thead><tr><th>Etiqueta</th><th>Valor</th><th>Orden</th><th class="text-center">Acciones</th></tr></thead>
+                <tbody id="cot-riesgos-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="cot-form-alternativas" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="mb-0">Alternativas y cuotas</h6>
+              <button class="btn btn-outline-primary btn-sm" type="button" id="cot-add-alt"><i class="fas fa-plus"></i> Agregar alternativa</button>
+            </div>
+            <div id="cot-alt-body"></div>
+          </div>
+
+          <div class="tab-pane fade" id="cot-form-comparativo" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="mb-0">Comparativo</h6>
+              <button class="btn btn-outline-primary btn-sm" type="button" id="cot-add-comp"><i class="fas fa-plus"></i> Agregar fila</button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-bordered table-sm cot-dyn-table" id="cot-comp-table">
+                <thead id="cot-comp-head"></thead>
+                <tbody id="cot-comp-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="cot-form-preview" role="tabpanel">
+            <div class="d-flex justify-content-end mb-2">
+              <button class="btn btn-outline-secondary btn-sm mr-2" type="button" id="cot-refresh-preview"><i class="fas fa-sync"></i> Actualizar vista</button>
+              <button class="btn btn-outline-info btn-sm mr-2" type="button" id="cot-ver-pdf"><i class="fas fa-file-pdf"></i> Ver PDF</button>
+              <button class="btn btn-primary btn-sm" type="button" id="cot-descargar-pdf"><i class="fas fa-download"></i> Descargar PDF</button>
+            </div>
+            <div class="cot-a4-preview" id="cot-preview"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar cotizacion</button>
       </div>
     </form>
   </div>
@@ -524,16 +693,33 @@ $permExpedientes = [
   .pol-toolbar-detail{display:grid;gap:.5rem;grid-template-columns:minmax(240px,1fr) 210px 160px 120px auto;align-items:center}
   .exp-pol-table{min-width:1280px}
   .exp-pol-table th,.exp-pol-table td{vertical-align:middle}
+  .cot-toolbar-detail{display:grid;gap:.5rem;grid-template-columns:minmax(260px,1fr) 180px 130px auto;align-items:center}
+  .exp-cot-table{min-width:1120px}
+  .cot-modal-dialog{max-width:min(1380px,calc(100vw - 2rem))}
+  .cot-modal-dialog .modal-content{max-height:calc(100vh - 2rem)}
+  .cot-modal-dialog .modal-body{overflow-y:auto}
+  .cot-dyn-table{min-width:900px}
+  .cot-alt-card{border:1px solid #ced4da;border-radius:.25rem;padding:.75rem;margin-bottom:.75rem;background:#fff}
+  .cot-alt-grid{display:grid;gap:.5rem;grid-template-columns:repeat(6,minmax(130px,1fr))}
+  .cot-cuotas-table{min-width:700px}
+  .cot-a4-preview{width:210mm;min-height:297mm;margin:0 auto;background:#fff;color:#212529;padding:16mm;box-shadow:0 0 0 1px #dee2e6,0 .5rem 1.5rem rgba(0,0,0,.15);font-size:12px}
+  .cot-a4-preview h2{font-size:22px;margin-bottom:6px}
+  .cot-a4-preview h3{font-size:15px;margin-top:14px;border-bottom:1px solid #dee2e6;padding-bottom:4px}
+  .cot-a4-preview table{width:100%;border-collapse:collapse;margin-bottom:8px}
+  .cot-a4-preview th,.cot-a4-preview td{border:1px solid #ced4da;padding:5px;vertical-align:top}
+  .cot-a4-preview th{background:#f1f3f5}
   .exp-loading,.exp-empty{display:none;padding:1rem;border:1px dashed #ced4da;border-radius:.25rem;text-align:center;color:#6c757d;background:#f8f9fa}
   .exp-actions{display:inline-flex;flex-direction:column;gap:.25rem}
   .exp-pagination .btn{min-width:36px}
   .exp-toast-zone{position:fixed;right:1rem;bottom:1rem;z-index:1080;width:min(360px,calc(100vw - 2rem))}
   @media(max-width:575.98px){.exp-detail-dialog{max-width:calc(100vw - .5rem);margin:.25rem}.exp-detail-dialog .modal-content{max-height:calc(100vh - .5rem)}}
-  @media(max-width:1199.98px){.pol-toolbar-detail{grid-template-columns:1fr 1fr}}
+  @media(max-width:1199.98px){.pol-toolbar-detail,.cot-toolbar-detail{grid-template-columns:1fr 1fr}.cot-alt-grid{grid-template-columns:1fr 1fr}.cot-a4-preview{width:100%;min-height:auto;padding:1rem}}
   @media(max-width:1199.98px){.exp-toolbar{grid-template-columns:1fr 1fr}}
-  @media(max-width:767.98px){.exp-toolbar,.pol-toolbar-detail{grid-template-columns:1fr}}
+  @media(max-width:767.98px){.exp-toolbar,.pol-toolbar-detail,.cot-toolbar-detail,.cot-alt-grid{grid-template-columns:1fr}}
 </style>
 
+<script src="<?php echo cb_e(cb_url('plugins/pdfmake/pdfmake.min.js')); ?>"></script>
+<script src="<?php echo cb_e(cb_url('plugins/pdfmake/vfs_fonts.js')); ?>"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   var csrf = <?php echo json_encode($csrfExpedientes); ?>;
@@ -543,10 +729,12 @@ document.addEventListener('DOMContentLoaded', function () {
   var requisitosEndpoint = 'api/expedientes/requisitos.php';
   var formatosExpEndpoint = 'api/expedientes/formatos.php';
   var polizasEndpoint = 'api/expedientes/polizas.php';
+  var cotizacionesEndpoint = 'api/expedientes/cotizaciones.php';
   var timelineEndpoint = 'api/expedientes/timeline.php';
   var rows = [], clientes = [], tipos = [], estados = [], estadoInicial = null, docTipos = [];
   var reqEstados = [], reqRows = [];
   var polAseguradoras = [], polEstados = [], polTiposDoc = [], polRows = [], polPage = 1;
+  var cotCtx = {}, cotEstados = [], cotRows = [], cotPage = 1, cotRiesgos = [], cotAlternativas = [], cotComparativos = [], cotSeq = 1;
   var expedienteDetalleId = 0;
   var page = 1, timer = null, confirmCallback = null;
 
@@ -578,6 +766,53 @@ document.addEventListener('DOMContentLoaded', function () {
   function optionPolTipos(selected){var h='<option value="">Seleccione tipo</option>';polTiposDoc.forEach(function(t){h+='<option value="'+esc(t.codigo)+'" '+(selected===t.codigo?'selected':'')+'>'+esc(t.nombre)+'</option>';});return h;}
   function fillPolContext(){document.getElementById('pol-filtro-aseguradora').innerHTML='<option value="0">Todas las aseguradoras</option>'+optionPolAseguradoras(0).replace('<option value="">Seleccione aseguradora</option>','');document.getElementById('pol-filtro-estado-poliza').innerHTML=optionPolEstados('todos',true);var f=document.getElementById('formPolizaExp');f.elements.aseguradora_id.innerHTML=optionPolAseguradoras();f.elements.estado_poliza.innerHTML=optionPolEstados('borrador',false);f.elements.tipo_documento_emitido.innerHTML=optionPolTipos('poliza');}
   function loadPolContext(){return fetchJson(polizasEndpoint+'?accion=contexto').then(function(r){var d=r.data||{};polAseguradoras=d.aseguradoras||[];polEstados=d.estados||[];polTiposDoc=d.tipos_documento||[];csrf=d.csrf||csrf;fillPolContext();}).catch(function(e){toast(e.message||'No se pudo cargar contexto de polizas.','danger');});}
+  function cotEstadoLabel(v){var out=v;cotEstados.forEach(function(e){if(e.codigo===v)out=e.nombre;});return out||'-';}
+  function badgeCotEstado(v){var m={borrador:'secondary',enviada:'primary',aceptada:'success',vencida:'warning',perdida:'danger',cancelada:'dark'};return '<span class="badge badge-'+(m[v]||'secondary')+'">'+esc(cotEstadoLabel(v))+'</span>';}
+  function optionCotEstados(selected,all){var h=all?'<option value="todos">Todos los estados</option>':'';cotEstados.forEach(function(e){h+='<option value="'+esc(e.codigo)+'" '+(selected===e.codigo?'selected':'')+'>'+esc(e.nombre)+'</option>';});return h;}
+  function cotAsegName(id){var out='';(cotCtx.aseguradoras||[]).forEach(function(a){if(Number(a.id)===Number(id))out=a.nombre_comercial||a.razon_social;});return out||'-';}
+  function optionCotAseg(selected){var h='<option value="">Aseguradora</option>';(cotCtx.aseguradoras||[]).forEach(function(a){h+='<option value="'+a.id+'" '+(Number(selected)===Number(a.id)?'selected':'')+'>'+esc(a.nombre_comercial||a.razon_social)+'</option>';});return h;}
+  function optionCotProductos(asegId,selected){var h='<option value="">Plan libre o sin producto</option>';(cotCtx.productos||[]).forEach(function(p){if(Number(p.aseguradora_id)!==Number(asegId))return;h+='<option value="'+p.id+'" '+(Number(selected)===Number(p.id)?'selected':'')+'>'+esc(p.nombre_producto+(p.nombre_plan?' / '+p.nombre_plan:''))+'</option>';});return h;}
+  function optionCotGps(selected){var h='';(cotCtx.gps||[]).forEach(function(g){h+='<option value="'+esc(g.codigo)+'" '+(selected===g.codigo?'selected':'')+'>'+esc(g.nombre)+'</option>';});return h;}
+  function optionCotModalidades(selected){var h='';(cotCtx.modalidades||[]).forEach(function(m){h+='<option value="'+esc(m.codigo)+'" '+(selected===m.codigo?'selected':'')+'>'+esc(m.nombre)+'</option>';});return h;}
+  function optionCotSecciones(selected){var h='';(cotCtx.secciones||[]).forEach(function(s){h+='<option value="'+esc(s.codigo)+'" '+(selected===s.codigo?'selected':'')+'>'+esc(s.nombre)+'</option>';});return h;}
+  function loadCotContext(id){return fetchJson(cotizacionesEndpoint+'?accion=contexto&expediente_id='+encodeURIComponent(id)).then(function(r){cotCtx=r.data||{};cotEstados=cotCtx.estados||[];csrf=cotCtx.csrf||csrf;document.getElementById('cot-filtro-estado').innerHTML=optionCotEstados('todos',true);document.getElementById('formCotizacionExp').elements.estado_cotizacion.innerHTML=optionCotEstados('borrador',false);renderCotExpInfo();}).catch(function(e){toast(e.message||'No se pudo cargar contexto de cotizaciones.','danger');});}
+  function renderCotExpInfo(){var x=cotCtx.expediente||{};document.getElementById('cot-exp-info').innerHTML='<dl class="row mb-0"><dt class="col-sm-4">Cliente</dt><dd class="col-sm-8">'+esc(x.cliente_razon_social||'-')+'<div class="text-muted small">'+esc(x.cliente_ruc||'Sin RUC')+'</div></dd><dt class="col-sm-4">Contacto</dt><dd class="col-sm-8">'+esc(x.contacto_nombre||'-')+'<div class="text-muted small">'+esc(x.contacto_correo||x.correo_principal||'-')+'</div></dd><dt class="col-sm-4">Tipo</dt><dd class="col-sm-8">'+esc(x.tipo_seguro_nombre||'-')+'</dd><dt class="col-sm-4">Ramo</dt><dd class="col-sm-8">'+esc(x.ramo_nombre||'-')+'</dd></dl>';}
+  function cotParams(){var p=new URLSearchParams();p.set('accion','listar');p.set('expediente_id',expedienteDetalleId);p.set('page',cotPage);p.set('q',document.getElementById('cot-search').value||'');p.set('estado_cotizacion',document.getElementById('cot-filtro-estado').value||'todos');p.set('estado',document.getElementById('cot-filtro-activo').value||'todos');return p;}
+  function loadCotizaciones(id){if(id)expedienteDetalleId=id;document.getElementById('cot-body').innerHTML='<tr><td colspan="8" class="text-muted text-center">Cargando cotizaciones...</td></tr>';document.getElementById('cot-empty').style.display='none';fetchJson(cotizacionesEndpoint+'?'+cotParams().toString()).then(function(r){var d=r.data||{};cotRows=d.rows||[];renderCotizaciones(cotRows);renderCotPagination(d.pagination||{});}).catch(function(e){document.getElementById('cot-body').innerHTML='';document.getElementById('cot-empty').style.display='block';toast(e.message||'No se pudieron cargar cotizaciones.','danger');});}
+  function renderCotizaciones(items){var h='';items.forEach(function(c){var titulo=c.titulo||c.descripcion||'-';var fechas=esc((c.fecha_cotizacion||'-')+' / '+(c.fecha_vencimiento||'-'));var aceptada=c.aseguradora_aceptada_nombre||c.aseguradora_aceptada_razon_social||'-';h+='<tr><td><strong>'+esc(c.codigo)+'</strong></td><td><span class="exp-text-clip" title="'+esc(titulo)+'">'+esc(resumen(titulo,80))+'</span></td><td>'+fechas+'</td><td>'+badgeCotEstado(c.estado_cotizacion)+'</td><td>'+esc(c.total_alternativas||0)+'</td><td><span class="exp-text-clip" title="'+esc(aceptada)+'">'+esc(resumen(aceptada,60))+'</span></td><td>'+badgeActivo(c.estado)+'</td><td class="text-center">'+cotActions(c)+'</td></tr>';});document.getElementById('cot-body').innerHTML=h;document.getElementById('cot-empty').style.display=items.length?'none':'block';}
+  function cotActions(c){var h='<span class="exp-actions"><button type="button" class="btn btn-xs btn-outline-info" data-cot-action="view" data-id="'+c.id+'" title="Ver / PDF" aria-label="Ver cotizacion"><i class="fas fa-eye"></i></button>';if(permisos.puede_editar)h+='<button type="button" class="btn btn-xs btn-outline-primary" data-cot-action="edit" data-id="'+c.id+'" title="Editar" aria-label="Editar cotizacion"><i class="fas fa-edit"></i></button>';if(permisos.puede_eliminar){var title=Number(c.estado)===1?'Desactivar':'Activar';h+='<button type="button" class="btn btn-xs btn-outline-secondary" data-cot-action="toggle" data-id="'+c.id+'" data-state="'+c.estado+'" title="'+title+'" aria-label="'+title+'"><i class="fas '+(Number(c.estado)===1?'fa-toggle-on':'fa-toggle-off')+'"></i></button>';}return h+'</span>';}
+  function renderCotPagination(pag){var total=Number(pag.total||0),cur=Number(pag.page||1),last=Number(pag.last_page||1),wrap=document.getElementById('cot-pagination');document.getElementById('cot-counter').textContent=total+(total===1?' registro':' registros');if(last<=1){wrap.innerHTML='';return;}wrap.innerHTML='<div class="btn-group btn-group-sm"><button type="button" class="btn btn-outline-secondary" data-cot-page="'+(cur-1)+'" '+(cur<=1?'disabled':'')+' title="Anterior" aria-label="Anterior"><i class="fas fa-chevron-left"></i></button><button type="button" class="btn btn-outline-secondary" disabled>'+cur+' / '+last+'</button><button type="button" class="btn btn-outline-secondary" data-cot-page="'+(cur+1)+'" '+(cur>=last?'disabled':'')+' title="Siguiente" aria-label="Siguiente"><i class="fas fa-chevron-right"></i></button></div>';}
+  function cotDefaultDue(){var d=new Date();d.setDate(d.getDate()+15);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  function cotResetArrays(){cotRiesgos=[];cotAlternativas=[];cotComparativos=[];cotSeq=1;}
+  function cotNewUid(){return 'a'+(cotSeq++);}
+  function cotProductName(productId){var out='';(cotCtx.productos||[]).forEach(function(p){if(Number(p.id)===Number(productId))out=p.nombre_producto+(p.nombre_plan?' / '+p.nombre_plan:'');});return out;}
+  function cotLoadRecordToForm(rec){var f=document.getElementById('formCotizacionExp');f.reset();clearValidation(f);f.dataset.codigo=rec.codigo||'';f.elements.id.value=rec.id||'';f.elements.expediente_id.value=expedienteDetalleId;f.elements.fecha_cotizacion.value=rec.fecha_cotizacion||todayDate();f.elements.fecha_vencimiento.value=rec.fecha_vencimiento||cotDefaultDue();f.elements.titulo.value=rec.titulo||'';f.elements.estado_cotizacion.value=rec.estado_cotizacion||'borrador';f.elements.descripcion.value=rec.descripcion||'';f.elements.observaciones.value=rec.observaciones||'';f.elements.nota_pdf.value=rec.nota_pdf||'';f.elements.estado.value=rec.estado==null?'1':String(rec.estado);cotRiesgos=(rec.riesgos||[]).map(function(r){return{etiqueta:r.etiqueta||'',valor:r.valor||'',orden_visual:r.orden_visual||0};});cotAlternativas=(rec.alternativas||[]).map(function(a){return{id:a.id||0,uid:cotNewUid(),aseguradora_id:a.aseguradora_id||'',producto_id:a.producto_id||'',nombre_plan_snapshot:a.nombre_plan_snapshot||'',orden_visual:a.orden_visual||0,vigencia_meses:a.vigencia_meses||'',vigencia_texto:a.vigencia_texto||'',suma_asegurada:a.suma_asegurada||'',moneda:a.moneda||'PEN',prima_comercial:a.prima_comercial||'',igv:a.igv||'',prima_total:a.prima_total||'',condicion_gps:a.condicion_gps||'no_requiere',es_aceptada:Number(a.es_aceptada||0),observaciones:a.observaciones||'',cuotas:(a.cuotas||[]).map(function(c){return{modalidad:c.modalidad||'contado',cantidad_cuotas:c.cantidad_cuotas||1,valor_cuota:c.valor_cuota||'',descripcion:c.descripcion||'',orden_visual:c.orden_visual||0};})};});cotComparativos=(rec.comparativos||[]).map(function(c){var valores={}, src=c.valores||{};Object.keys(src).forEach(function(k){var dbId=String(k).replace('db_','');var alt=cotAlternativas.find(function(a){return Number(a.id)===Number(dbId);});if(alt)valores[alt.uid]=src[k]||'';});return{seccion:c.seccion||'cobertura',etiqueta:c.etiqueta||'',detalle:c.detalle||'',orden_visual:c.orden_visual||0,valores:valores};});renderCotRiesgos();renderCotAlternativas();renderCotComparativos();renderCotPreview();}
+  function openCotModal(id,previewOnly){document.getElementById('modalCotizacionExpTitle').textContent=id?'Cotizacion':'Registrar cotizacion';cotResetArrays();if(!id){cotLoadRecordToForm({fecha_cotizacion:todayDate(),fecha_vencimiento:cotDefaultDue(),estado_cotizacion:'borrador',estado:1,riesgos:[{etiqueta:'',valor:'',orden_visual:1}],alternativas:[],comparativos:[]});$('#modalCotizacionExp').modal('show');return;}fetchJson(cotizacionesEndpoint+'?accion=obtener&expediente_id='+encodeURIComponent(expedienteDetalleId)+'&id='+encodeURIComponent(id)).then(function(r){cotLoadRecordToForm((r.data||{}).record||{});$('#modalCotizacionExp').modal('show');if(previewOnly){$('#modalCotizacionExp a[href="#cot-form-preview"]').tab('show');renderCotPreview();}}).catch(function(e){toast(e.message||'No se pudo cargar la cotizacion.','danger');});}
+  function renderCotRiesgos(){var h='';cotRiesgos.forEach(function(r,i){h+='<tr class="cot-riesgo-row"><td><input class="form-control form-control-sm" data-field="etiqueta" value="'+esc(r.etiqueta)+'" maxlength="120"></td><td><input class="form-control form-control-sm" data-field="valor" value="'+esc(r.valor)+'" maxlength="500"></td><td><input class="form-control form-control-sm" data-field="orden_visual" type="number" min="0" value="'+esc(r.orden_visual||i+1)+'"></td><td class="text-center"><button class="btn btn-xs btn-outline-danger" type="button" data-cot-remove-riesgo="'+i+'" title="Quitar" aria-label="Quitar"><i class="fas fa-trash"></i></button></td></tr>';});document.getElementById('cot-riesgos-body').innerHTML=h||'<tr><td colspan="4" class="text-muted text-center">Agrega datos del riesgo.</td></tr>';}
+  function renderCotAlternativas(){var h='';cotAlternativas.forEach(function(a,i){if(!a.uid)a.uid=cotNewUid();h+='<div class="card cot-alt-card" data-uid="'+esc(a.uid)+'"><div class="card-header py-2 d-flex justify-content-between align-items-center"><strong>Alternativa '+(i+1)+'</strong><button class="btn btn-xs btn-outline-danger" type="button" data-cot-remove-alt="'+esc(a.uid)+'" title="Quitar alternativa" aria-label="Quitar alternativa"><i class="fas fa-trash"></i></button></div><div class="card-body"><div class="cot-alt-grid"><div><label>Aseguradora</label><select class="form-control form-control-sm cot-alt-aseg">'+optionCotAseg(a.aseguradora_id)+'</select></div><div><label>Producto / plan</label><select class="form-control form-control-sm cot-alt-producto">'+optionCotProductos(a.aseguradora_id,a.producto_id)+'</select></div><div><label>Plan libre</label><input class="form-control form-control-sm cot-alt-plan" value="'+esc(a.nombre_plan_snapshot||'')+'" maxlength="180"></div><div><label>Orden</label><input class="form-control form-control-sm cot-alt-orden" type="number" min="0" value="'+esc(a.orden_visual||i+1)+'"></div><div><label>Vigencia meses</label><input class="form-control form-control-sm cot-alt-vig-meses" type="number" min="0" value="'+esc(a.vigencia_meses||'')+'"></div><div><label>Vigencia texto</label><input class="form-control form-control-sm cot-alt-vig-texto" value="'+esc(a.vigencia_texto||'')+'" maxlength="120"></div><div><label>Suma asegurada</label><input class="form-control form-control-sm cot-alt-suma" type="number" min="0" step="0.01" value="'+esc(a.suma_asegurada||'')+'"></div><div><label>Moneda</label><input class="form-control form-control-sm cot-alt-moneda" value="'+esc(a.moneda||'PEN')+'" maxlength="10"></div><div><label>Prima comercial</label><input class="form-control form-control-sm cot-alt-prima" type="number" min="0" step="0.01" value="'+esc(a.prima_comercial||'')+'"></div><div><label>IGV</label><input class="form-control form-control-sm cot-alt-igv" type="number" min="0" step="0.01" value="'+esc(a.igv||'')+'"></div><div><label>Prima total</label><input class="form-control form-control-sm cot-alt-total" type="number" min="0" step="0.01" value="'+esc(a.prima_total||'')+'"></div><div><label>GPS</label><select class="form-control form-control-sm cot-alt-gps">'+optionCotGps(a.condicion_gps||'no_requiere')+'</select></div></div><div class="form-row mt-2"><div class="form-group col-md-9"><label>Observaciones</label><input class="form-control form-control-sm cot-alt-obs" value="'+esc(a.observaciones||'')+'" maxlength="1000"></div><div class="form-group col-md-3 d-flex align-items-end"><div class="custom-control custom-checkbox"><input class="custom-control-input cot-alt-aceptada" type="checkbox" id="cot-aceptada-'+esc(a.uid)+'" '+(Number(a.es_aceptada)===1?'checked':'')+'><label class="custom-control-label" for="cot-aceptada-'+esc(a.uid)+'">Aceptada</label></div></div></div><div class="d-flex justify-content-between align-items-center mb-1"><strong>Opciones de pago</strong><button class="btn btn-xs btn-outline-primary" type="button" data-cot-add-cuota="'+esc(a.uid)+'"><i class="fas fa-plus"></i> Cuota</button></div><div class="table-responsive"><table class="table table-bordered table-sm cot-cuotas-table"><thead><tr><th>Modalidad</th><th>Cantidad</th><th>Valor</th><th>Descripcion</th><th>Orden</th><th></th></tr></thead><tbody>'+renderCotCuotas(a)+'</tbody></table></div></div></div>';});document.getElementById('cot-alt-body').innerHTML=h||'<div class="text-muted text-center py-3">Agrega alternativas de aseguradoras para la cotizacion.</div>';renderCotComparativos();}
+  function renderCotCuotas(a){var h='';(a.cuotas||[]).forEach(function(c,i){h+='<tr class="cot-cuota-row"><td><select class="form-control form-control-sm cot-cuota-modalidad">'+optionCotModalidades(c.modalidad||'contado')+'</select></td><td><input class="form-control form-control-sm cot-cuota-cantidad" type="number" min="0" value="'+esc(c.cantidad_cuotas||1)+'"></td><td><input class="form-control form-control-sm cot-cuota-valor" type="number" min="0" step="0.01" value="'+esc(c.valor_cuota||'')+'"></td><td><input class="form-control form-control-sm cot-cuota-desc" value="'+esc(c.descripcion||'')+'" maxlength="255"></td><td><input class="form-control form-control-sm cot-cuota-orden" type="number" min="0" value="'+esc(c.orden_visual||i+1)+'"></td><td class="text-center"><button class="btn btn-xs btn-outline-danger" type="button" data-cot-remove-cuota="'+i+'"><i class="fas fa-trash"></i></button></td></tr>';});return h||'<tr><td colspan="6" class="text-muted text-center">Sin cuotas registradas.</td></tr>';}
+  function renderCotComparativos(){var alts=cotReadAlternativas(false);var head='<tr><th>Seccion</th><th>Etiqueta</th><th>Detalle</th><th>Orden</th>';alts.forEach(function(a,i){head+='<th>'+esc(cotAsegName(a.aseguradora_id))+'<div class="text-muted small">'+esc(a.nombre_plan_snapshot||cotProductName(a.producto_id)||'Alternativa '+(i+1))+'</div></th>';});head+='<th class="text-center">Acciones</th></tr>';var body='';cotComparativos.forEach(function(c,i){body+='<tr class="cot-comp-row"><td><select class="form-control form-control-sm cot-comp-seccion">'+optionCotSecciones(c.seccion||'cobertura')+'</select></td><td><input class="form-control form-control-sm cot-comp-etiqueta" value="'+esc(c.etiqueta||'')+'" maxlength="180"></td><td><input class="form-control form-control-sm cot-comp-detalle" value="'+esc(c.detalle||'')+'" maxlength="500"></td><td><input class="form-control form-control-sm cot-comp-orden" type="number" min="0" value="'+esc(c.orden_visual||i+1)+'"></td>';alts.forEach(function(a){body+='<td><input class="form-control form-control-sm cot-comp-valor" data-alt-uid="'+esc(a.uid)+'" value="'+esc((c.valores||{})[a.uid]||'')+'" maxlength="500"></td>';});body+='<td class="text-center"><button class="btn btn-xs btn-outline-danger" type="button" data-cot-remove-comp="'+i+'"><i class="fas fa-trash"></i></button></td></tr>';});document.getElementById('cot-comp-head').innerHTML=head;document.getElementById('cot-comp-body').innerHTML=body||'<tr><td colspan="'+(5+alts.length)+'" class="text-muted text-center">Agrega filas comparativas.</td></tr>';}
+  function cotReadRiesgos(){var out=[];Array.prototype.forEach.call(document.querySelectorAll('#cot-riesgos-body .cot-riesgo-row'),function(tr,i){out.push({etiqueta:tr.querySelector('[data-field="etiqueta"]').value.trim(),valor:tr.querySelector('[data-field="valor"]').value.trim(),orden_visual:tr.querySelector('[data-field="orden_visual"]').value||i+1});});cotRiesgos=out;return out;}
+  function cotReadAlternativas(sync){var out=[];Array.prototype.forEach.call(document.querySelectorAll('#cot-alt-body .cot-alt-card'),function(card,i){var uid=card.dataset.uid||cotNewUid();var cuotas=[];Array.prototype.forEach.call(card.querySelectorAll('.cot-cuota-row'),function(tr,j){cuotas.push({modalidad:tr.querySelector('.cot-cuota-modalidad').value,cantidad_cuotas:tr.querySelector('.cot-cuota-cantidad').value||0,valor_cuota:tr.querySelector('.cot-cuota-valor').value,descripcion:tr.querySelector('.cot-cuota-desc').value.trim(),orden_visual:tr.querySelector('.cot-cuota-orden').value||j+1});});out.push({uid:uid,aseguradora_id:card.querySelector('.cot-alt-aseg').value,producto_id:card.querySelector('.cot-alt-producto').value,nombre_plan_snapshot:card.querySelector('.cot-alt-plan').value.trim(),orden_visual:card.querySelector('.cot-alt-orden').value||i+1,vigencia_meses:card.querySelector('.cot-alt-vig-meses').value,vigencia_texto:card.querySelector('.cot-alt-vig-texto').value.trim(),suma_asegurada:card.querySelector('.cot-alt-suma').value,moneda:card.querySelector('.cot-alt-moneda').value.trim()||'PEN',prima_comercial:card.querySelector('.cot-alt-prima').value,igv:card.querySelector('.cot-alt-igv').value,prima_total:card.querySelector('.cot-alt-total').value,condicion_gps:card.querySelector('.cot-alt-gps').value,es_aceptada:card.querySelector('.cot-alt-aceptada').checked?1:0,observaciones:card.querySelector('.cot-alt-obs').value.trim(),cuotas:cuotas});});if(sync!==false)cotAlternativas=out;return out;}
+  function cotReadComparativos(){var alts=cotReadAlternativas(false), out=[];Array.prototype.forEach.call(document.querySelectorAll('#cot-comp-body .cot-comp-row'),function(tr,i){var vals={};alts.forEach(function(a){var input=tr.querySelector('.cot-comp-valor[data-alt-uid="'+a.uid+'"]');vals[a.uid]=input?input.value.trim():'';});out.push({seccion:tr.querySelector('.cot-comp-seccion').value,etiqueta:tr.querySelector('.cot-comp-etiqueta').value.trim(),detalle:tr.querySelector('.cot-comp-detalle').value.trim(),orden_visual:tr.querySelector('.cot-comp-orden').value||i+1,valores:vals});});cotComparativos=out;return out;}
+  function cotCurrentPayload(){var f=document.getElementById('formCotizacionExp');var riesgos=cotReadRiesgos(), alts=cotReadAlternativas(), comps=cotReadComparativos();f.elements.riesgos_json.value=JSON.stringify(riesgos);f.elements.alternativas_json.value=JSON.stringify(alts);f.elements.comparativos_json.value=JSON.stringify(comps);return{form:f,riesgos:riesgos,alternativas:alts,comparativos:comps,expediente:cotCtx.expediente||{},codigo:f.dataset.codigo||'BORRADOR',fecha_cotizacion:f.elements.fecha_cotizacion.value,fecha_vencimiento:f.elements.fecha_vencimiento.value,titulo:f.elements.titulo.value,estado_cotizacion:f.elements.estado_cotizacion.value,descripcion:f.elements.descripcion.value,observaciones:f.elements.observaciones.value,nota_pdf:f.elements.nota_pdf.value};}
+  function saveCot(form){if(!form.checkValidity()){form.classList.add('was-validated');return;}clearValidation(form);cotCurrentPayload();var creating=!form.elements.id.value;var data=new FormData(form);if(creating)data.delete('id');data.set('expediente_id',expedienteDetalleId);data.set('_csrf',csrf);fetchJson(cotizacionesEndpoint+'?accion='+(creating?'crear':'actualizar'),{method:'POST',body:data}).then(function(r){$('#modalCotizacionExp').modal('hide');toast(r.message||'Cotizacion guardada.','success');loadCotizaciones(expedienteDetalleId);loadActividad(expedienteDetalleId);}).catch(function(e){applyErrors(form,e.errors||{});toast(e.message||'No se pudo guardar la cotizacion.','danger');});}
+  function cotMoney(v,mon){return (mon||'')+' '+(v===''||v==null?'-':v);}
+  function renderCotPreview(){var d=cotCurrentPayload(), x=d.expediente;var h='<div class="d-flex justify-content-between align-items-start mb-3"><div><h4 class="mb-1">Broker Seguros</h4><div class="text-muted">Cotizacion '+esc(d.codigo||'BORRADOR')+'</div></div><div class="text-right small"><div>Fecha: '+esc(d.fecha_cotizacion||'-')+'</div><div>Vence: '+esc(d.fecha_vencimiento||'-')+'</div><div>Estado: '+esc(cotEstadoLabel(d.estado_cotizacion))+'</div></div></div><h5>'+esc(d.titulo||'Cotizacion de seguro')+'</h5><table class="table table-sm table-bordered"><tbody><tr><th>Cliente</th><td>'+esc(x.cliente_razon_social||'-')+'</td><th>RUC</th><td>'+esc(x.cliente_ruc||'Sin RUC')+'</td></tr><tr><th>Contacto</th><td>'+esc(x.contacto_nombre||'-')+'</td><th>Tipo seguro</th><td>'+esc(x.tipo_seguro_nombre||'-')+'</td></tr></tbody></table>';
+    if(d.riesgos.length){h+='<h6>Datos del riesgo</h6><table class="table table-sm table-bordered"><tbody>';d.riesgos.forEach(function(r){if(r.etiqueta||r.valor)h+='<tr><th>'+esc(r.etiqueta)+'</th><td>'+esc(r.valor)+'</td></tr>';});h+='</tbody></table>';}
+    if(d.alternativas.length){h+='<h6>Alternativas</h6><table class="table table-sm table-bordered"><thead><tr><th>Aseguradora</th><th>Plan</th><th>Vigencia</th><th>Suma asegurada</th><th>Prima total</th><th>GPS</th></tr></thead><tbody>';d.alternativas.forEach(function(a){h+='<tr><td>'+esc(cotAsegName(a.aseguradora_id))+'</td><td>'+esc(a.nombre_plan_snapshot||cotProductName(a.producto_id)||'-')+'</td><td>'+esc(a.vigencia_texto||((a.vigencia_meses||'-')+' meses'))+'</td><td>'+esc(cotMoney(a.suma_asegurada,a.moneda))+'</td><td>'+esc(cotMoney(a.prima_total,a.moneda))+'</td><td>'+esc(a.condicion_gps||'-')+'</td></tr>';});h+='</tbody></table>';}
+    if(d.alternativas.some(function(a){return a.cuotas&&a.cuotas.length;})){h+='<h6>Alternativas de pago</h6><table class="table table-sm table-bordered"><thead><tr><th>Alternativa</th><th>Modalidad</th><th>Cantidad</th><th>Valor</th><th>Descripcion</th></tr></thead><tbody>';d.alternativas.forEach(function(a,i){(a.cuotas||[]).forEach(function(c){h+='<tr><td>'+esc(cotAsegName(a.aseguradora_id)||('Alternativa '+(i+1)))+'</td><td>'+esc(c.modalidad)+'</td><td>'+esc(c.cantidad_cuotas)+'</td><td>'+esc(cotMoney(c.valor_cuota,a.moneda))+'</td><td>'+esc(c.descripcion||'-')+'</td></tr>';});});h+='</tbody></table>';}
+    ['cobertura','servicio','deducible','condicion','otro'].forEach(function(sec){var rows=d.comparativos.filter(function(c){return c.seccion===sec;});if(!rows.length)return;h+='<h6>'+esc(cotEstadoLabel(sec)||sec)+'</h6><div class="table-responsive"><table class="table table-sm table-bordered"><thead><tr><th>Concepto</th>';d.alternativas.forEach(function(a){h+='<th>'+esc(cotAsegName(a.aseguradora_id))+'</th>';});h+='</tr></thead><tbody>';rows.forEach(function(c){h+='<tr><td><strong>'+esc(c.etiqueta)+'</strong><div class="text-muted small">'+esc(c.detalle||'')+'</div></td>';d.alternativas.forEach(function(a){h+='<td>'+esc((c.valores||{})[a.uid]||'-')+'</td>';});h+='</tr>';});h+='</tbody></table></div>';});
+    h+='<p><strong>Observaciones:</strong> '+esc(d.observaciones||'-')+'</p><p class="text-muted small">'+esc(d.nota_pdf||'Valores y condiciones sujetos a validacion y emision de la aseguradora.')+'</p>';document.getElementById('cot-preview').innerHTML=h;}
+  function cotPdfDefinition(){var d=cotCurrentPayload(), x=d.expediente;var content=[{text:'Broker Seguros',style:'brand'},{text:'Cotizacion '+(d.codigo||'BORRADOR'),style:'title'},{columns:[{text:'Fecha: '+(d.fecha_cotizacion||'-')},{text:'Vence: '+(d.fecha_vencimiento||'-'),alignment:'right'}],margin:[0,0,0,8]},{table:{widths:['25%','25%','25%','25%'],body:[['Cliente',x.cliente_razon_social||'-','RUC',x.cliente_ruc||'Sin RUC'],['Contacto',x.contacto_nombre||'-','Tipo seguro',x.tipo_seguro_nombre||'-']]},layout:'lightHorizontalLines',margin:[0,0,0,10]}];
+    if(d.descripcion)content.push({text:d.descripcion,margin:[0,0,0,8]});
+    if(d.riesgos.length)content.push({text:'Datos del riesgo',style:'section'},{table:{widths:['35%','65%'],body:[['Etiqueta','Valor']].concat(d.riesgos.filter(function(r){return r.etiqueta||r.valor;}).map(function(r){return[r.etiqueta,r.valor];}))},margin:[0,0,0,10]});
+    if(d.alternativas.length)content.push({text:'Alternativas',style:'section'},{table:{widths:['18%','22%','15%','15%','15%','15%'],body:[['Aseguradora','Plan','Vigencia','Suma asegurada','Prima total','GPS']].concat(d.alternativas.map(function(a){return[cotAsegName(a.aseguradora_id),a.nombre_plan_snapshot||cotProductName(a.producto_id)||'-',a.vigencia_texto||((a.vigencia_meses||'-')+' meses'),cotMoney(a.suma_asegurada,a.moneda),cotMoney(a.prima_total,a.moneda),a.condicion_gps||'-'];}))},fontSize:8,margin:[0,0,0,10]});
+    var cuotas=[];d.alternativas.forEach(function(a,i){(a.cuotas||[]).forEach(function(c){cuotas.push([cotAsegName(a.aseguradora_id)||('Alternativa '+(i+1)),c.modalidad,c.cantidad_cuotas,cotMoney(c.valor_cuota,a.moneda),c.descripcion||'-']);});});if(cuotas.length)content.push({text:'Alternativas de pago',style:'section'},{table:{widths:['25%','18%','12%','18%','27%'],body:[['Alternativa','Modalidad','Cantidad','Valor','Descripcion']].concat(cuotas)},fontSize:8,margin:[0,0,0,10]});
+    ['cobertura','servicio','deducible','condicion','otro'].forEach(function(sec){var rows=d.comparativos.filter(function(c){return c.seccion===sec;});if(!rows.length)return;var head=['Concepto'].concat(d.alternativas.map(function(a){return cotAsegName(a.aseguradora_id);}));var body=[head].concat(rows.map(function(c){return[c.etiqueta+(c.detalle?' - '+c.detalle:'')].concat(d.alternativas.map(function(a){return(c.valores||{})[a.uid]||'-';}));}));content.push({text:sec.charAt(0).toUpperCase()+sec.slice(1),style:'section'},{table:{body:body},fontSize:8,margin:[0,0,0,10]});});
+    content.push({text:'Observaciones',style:'section'},{text:d.observaciones||'-',margin:[0,0,0,8]},{text:d.nota_pdf||'Valores y condiciones sujetos a validacion y emision de la aseguradora.',italics:true,fontSize:8});return{pageSize:'A4',pageMargins:[36,36,36,42],content:content,footer:function(current,total){return{text:'Pagina '+current+' de '+total,alignment:'center',fontSize:8,margin:[0,10,0,0]};},styles:{brand:{fontSize:16,bold:true,color:'#0b2b55'},title:{fontSize:13,bold:true,margin:[0,2,0,10]},section:{fontSize:11,bold:true,margin:[0,8,0,4]}},defaultStyle:{fontSize:9}};}
+  function cotPdfName(){var f=document.getElementById('formCotizacionExp'), code=f.dataset.codigo||('COT-'+(new Date().getFullYear())+'-BORRADOR');return code+'.pdf';}
+  function cotOpenPdf(download){if(typeof pdfMake==='undefined'){toast('pdfMake local no esta disponible.','danger');return;}renderCotPreview();var pdf=pdfMake.createPdf(cotPdfDefinition());if(download)pdf.download(cotPdfName());else pdf.open();}
   function loadContext(){return fetchJson(endpoint+'?accion=contexto').then(function(r){var d=r.data||{};clientes=d.clientes||[];tipos=d.tipos_seguro||[];estados=d.estados_expediente||[];estadoInicial=d.estado_inicial||null;csrf=d.csrf||csrf;fillOptions();}).catch(function(e){toast(e.message||'No se pudo cargar contexto.','danger');});}
   function load(){document.getElementById('exp-loading').style.display='block';fetchJson(endpoint+'?'+params().toString()).then(function(r){var d=r.data||{};rows=d.rows||[];renderRows();renderPagination(d.pagination||{});}).catch(function(e){toast(e.message||'No se pudo cargar expedientes.','danger');}).finally(function(){document.getElementById('exp-loading').style.display='none';});}
   function renderRows(){var h='';rows.forEach(function(r){var cliente='<strong class="exp-text-clip" title="'+esc(r.cliente_razon_social||'')+'">'+esc(resumen(r.cliente_razon_social,90))+'</strong><div class="text-muted small">'+esc((r.cliente_ruc||'Sin RUC')+' / '+(r.tipo_cliente||''))+'</div>';var tipo='<span class="exp-text-clip" title="'+esc(r.tipo_seguro_nombre||'')+'">'+esc(resumen(r.tipo_seguro_nombre,90))+'</span>';var descripcion='<span class="exp-text-clip" title="'+esc(r.descripcion||'')+'">'+esc(resumen(r.descripcion||'-',110))+'</span>';h+='<tr><td><strong>'+esc(r.codigo)+'</strong></td><td>'+cliente+'</td><td>'+tipo+'</td><td>'+descripcion+'</td><td>'+badgeEstado(r)+'</td><td>'+esc(r.fecha_apertura)+'</td><td>'+badgeActivo(r.estado)+'</td><td class="text-center">'+actions(r)+'</td></tr>';});document.getElementById('exp-body').innerHTML=h;document.getElementById('exp-empty').style.display=rows.length?'none':'block';}
@@ -589,7 +824,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
   function openModal(id){var form=document.getElementById('formExpediente');form.reset();clearValidation(form);form.dataset.mode=id?'edit':'create';form.elements.id.value='';form.elements.estado.value='1';form.elements.fecha_apertura.value=today();form.elements.estado_expediente_id.disabled=!id;document.getElementById('exp-estado-help').style.display=id?'none':'block';document.getElementById('modalExpedienteTitle').textContent=id?'Editar expediente':'Registrar expediente';if(!id){if(estadoInicial){form.elements.estado_expediente_id.value=estadoInicial.id;}$('#modalExpediente').modal('show');return;}fetchJson(endpoint+'?accion=obtener&id='+encodeURIComponent(id)).then(function(r){var rec=(r.data||{}).record||{};['id','cliente_id','tipo_seguro_id','estado_expediente_id','descripcion','observaciones','fecha_apertura','estado'].forEach(function(k){setVal(form,k,rec[k]);});$('#modalExpediente').modal('show');}).catch(function(e){toast(e.message||'No se pudo cargar el expediente.','danger');});}
   function save(form){if(!form.checkValidity()){form.classList.add('was-validated');return;}clearValidation(form);var creating=form.dataset.mode!=='edit';var data=new FormData(form);if(creating){data.delete('id');if(estadoInicial){data.set('estado_expediente_id',estadoInicial.id);}}post(creating?'crear':'actualizar',data).then(function(r){$('#modalExpediente').modal('hide');toast(r.message||'Expediente guardado.','success');loadContext().then(load);}).catch(function(e){applyErrors(form,e.errors||{});toast(e.message||'No se pudo guardar el expediente.','danger');});}
-  function viewDetail(id){fetchJson(endpoint+'?accion=obtener&id='+encodeURIComponent(id)).then(function(r){var x=(r.data||{}).record||{};expedienteDetalleId=id;document.getElementById('exp-detalle-resumen').innerHTML='<dl class="row mb-0"><dt class="col-sm-3">Codigo</dt><dd class="col-sm-9">'+esc(x.codigo)+'</dd><dt class="col-sm-3">Cliente</dt><dd class="col-sm-9">'+esc(x.cliente_razon_social)+'<div class="text-muted small">'+esc(x.cliente_ruc||'Sin RUC')+'</div></dd><dt class="col-sm-3">Tipo</dt><dd class="col-sm-9">'+esc(x.tipo_seguro_nombre)+'</dd><dt class="col-sm-3">Estado</dt><dd class="col-sm-9">'+esc(x.estado_expediente_nombre)+'</dd><dt class="col-sm-3">Fecha apertura</dt><dd class="col-sm-9">'+esc(x.fecha_apertura)+'</dd><dt class="col-sm-3">Descripcion</dt><dd class="col-sm-9">'+esc(x.descripcion)+'</dd><dt class="col-sm-3">Observaciones</dt><dd class="col-sm-9">'+esc(x.observaciones||'-')+'</dd></dl>';var form=document.getElementById('formExpDocumento');if(form){form.reset();clearValidation(form);form.elements.expediente_id.value=id;}document.getElementById('exp-req-filtro-estado').value='todos';document.getElementById('pol-search').value='';document.getElementById('pol-filtro-aseguradora').value='0';document.getElementById('pol-filtro-estado-poliza').value='todos';document.getElementById('pol-filtro-activo').value='todos';polPage=1;$('#expDetalleTabs a[href="#exp-tab-resumen"]').tab('show');loadDocs(id);loadFormatos(id);loadReqs(id);loadPolizas(id);loadActividad(id);$('#modalDetalleExpediente').modal('show');}).catch(function(e){toast(e.message||'No se pudo cargar detalle.','danger');});}
+  function viewDetail(id){fetchJson(endpoint+'?accion=obtener&id='+encodeURIComponent(id)).then(function(r){var x=(r.data||{}).record||{};expedienteDetalleId=id;document.getElementById('exp-detalle-resumen').innerHTML='<dl class="row mb-0"><dt class="col-sm-3">Codigo</dt><dd class="col-sm-9">'+esc(x.codigo)+'</dd><dt class="col-sm-3">Cliente</dt><dd class="col-sm-9">'+esc(x.cliente_razon_social)+'<div class="text-muted small">'+esc(x.cliente_ruc||'Sin RUC')+'</div></dd><dt class="col-sm-3">Tipo</dt><dd class="col-sm-9">'+esc(x.tipo_seguro_nombre)+'</dd><dt class="col-sm-3">Estado</dt><dd class="col-sm-9">'+esc(x.estado_expediente_nombre)+'</dd><dt class="col-sm-3">Fecha apertura</dt><dd class="col-sm-9">'+esc(x.fecha_apertura)+'</dd><dt class="col-sm-3">Descripcion</dt><dd class="col-sm-9">'+esc(x.descripcion)+'</dd><dt class="col-sm-3">Observaciones</dt><dd class="col-sm-9">'+esc(x.observaciones||'-')+'</dd></dl>';var form=document.getElementById('formExpDocumento');if(form){form.reset();clearValidation(form);form.elements.expediente_id.value=id;}document.getElementById('exp-req-filtro-estado').value='todos';document.getElementById('pol-search').value='';document.getElementById('pol-filtro-aseguradora').value='0';document.getElementById('pol-filtro-estado-poliza').value='todos';document.getElementById('pol-filtro-activo').value='todos';document.getElementById('cot-search').value='';document.getElementById('cot-filtro-activo').value='todos';polPage=1;cotPage=1;$('#expDetalleTabs a[href="#exp-tab-resumen"]').tab('show');loadDocs(id);loadFormatos(id);loadReqs(id);loadCotContext(id).then(function(){document.getElementById('cot-filtro-estado').value='todos';loadCotizaciones(id);});loadPolizas(id);loadActividad(id);$('#modalDetalleExpediente').modal('show');}).catch(function(e){toast(e.message||'No se pudo cargar detalle.','danger');});}
   function loadDocs(id){document.getElementById('exp-docs-body').innerHTML='<tr><td colspan="7" class="text-muted text-center">Cargando documentos...</td></tr>';document.getElementById('exp-docs-empty').style.display='none';fetchJson(documentosEndpoint+'?accion=listar&expediente_id='+encodeURIComponent(id)).then(function(r){renderDocs((r.data||{}).rows||[]);}).catch(function(e){document.getElementById('exp-docs-body').innerHTML='';document.getElementById('exp-docs-empty').style.display='block';toast(e.message||'No se pudieron cargar documentos.','danger');});}
   function renderDocs(items){var h='';items.forEach(function(d){var activo=Number(d.vinculo_estado)===1&&Number(d.archivo_estado)===1;var acciones='<span class="exp-actions"><a class="btn btn-xs btn-outline-info" href="'+documentosEndpoint+'?accion=descargar&vinculo_id='+encodeURIComponent(d.vinculo_id)+'" title="Descargar" aria-label="Descargar"><i class="fas fa-download"></i></a>';if(permisos.puede_editar&&activo){acciones+='<button type="button" class="btn btn-xs btn-outline-secondary" data-doc-archive="'+esc(d.vinculo_id)+'" title="Archivar" aria-label="Archivar"><i class="fas fa-archive"></i></button>';}acciones+='</span>';h+='<tr><td>'+esc(d.tipo_documento_nombre||d.slot||'-')+'</td><td><strong>'+esc(d.nombre_original||'-')+'</strong><div class="text-muted small">'+esc(d.mime_type||'')+' '+esc(bytes(d.tamanio_bytes))+'</div></td><td>'+esc(d.descripcion||'-')+'</td><td>'+esc(d.cargado_en||'-')+'</td><td>'+esc(d.cargado_por_usuario_externo_id||'-')+'</td><td>'+badgeActivo(activo?1:0)+'</td><td class="text-center">'+acciones+'</td></tr>';});document.getElementById('exp-docs-body').innerHTML=h;document.getElementById('exp-docs-empty').style.display=items.length?'none':'block';}
   function loadFormatos(id){document.getElementById('exp-formatos-body').innerHTML='<tr><td colspan="4" class="text-muted text-center">Cargando formatos...</td></tr>';document.getElementById('exp-formatos-empty').style.display='none';fetchJson(formatosExpEndpoint+'?accion=listar&expediente_id='+encodeURIComponent(id)).then(function(r){renderFormatos((r.data||{}).rows||[]);}).catch(function(e){document.getElementById('exp-formatos-body').innerHTML='';document.getElementById('exp-formatos-empty').style.display='block';toast(e.message||'No se pudieron cargar formatos.','danger');});}
@@ -646,6 +881,22 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('pol-body').addEventListener('click',function(e){var b=e.target.closest('[data-pol-action]');if(b){var id=b.dataset.id;if(b.dataset.polAction==='view')viewPol(id);else if(b.dataset.polAction==='edit')openPolModal(id);else if(b.dataset.polAction==='pdf')openPolPdf(id);else confirmAction(Number(b.dataset.state)===1?'Desea desactivar esta poliza?':'Desea activar esta poliza?',function(){togglePol(id);});return;}var a=e.target.closest('[data-pol-pdf-archive]');if(!a)return;var vinculoId=a.getAttribute('data-pol-pdf-archive');confirmAction('Desea archivar el PDF principal de esta poliza?',function(){var data=new FormData();data.set('vinculo_id',vinculoId);data.set('expediente_id',expedienteDetalleId);postPol('archivar_pdf',data).then(function(r){toast(r.message||'PDF archivado.','success');loadPolizas(expedienteDetalleId);loadActividad(expedienteDetalleId);}).catch(function(e){toast(e.message||'No se pudo archivar el PDF.','danger');});});});
   document.getElementById('formPolizaExp').addEventListener('submit',function(e){e.preventDefault();savePol(e.target);});
   document.getElementById('formPolizaPdfExp').addEventListener('submit',function(e){e.preventDefault();savePolPdf(e.target);});
+  document.getElementById('cot-btn-buscar').addEventListener('click',function(){cotPage=1;loadCotizaciones(expedienteDetalleId);});
+  ['cot-search','cot-filtro-estado','cot-filtro-activo'].forEach(function(id){document.getElementById(id).addEventListener(id==='cot-search'?'input':'change',function(){clearTimeout(timer);timer=setTimeout(function(){cotPage=1;loadCotizaciones(expedienteDetalleId);},id==='cot-search'?300:0);});});
+  var btnCotNuevo=document.getElementById('cot-btn-nuevo');if(btnCotNuevo)btnCotNuevo.addEventListener('click',function(){openCotModal(null);});
+  document.getElementById('cot-pagination').addEventListener('click',function(e){var b=e.target.closest('[data-cot-page]');if(!b)return;cotPage=Number(b.dataset.cotPage)||1;loadCotizaciones(expedienteDetalleId);});
+  document.getElementById('cot-body').addEventListener('click',function(e){var b=e.target.closest('[data-cot-action]');if(!b)return;var id=b.dataset.id;if(b.dataset.cotAction==='view')openCotModal(id,true);else if(b.dataset.cotAction==='edit')openCotModal(id,false);else confirmAction(Number(b.dataset.state)===1?'Desea desactivar esta cotizacion?':'Desea activar esta cotizacion?',function(){var data=new FormData();data.set('id',id);data.set('expediente_id',expedienteDetalleId);data.set('_csrf',csrf);fetchJson(cotizacionesEndpoint+'?accion=cambiar_estado',{method:'POST',body:data}).then(function(r){toast(r.message||'Estado actualizado.','success');loadCotizaciones(expedienteDetalleId);loadActividad(expedienteDetalleId);}).catch(function(e){toast(e.message||'No se pudo actualizar estado.','danger');});});});
+  document.getElementById('formCotizacionExp').addEventListener('submit',function(e){e.preventDefault();saveCot(e.target);});
+  document.getElementById('cot-add-riesgo').addEventListener('click',function(){cotReadRiesgos();cotRiesgos.push({etiqueta:'',valor:'',orden_visual:cotRiesgos.length+1});renderCotRiesgos();});
+  document.getElementById('cot-riesgos-body').addEventListener('click',function(e){var b=e.target.closest('[data-cot-remove-riesgo]');if(!b)return;cotReadRiesgos();cotRiesgos.splice(Number(b.getAttribute('data-cot-remove-riesgo')),1);renderCotRiesgos();});
+  document.getElementById('cot-add-alt').addEventListener('click',function(){cotReadAlternativas();cotAlternativas.push({uid:cotNewUid(),aseguradora_id:'',producto_id:'',nombre_plan_snapshot:'',orden_visual:cotAlternativas.length+1,vigencia_meses:'',vigencia_texto:'',suma_asegurada:'',moneda:'PEN',prima_comercial:'',igv:'',prima_total:'',condicion_gps:'no_requiere',es_aceptada:0,observaciones:'',cuotas:[]});renderCotAlternativas();});
+  document.getElementById('cot-alt-body').addEventListener('change',function(e){var card=e.target.closest('.cot-alt-card');if(!card)return;if(e.target.classList.contains('cot-alt-aseg')){var prod=card.querySelector('.cot-alt-producto');prod.innerHTML=optionCotProductos(e.target.value,'');renderCotComparativos();}if(e.target.classList.contains('cot-alt-aceptada')&&e.target.checked){Array.prototype.forEach.call(document.querySelectorAll('.cot-alt-aceptada'),function(ch){if(ch!==e.target)ch.checked=false;});}if(e.target.classList.contains('cot-alt-aseg')||e.target.classList.contains('cot-alt-producto')||e.target.classList.contains('cot-alt-plan'))renderCotComparativos();});
+  document.getElementById('cot-alt-body').addEventListener('click',function(e){var add=e.target.closest('[data-cot-add-cuota]');if(add){cotReadAlternativas();var uid=add.getAttribute('data-cot-add-cuota');cotAlternativas.forEach(function(a){if(a.uid===uid){a.cuotas=a.cuotas||[];a.cuotas.push({modalidad:'contado',cantidad_cuotas:1,valor_cuota:'',descripcion:'',orden_visual:a.cuotas.length+1});}});renderCotAlternativas();return;}var rem=e.target.closest('[data-cot-remove-alt]');if(rem){cotReadAlternativas();cotAlternativas=cotAlternativas.filter(function(a){return a.uid!==rem.getAttribute('data-cot-remove-alt');});renderCotAlternativas();return;}var remCuota=e.target.closest('[data-cot-remove-cuota]');if(!remCuota)return;var card=remCuota.closest('.cot-alt-card'), uid=card.dataset.uid, idx=Number(remCuota.getAttribute('data-cot-remove-cuota'));cotReadAlternativas();cotAlternativas.forEach(function(a){if(a.uid===uid)a.cuotas.splice(idx,1);});renderCotAlternativas();});
+  document.getElementById('cot-add-comp').addEventListener('click',function(){cotReadComparativos();cotComparativos.push({seccion:'cobertura',etiqueta:'',detalle:'',orden_visual:cotComparativos.length+1,valores:{}});renderCotComparativos();});
+  document.getElementById('cot-comp-body').addEventListener('click',function(e){var b=e.target.closest('[data-cot-remove-comp]');if(!b)return;cotReadComparativos();cotComparativos.splice(Number(b.getAttribute('data-cot-remove-comp')),1);renderCotComparativos();});
+  document.getElementById('cot-refresh-preview').addEventListener('click',renderCotPreview);
+  document.getElementById('cot-ver-pdf').addEventListener('click',function(){cotOpenPdf(false);});
+  document.getElementById('cot-descargar-pdf').addEventListener('click',function(){cotOpenPdf(true);});
   document.getElementById('modalConfirmExpedienteOk').addEventListener('click',function(){var cb=confirmCallback;confirmCallback=null;$('#modalConfirmExpediente').modal('hide');if(typeof cb==='function')cb();});
   Promise.all([loadContext(),loadDocTipos(),loadReqEstados(),loadPolContext()]).then(load);
 });

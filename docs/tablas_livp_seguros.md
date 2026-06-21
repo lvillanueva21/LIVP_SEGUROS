@@ -695,6 +695,134 @@ Timeline:
 Motivo del cambio:
 - Incorporar una primera gestion basica de documentos emitidos sin implementar cotizaciones, renovaciones, endosos avanzados, pagos ni garantias.
 
+### 2026-06-21 - cotizaciones completas en expedientes
+
+Tablas:
+- `seg_cotizaciones`
+- `seg_cotizacion_datos_riesgo`
+- `seg_cotizacion_alternativas`
+- `seg_cotizacion_alternativa_cuotas`
+- `seg_cotizacion_comparativos`
+- `seg_cotizacion_comparativo_valores`
+
+Tipo de cambio: creadas
+Modulo relacionado: `expedientes`
+Proposito: registrar cotizaciones comerciales completas dentro del expediente, con datos variables del riesgo, alternativas de aseguradoras, opciones de pago, comparativos y generacion de PDF en navegador.
+
+Columnas principales de `seg_cotizaciones`:
+- `id`
+- `codigo`
+- `expediente_id`
+- `fecha_cotizacion`
+- `fecha_vencimiento`
+- `titulo`
+- `estado_cotizacion`
+- `descripcion`
+- `observaciones`
+- `nota_pdf`
+- `estado`
+- auditoria estandar local
+
+Columnas principales de `seg_cotizacion_datos_riesgo`:
+- `id`
+- `cotizacion_id`
+- `etiqueta`
+- `valor`
+- `orden_visual`
+- `estado`
+- auditoria estandar local
+
+Columnas principales de `seg_cotizacion_alternativas`:
+- `id`
+- `cotizacion_id`
+- `aseguradora_id`
+- `producto_id`
+- `nombre_plan_snapshot`
+- `orden_visual`
+- `vigencia_meses`
+- `vigencia_texto`
+- `suma_asegurada`
+- `moneda`
+- `prima_comercial`
+- `igv`
+- `prima_total`
+- `condicion_gps`
+- `es_aceptada`
+- `observaciones`
+- `estado`
+- auditoria estandar local
+
+Columnas principales de `seg_cotizacion_alternativa_cuotas`:
+- `id`
+- `alternativa_id`
+- `modalidad`
+- `cantidad_cuotas`
+- `valor_cuota`
+- `descripcion`
+- `orden_visual`
+- `estado`
+- auditoria estandar local
+
+Columnas principales de `seg_cotizacion_comparativos`:
+- `id`
+- `cotizacion_id`
+- `seccion`
+- `etiqueta`
+- `detalle`
+- `orden_visual`
+- `estado`
+- auditoria estandar local
+
+Columnas principales de `seg_cotizacion_comparativo_valores`:
+- `id`
+- `comparativo_id`
+- `alternativa_id`
+- `valor`
+- `estado`
+- auditoria estandar local
+
+Relaciones:
+- `seg_cotizaciones.expediente_id` referencia `seg_expedientes.id`.
+- `seg_cotizacion_datos_riesgo.cotizacion_id` referencia `seg_cotizaciones.id`.
+- `seg_cotizacion_alternativas.cotizacion_id` referencia `seg_cotizaciones.id`.
+- `seg_cotizacion_alternativas.aseguradora_id` referencia `seg_aseguradoras.id`.
+- `seg_cotizacion_alternativas.producto_id` referencia opcionalmente `seg_productos.id`.
+- `seg_cotizacion_alternativa_cuotas.alternativa_id` referencia `seg_cotizacion_alternativas.id`.
+- `seg_cotizacion_comparativos.cotizacion_id` referencia `seg_cotizaciones.id`.
+- `seg_cotizacion_comparativo_valores.comparativo_id` referencia `seg_cotizacion_comparativos.id`.
+- `seg_cotizacion_comparativo_valores.alternativa_id` referencia `seg_cotizacion_alternativas.id`.
+
+Indices y unique:
+- `seg_cotizaciones.codigo` es unico y generado por backend con formato `COT-AAAA-000001`.
+- Indices por expediente, estado de cotizacion, estado activo/inactivo, aseguradora, producto, alternativa, seccion y orden visual.
+
+Reglas de estado o eliminacion:
+- Estados de cotizacion permitidos: `borrador`, `enviada`, `aceptada`, `vencida`, `perdida`, `cancelada`.
+- Condicion GPS permitida: `no_requiere`, `requerido`, `opcional`, `pendiente`.
+- Modalidades de cuota permitidas: `afiliacion`, `cupon`, `contado`, `otro`.
+- Secciones comparativas permitidas: `cobertura`, `servicio`, `deducible`, `condicion`, `otro`.
+- `estado = 1` Activo.
+- `estado = 0` Inactivo.
+- No hay borrado fisico; los hijos se versionan operativamente desactivando registros previos al editar.
+- Solo una alternativa activa puede estar aceptada por cotizacion.
+- Una cotizacion en estado `aceptada` debe tener exactamente una alternativa aceptada.
+- Solo se permiten aseguradoras activas y productos activos compatibles con la aseguradora y ramo del tipo de seguro del expediente.
+- Los montos no pueden ser negativos.
+
+PDF:
+- La vista previa se genera en HTML formato A4 dentro de Expedientes.
+- El PDF se genera en navegador usando pdfMake local desde `plugins/pdfmake/pdfmake.min.js` y `plugins/pdfmake/vfs_fonts.js`.
+- No usa TCPDF, Dompdf, Composer, CDN ni API externa.
+- El PDF no se guarda aun como archivo historico; se visualiza o descarga desde el navegador.
+
+Timeline:
+- Los eventos se registran sobre el expediente padre con `entidad_tipo = expediente`.
+- Eventos: `cotizacion_creada`, `cotizacion_editada`, `cotizacion_estado_modificado`, `cotizacion_alternativa_registrada`, `cotizacion_alternativa_modificada`, `cotizacion_alternativa_aceptada`, `cotizacion_cuota_registrada`, `cotizacion_comparativo_actualizado`, `cotizacion_activada`, `cotizacion_desactivada`.
+- Si no hay cambios reales, no se generan eventos nuevos.
+
+Motivo del cambio:
+- Permitir cotizaciones comerciales completas, comparables y descargables en PDF sin implementar todavia aceptacion formal vinculada a polizas, pagos, vouchers ni garantias.
+
 ## Plantilla obligatoria para registros futuros
 
 Copiar esta plantilla cada vez que se cree, modifique o elimine una tabla local.
