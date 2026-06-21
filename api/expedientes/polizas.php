@@ -104,12 +104,17 @@ function pol_listar(): void
     $q = trim((string) ($_GET['q'] ?? ''));
     $q = function_exists('mb_substr') ? mb_substr($q, 0, 120, 'UTF-8') : substr($q, 0, 120);
     if ($q !== '') {
-        $where[] = "(p.codigo LIKE :q
-            OR p.numero_documento LIKE :q
-            OR p.contratante_nombre_snapshot LIKE :q
-            OR a.razon_social LIKE :q
-            OR a.nombre_comercial LIKE :q)";
-        $params[':q'] = exp_bind_like($q);
+        $where[] = "(p.codigo LIKE :q_codigo
+            OR p.numero_documento LIKE :q_numero_documento
+            OR p.contratante_nombre_snapshot LIKE :q_contratante
+            OR a.razon_social LIKE :q_aseguradora_razon
+            OR a.nombre_comercial LIKE :q_aseguradora_nombre)";
+        $like = exp_bind_like($q);
+        $params[':q_codigo'] = $like;
+        $params[':q_numero_documento'] = $like;
+        $params[':q_contratante'] = $like;
+        $params[':q_aseguradora_razon'] = $like;
+        $params[':q_aseguradora_nombre'] = $like;
     }
 
     $whereSql = ' WHERE ' . implode(' AND ', $where);

@@ -20,8 +20,13 @@ function tipo_listar(PDO $pdo)
         $params[':estado'] = $estado === 'activo' ? 1 : 0;
     }
     if ($q !== '') {
-        $where[] = "(t.codigo LIKE :q OR t.nombre LIKE :q OR t.descripcion LIKE :q OR t.ejemplo_uso LIKE :q OR r.nombre LIKE :q)";
-        $params[':q'] = cat_bind_like($q);
+        $where[] = "(t.codigo LIKE :q_codigo OR t.nombre LIKE :q_nombre OR t.descripcion LIKE :q_descripcion OR t.ejemplo_uso LIKE :q_ejemplo_uso OR r.nombre LIKE :q_ramo)";
+        $like = cat_bind_like($q);
+        $params[':q_codigo'] = $like;
+        $params[':q_nombre'] = $like;
+        $params[':q_descripcion'] = $like;
+        $params[':q_ejemplo_uso'] = $like;
+        $params[':q_ramo'] = $like;
     }
 
     $whereSql = $where ? ' WHERE ' . implode(' AND ', $where) : '';

@@ -77,12 +77,17 @@ function requisitos_listar(): void
     $q = trim((string) ($_GET['q'] ?? ''));
     $q = function_exists('mb_substr') ? mb_substr($q, 0, 120, 'UTF-8') : substr($q, 0, 120);
     if ($q !== '') {
-        $where[] = "(rt.codigo LIKE :q
-            OR rt.nombre LIKE :q
-            OR rt.descripcion LIKE :q
-            OR ts.nombre LIKE :q
-            OR r.nombre LIKE :q)";
-        $params[':q'] = req_bind_like($q);
+        $where[] = "(rt.codigo LIKE :q_codigo
+            OR rt.nombre LIKE :q_nombre
+            OR rt.descripcion LIKE :q_descripcion
+            OR ts.nombre LIKE :q_tipo_seguro
+            OR r.nombre LIKE :q_ramo)";
+        $like = req_bind_like($q);
+        $params[':q_codigo'] = $like;
+        $params[':q_nombre'] = $like;
+        $params[':q_descripcion'] = $like;
+        $params[':q_tipo_seguro'] = $like;
+        $params[':q_ramo'] = $like;
     }
 
     $whereSql = $where ? (' WHERE ' . implode(' AND ', $where)) : '';

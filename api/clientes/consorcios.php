@@ -61,8 +61,13 @@ function consorcios_listar(): void
         $where[] = 'c.estado = 0';
     }
     if ($q !== '') {
-        $where[] = '(c.ruc LIKE :q OR c.razon_social LIKE :q OR c.nombre_comercial LIKE :q OR op.razon_social LIKE :q OR op.ruc LIKE :q)';
-        $params[':q'] = '%' . $q . '%';
+        $where[] = '(c.ruc LIKE :q_ruc OR c.razon_social LIKE :q_razon_social OR c.nombre_comercial LIKE :q_nombre_comercial OR op.razon_social LIKE :q_operador_razon OR op.ruc LIKE :q_operador_ruc)';
+        $like = '%' . $q . '%';
+        $params[':q_ruc'] = $like;
+        $params[':q_razon_social'] = $like;
+        $params[':q_nombre_comercial'] = $like;
+        $params[':q_operador_razon'] = $like;
+        $params[':q_operador_ruc'] = $like;
     }
     $whereSql = 'WHERE ' . implode(' AND ', $where);
 

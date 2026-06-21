@@ -82,13 +82,19 @@ function exp_listar(): void
     $q = trim((string) ($_GET['q'] ?? ''));
     $q = function_exists('mb_substr') ? mb_substr($q, 0, 120, 'UTF-8') : substr($q, 0, 120);
     if ($q !== '') {
-        $where[] = "(e.codigo LIKE :q
-            OR e.descripcion LIKE :q
-            OR c.razon_social LIKE :q
-            OR c.nombre_comercial LIKE :q
-            OR c.ruc LIKE :q
-            OR ts.nombre LIKE :q)";
-        $params[':q'] = exp_bind_like($q);
+        $where[] = "(e.codigo LIKE :q_codigo
+            OR e.descripcion LIKE :q_descripcion
+            OR c.razon_social LIKE :q_cliente_razon
+            OR c.nombre_comercial LIKE :q_cliente_nombre
+            OR c.ruc LIKE :q_cliente_ruc
+            OR ts.nombre LIKE :q_tipo_seguro)";
+        $like = exp_bind_like($q);
+        $params[':q_codigo'] = $like;
+        $params[':q_descripcion'] = $like;
+        $params[':q_cliente_razon'] = $like;
+        $params[':q_cliente_nombre'] = $like;
+        $params[':q_cliente_ruc'] = $like;
+        $params[':q_tipo_seguro'] = $like;
     }
 
     $filters = [

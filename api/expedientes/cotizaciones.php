@@ -163,13 +163,19 @@ function cot_listar(): void
     $q = trim((string) ($_GET['q'] ?? ''));
     $q = function_exists('mb_substr') ? mb_substr($q, 0, 120, 'UTF-8') : substr($q, 0, 120);
     if ($q !== '') {
-        $where[] = "(c.codigo LIKE :q
-            OR c.titulo LIKE :q
-            OR c.descripcion LIKE :q
-            OR cli.razon_social LIKE :q
-            OR a.razon_social LIKE :q
-            OR a.nombre_comercial LIKE :q)";
-        $params[':q'] = exp_bind_like($q);
+        $where[] = "(c.codigo LIKE :q_codigo
+            OR c.titulo LIKE :q_titulo
+            OR c.descripcion LIKE :q_descripcion
+            OR cli.razon_social LIKE :q_cliente
+            OR a.razon_social LIKE :q_aseguradora_razon
+            OR a.nombre_comercial LIKE :q_aseguradora_nombre)";
+        $like = exp_bind_like($q);
+        $params[':q_codigo'] = $like;
+        $params[':q_titulo'] = $like;
+        $params[':q_descripcion'] = $like;
+        $params[':q_cliente'] = $like;
+        $params[':q_aseguradora_razon'] = $like;
+        $params[':q_aseguradora_nombre'] = $like;
     }
     $whereSql = ' WHERE ' . implode(' AND ', $where);
     $fromSql = " FROM seg_cotizaciones c

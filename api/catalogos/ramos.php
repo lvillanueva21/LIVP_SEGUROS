@@ -20,8 +20,11 @@ function ramo_listar(PDO $pdo)
         $params[':estado'] = $estado === 'activo' ? 1 : 0;
     }
     if ($q !== '') {
-        $where[] = "(codigo LIKE :q OR nombre LIKE :q OR descripcion LIKE :q)";
-        $params[':q'] = cat_bind_like($q);
+        $where[] = "(codigo LIKE :q_codigo OR nombre LIKE :q_nombre OR descripcion LIKE :q_descripcion)";
+        $like = cat_bind_like($q);
+        $params[':q_codigo'] = $like;
+        $params[':q_nombre'] = $like;
+        $params[':q_descripcion'] = $like;
     }
 
     $whereSql = $where ? ' WHERE ' . implode(' AND ', $where) : '';

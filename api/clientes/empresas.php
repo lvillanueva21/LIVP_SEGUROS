@@ -67,12 +67,20 @@ function clientes_listar(): void
     }
 
     if ($q !== '') {
-        $where[] = '(c.ruc LIKE :q OR c.razon_social LIKE :q OR c.nombre_comercial LIKE :q OR c.telefono_principal LIKE :q OR c.correo_principal LIKE :q OR EXISTS (
+        $where[] = '(c.ruc LIKE :q_ruc OR c.razon_social LIKE :q_razon_social OR c.nombre_comercial LIKE :q_nombre_comercial OR c.telefono_principal LIKE :q_telefono OR c.correo_principal LIKE :q_correo OR EXISTS (
             SELECT 1 FROM seg_cliente_contactos cc
             WHERE cc.cliente_id = c.id
-              AND (cc.nombre_completo LIKE :q OR cc.telefono LIKE :q OR cc.correo LIKE :q)
+              AND (cc.nombre_completo LIKE :q_contacto_nombre OR cc.telefono LIKE :q_contacto_telefono OR cc.correo LIKE :q_contacto_correo)
         ))';
-        $params[':q'] = '%' . $q . '%';
+        $like = '%' . $q . '%';
+        $params[':q_ruc'] = $like;
+        $params[':q_razon_social'] = $like;
+        $params[':q_nombre_comercial'] = $like;
+        $params[':q_telefono'] = $like;
+        $params[':q_correo'] = $like;
+        $params[':q_contacto_nombre'] = $like;
+        $params[':q_contacto_telefono'] = $like;
+        $params[':q_contacto_correo'] = $like;
     }
 
     $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';

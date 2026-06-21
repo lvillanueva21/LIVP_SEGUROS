@@ -90,12 +90,17 @@ function formatos_listar(): void
     $q = trim((string) ($_GET['q'] ?? ''));
     $q = function_exists('mb_substr') ? mb_substr($q, 0, 120, 'UTF-8') : substr($q, 0, 120);
     if ($q !== '') {
-        $where[] = "(f.codigo LIKE :q
-            OR f.nombre LIKE :q
-            OR f.descripcion LIKE :q
-            OR ts.nombre LIKE :q
-            OR rt.nombre LIKE :q)";
-        $params[':q'] = fmt_bind_like($q);
+        $where[] = "(f.codigo LIKE :q_codigo
+            OR f.nombre LIKE :q_nombre
+            OR f.descripcion LIKE :q_descripcion
+            OR ts.nombre LIKE :q_tipo_seguro
+            OR rt.nombre LIKE :q_requisito)";
+        $like = fmt_bind_like($q);
+        $params[':q_codigo'] = $like;
+        $params[':q_nombre'] = $like;
+        $params[':q_descripcion'] = $like;
+        $params[':q_tipo_seguro'] = $like;
+        $params[':q_requisito'] = $like;
     }
 
     $whereSql = $where ? (' WHERE ' . implode(' AND ', $where)) : '';
