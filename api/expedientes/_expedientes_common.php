@@ -293,3 +293,83 @@ function exp_tipo_documento_label(string $codigo): string
     $options = exp_tipo_documento_options();
     return $options[$codigo] ?? $codigo;
 }
+
+function exp_requisito_estados(): array
+{
+    return [
+        'pendiente' => 'Pendiente',
+        'entregado' => 'Entregado',
+        'observado' => 'Observado',
+        'aprobado' => 'Aprobado',
+        'rechazado' => 'Rechazado',
+        'no_aplica' => 'No aplica',
+    ];
+}
+
+function exp_requisito_estado_label(string $codigo): string
+{
+    $options = exp_requisito_estados();
+    return $options[$codigo] ?? $codigo;
+}
+
+function exp_requisito_estado_valido(string $codigo): bool
+{
+    return isset(exp_requisito_estados()[$codigo]);
+}
+
+function exp_expediente_tiene_requisitos(PDO $pdo, int $expedienteId): bool
+{
+    $stmt = $pdo->prepare('SELECT COUNT(*) FROM seg_expediente_requisitos WHERE expediente_id = :id');
+    $stmt->execute([':id' => $expedienteId]);
+    return (int) $stmt->fetchColumn() > 0;
+}
+
+function exp_generar_requisitos_expediente(PDO $pdo, int $expedienteId, int $tipoSeguroId, ?int $userId, string $now): int
+{
+    if ($expedienteId <= 0 || $tipoSeguroId <= 0) {
+        throw new RuntimeException('Datos invalidos para generar requisitos.');
+    }
+
+    $stmtCount = $pdo->prepare('SELECT id FROM seg_expediente_requisitos WHERE expediente_id = :id LIMIT 1 FOR UPDATE');
+    $stmtCount->execute([':id' => $expedienteId]);
+    if ($stmtCount->fetchColumn()) {
+        return 0;
+    }
+
+    $stmtBase = $pdo->prepare('SELECT id, codigo, nombre, descripcion, es_obligatorio, orden_visual
+        FROM seg_requisitos_tipo_seguro
+        WHERE tipo_seguro_id = :tipo_seguro_id
+          AND estado = 1
+        ORDER BY orden_visual ASC, nombre ASC, id ASC');
+    $stmtBase->execute([':tipo_seguro_id' => $tipoSeguroId]);
+    $baseRows = $stmtBase->fetchAll(PDO::FETCH_ASSOC);
+    if (!$baseRows) {
+        return 0;
+    }
+
+    $stmtInsert = $pdo->prepare('INSERT INTO seg_expediente_requisitos
+        (expediente_id, requisito_tipo_seguro_id, codigo_requisito_snapshot, nombre_snapshot, descripcion_snapshot, es_obligatorio_snapshot, orden_visual_snapshot, estado_requisito, observacion_actual, fecha_entrega, entregado_por_usuario_externo_id, fecha_evaluacion, evaluado_por_usuario_externo_id, creado_por_usuario_externo_id, actualizado_por_usuario_externo_id, creado_en, actualizado_en)
+        VALUES
+        (:expediente_id, :requisito_tipo_id, :codigo, :nombre, :descripcion, :es_obligatorio, :orden_visual, :estado_requisito, NULL, NULL, NULL, NULL, NULL, :creado_por, :actualizado_por, :creado_en, :actualizado_en)');
+
+    $count = 0;
+    foreach ($baseRows as $row) {
+        $stmtInsert->execute([
+            ':expediente_id' => $expedienteId,
+            ':requisito_tipo_id' => (int) $row['id'],
+            ':codigo' => (string) $row['codigo'],
+            ':nombre' => (string) $row['nombre'],
+            ':descripcion' => $row['descripcion'],
+            ':es_obligatorio' => (int) $row['es_obligatorio'],
+            ':orden_visual' => (int) $row['orden_visual'],
+            ':estado_requisito' => 'pendiente',
+            ':creado_por' => $userId,
+            ':actualizado_por' => $userId,
+            ':creado_en' => $now,
+            ':actualizado_en' => $now,
+        ]);
+        $count++;
+    }
+
+    return $count;
+}

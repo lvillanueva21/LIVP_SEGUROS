@@ -130,6 +130,7 @@ $permExpedientes = [
         <ul class="nav nav-tabs" id="expDetalleTabs" role="tablist">
           <li class="nav-item"><a class="nav-link active" data-toggle="pill" href="#exp-tab-resumen" role="tab">Resumen</a></li>
           <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#exp-tab-documentos" role="tab">Documentos</a></li>
+          <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#exp-tab-requisitos" role="tab">Requisitos</a></li>
           <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#exp-tab-actividad" role="tab">Actividad</a></li>
         </ul>
         <div class="tab-content border-left border-right border-bottom p-3 exp-detail-content">
@@ -177,6 +178,39 @@ $permExpedientes = [
             </div>
             <div class="exp-empty mt-2" id="exp-docs-empty">No hay documentos vinculados.</div>
           </div>
+          <div class="tab-pane fade" id="exp-tab-requisitos" role="tabpanel">
+            <div class="d-flex flex-wrap align-items-center justify-content-between mb-2">
+              <div class="form-inline">
+                <label class="mr-2 mb-2" for="exp-req-filtro-estado">Estado</label>
+                <select class="form-control form-control-sm mb-2" id="exp-req-filtro-estado">
+                  <option value="todos">Todos</option>
+                </select>
+              </div>
+              <?php if ($permExpedientes['puede_crear']): ?>
+                <button class="btn btn-primary btn-sm mb-2" type="button" id="exp-req-generar" style="display:none;"><i class="fas fa-tasks"></i> Generar requisitos</button>
+              <?php endif; ?>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-bordered table-sm mb-0 exp-req-table">
+                <thead>
+                  <tr>
+                    <th>Orden</th>
+                    <th>Requisito</th>
+                    <th>Descripcion</th>
+                    <th>Condicion</th>
+                    <th>Estado</th>
+                    <th>Observacion</th>
+                    <th>Entrega</th>
+                    <th>Evaluacion</th>
+                    <th>Docs</th>
+                    <th class="text-center" style="width:96px;">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="exp-req-body"></tbody>
+              </table>
+            </div>
+            <div class="exp-empty mt-2" id="exp-req-empty">Este expediente no tiene requisitos generados.</div>
+          </div>
           <div class="tab-pane fade" id="exp-tab-actividad" role="tabpanel">
             <div id="exp-actividad-body"></div>
             <div class="exp-empty" id="exp-actividad-empty">No hay actividad registrada.</div>
@@ -187,6 +221,65 @@ $permExpedientes = [
         <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cerrar</button>
       </div>
     </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalReqEstadoExp" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <form class="modal-content" id="formReqEstadoExp" autocomplete="off" novalidate>
+      <div class="modal-header">
+        <h5 class="modal-title">Cambiar estado de requisito</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" name="id">
+        <input type="hidden" name="expediente_id">
+        <div class="form-group">
+          <label>Requisito</label>
+          <input class="form-control" id="req-estado-nombre" readonly>
+        </div>
+        <div class="form-group">
+          <label>Estado</label>
+          <select class="form-control" name="estado_requisito" required></select>
+        </div>
+        <div class="form-group mb-0">
+          <label>Observacion o motivo</label>
+          <textarea class="form-control" name="observacion_actual" rows="3" maxlength="1000"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal fade" id="modalReqDocExp" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <form class="modal-content" id="formReqDocExp" enctype="multipart/form-data" autocomplete="off" novalidate>
+      <div class="modal-header">
+        <h5 class="modal-title">Cargar respuesta documental</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" name="id">
+        <input type="hidden" name="expediente_id">
+        <div class="form-group">
+          <label>Requisito</label>
+          <input class="form-control" id="req-doc-nombre" readonly>
+        </div>
+        <div class="form-group mb-0">
+          <label>Archivo(s)</label>
+          <input class="form-control" name="archivo" type="file" multiple required>
+          <small class="text-muted">Se usaran las extensiones y validaciones permitidas por almacen del sistema.</small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-upload"></i> Cargar</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -220,6 +313,9 @@ $permExpedientes = [
   .exp-detail-dialog .modal-body{overflow-y:auto}
   .exp-detail-content{min-height:360px}
   .exp-doc-table{min-width:1000px}
+  .exp-req-table{min-width:1500px}
+  .exp-req-docs{margin:.35rem 0 0 0;padding-left:1rem}
+  .exp-req-docs li{margin-bottom:.2rem}
   .exp-loading,.exp-empty{display:none;padding:1rem;border:1px dashed #ced4da;border-radius:.25rem;text-align:center;color:#6c757d;background:#f8f9fa}
   .exp-actions{display:inline-flex;flex-direction:column;gap:.25rem}
   .exp-pagination .btn{min-width:36px}
@@ -235,8 +331,10 @@ document.addEventListener('DOMContentLoaded', function () {
   var permisos = <?php echo json_encode($permExpedientes); ?>;
   var endpoint = 'api/expedientes/expedientes.php';
   var documentosEndpoint = 'api/expedientes/documentos.php';
+  var requisitosEndpoint = 'api/expedientes/requisitos.php';
   var timelineEndpoint = 'api/expedientes/timeline.php';
   var rows = [], clientes = [], tipos = [], estados = [], estadoInicial = null, docTipos = [];
+  var reqEstados = [], reqRows = [];
   var expedienteDetalleId = 0;
   var page = 1, timer = null, confirmCallback = null;
 
@@ -247,6 +345,8 @@ document.addEventListener('DOMContentLoaded', function () {
   function postDocs(action,data){data.set('_csrf',csrf);return fetchJson(documentosEndpoint+'?accion='+encodeURIComponent(action),{method:'POST',body:data});}
   function badgeActivo(v){return Number(v)===1?'<span class="badge badge-success">Activo</span>':'<span class="badge badge-secondary">Inactivo</span>';}
   function badgeEstado(row){var color=row.color_etiqueta||'#6c757d';return '<span class="badge" style="background:'+esc(color)+';color:#fff">'+esc(row.estado_expediente_nombre||'-')+'</span>';}
+  function badgeReqEstado(v){var m={pendiente:'secondary',entregado:'primary',observado:'warning',aprobado:'success',rechazado:'danger',no_aplica:'info'};var label=reqEstadoLabel(v);return '<span class="badge badge-'+(m[v]||'secondary')+'">'+esc(label)+'</span>';}
+  function reqEstadoLabel(v){var out=v;reqEstados.forEach(function(e){if(e.codigo===v)out=e.nombre;});return out||'-';}
   function bytes(v){var n=Number(v||0);if(n<1024)return n+' B';if(n<1048576)return (n/1024).toFixed(1)+' KB';return (n/1048576).toFixed(1)+' MB';}
   function resumen(v,max){v=String(v==null?'':v);return v.length>max?v.slice(0,max-1)+'...':v;}
   function params(){var p=new URLSearchParams();p.set('accion','listar');p.set('page',page);p.set('q',document.getElementById('exp-search').value||'');p.set('cliente_id',document.getElementById('exp-filtro-cliente').value||'0');p.set('tipo_seguro_id',document.getElementById('exp-filtro-tipo').value||'0');p.set('estado_expediente_id',document.getElementById('exp-filtro-estado-exp').value||'0');p.set('estado',document.getElementById('exp-filtro-activo').value||'todos');return p;}
@@ -256,6 +356,8 @@ document.addEventListener('DOMContentLoaded', function () {
   function fillOptions(){document.getElementById('exp-filtro-cliente').innerHTML='<option value="0">Todos los clientes</option>'+optionClientes(0).replace('<option value="">Seleccione cliente</option>','');document.getElementById('exp-filtro-tipo').innerHTML='<option value="0">Todos los tipos</option>'+optionTipos(0).replace('<option value="">Seleccione tipo</option>','');document.getElementById('exp-filtro-estado-exp').innerHTML='<option value="0">Todos los estados</option>'+optionEstados(0).replace('<option value="">Seleccione estado</option>','');var f=document.getElementById('formExpediente');f.elements.cliente_id.innerHTML=optionClientes();f.elements.tipo_seguro_id.innerHTML=optionTipos();f.elements.estado_expediente_id.innerHTML=optionEstados();}
   function fillDocTipos(){var form=document.getElementById('formExpDocumento');if(!form)return;var h='<option value="">Seleccione tipo</option>';docTipos.forEach(function(t){h+='<option value="'+esc(t.codigo)+'">'+esc(t.nombre)+'</option>';});form.elements.tipo_documento.innerHTML=h;}
   function loadDocTipos(){return fetchJson(documentosEndpoint+'?accion=tipos').then(function(r){docTipos=(r.data||{}).rows||[];fillDocTipos();}).catch(function(e){toast(e.message||'No se pudo cargar tipos de documento.','danger');});}
+  function fillReqEstados(){var filtro=document.getElementById('exp-req-filtro-estado');if(filtro){var h='<option value="todos">Todos</option>';reqEstados.forEach(function(e){h+='<option value="'+esc(e.codigo)+'">'+esc(e.nombre)+'</option>';});filtro.innerHTML=h;}var form=document.getElementById('formReqEstadoExp');if(form){var s='';reqEstados.forEach(function(e){s+='<option value="'+esc(e.codigo)+'">'+esc(e.nombre)+'</option>';});form.elements.estado_requisito.innerHTML=s;}}
+  function loadReqEstados(){return fetchJson(requisitosEndpoint+'?accion=estados').then(function(r){reqEstados=(r.data||{}).rows||[];fillReqEstados();}).catch(function(e){toast(e.message||'No se pudo cargar estados de requisitos.','danger');});}
   function loadContext(){return fetchJson(endpoint+'?accion=contexto').then(function(r){var d=r.data||{};clientes=d.clientes||[];tipos=d.tipos_seguro||[];estados=d.estados_expediente||[];estadoInicial=d.estado_inicial||null;csrf=d.csrf||csrf;fillOptions();}).catch(function(e){toast(e.message||'No se pudo cargar contexto.','danger');});}
   function load(){document.getElementById('exp-loading').style.display='block';fetchJson(endpoint+'?'+params().toString()).then(function(r){var d=r.data||{};rows=d.rows||[];renderRows();renderPagination(d.pagination||{});}).catch(function(e){toast(e.message||'No se pudo cargar expedientes.','danger');}).finally(function(){document.getElementById('exp-loading').style.display='none';});}
   function renderRows(){var h='';rows.forEach(function(r){var cliente='<strong class="exp-text-clip" title="'+esc(r.cliente_razon_social||'')+'">'+esc(resumen(r.cliente_razon_social,90))+'</strong><div class="text-muted small">'+esc((r.cliente_ruc||'Sin RUC')+' / '+(r.tipo_cliente||''))+'</div>';var tipo='<span class="exp-text-clip" title="'+esc(r.tipo_seguro_nombre||'')+'">'+esc(resumen(r.tipo_seguro_nombre,90))+'</span>';var descripcion='<span class="exp-text-clip" title="'+esc(r.descripcion||'')+'">'+esc(resumen(r.descripcion||'-',110))+'</span>';h+='<tr><td><strong>'+esc(r.codigo)+'</strong></td><td>'+cliente+'</td><td>'+tipo+'</td><td>'+descripcion+'</td><td>'+badgeEstado(r)+'</td><td>'+esc(r.fecha_apertura)+'</td><td>'+badgeActivo(r.estado)+'</td><td class="text-center">'+actions(r)+'</td></tr>';});document.getElementById('exp-body').innerHTML=h;document.getElementById('exp-empty').style.display=rows.length?'none':'block';}
@@ -267,9 +369,19 @@ document.addEventListener('DOMContentLoaded', function () {
   function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
   function openModal(id){var form=document.getElementById('formExpediente');form.reset();clearValidation(form);form.dataset.mode=id?'edit':'create';form.elements.id.value='';form.elements.estado.value='1';form.elements.fecha_apertura.value=today();form.elements.estado_expediente_id.disabled=!id;document.getElementById('exp-estado-help').style.display=id?'none':'block';document.getElementById('modalExpedienteTitle').textContent=id?'Editar expediente':'Registrar expediente';if(!id){if(estadoInicial){form.elements.estado_expediente_id.value=estadoInicial.id;}$('#modalExpediente').modal('show');return;}fetchJson(endpoint+'?accion=obtener&id='+encodeURIComponent(id)).then(function(r){var rec=(r.data||{}).record||{};['id','cliente_id','tipo_seguro_id','estado_expediente_id','descripcion','observaciones','fecha_apertura','estado'].forEach(function(k){setVal(form,k,rec[k]);});$('#modalExpediente').modal('show');}).catch(function(e){toast(e.message||'No se pudo cargar el expediente.','danger');});}
   function save(form){if(!form.checkValidity()){form.classList.add('was-validated');return;}clearValidation(form);var creating=form.dataset.mode!=='edit';var data=new FormData(form);if(creating){data.delete('id');if(estadoInicial){data.set('estado_expediente_id',estadoInicial.id);}}post(creating?'crear':'actualizar',data).then(function(r){$('#modalExpediente').modal('hide');toast(r.message||'Expediente guardado.','success');loadContext().then(load);}).catch(function(e){applyErrors(form,e.errors||{});toast(e.message||'No se pudo guardar el expediente.','danger');});}
-  function viewDetail(id){fetchJson(endpoint+'?accion=obtener&id='+encodeURIComponent(id)).then(function(r){var x=(r.data||{}).record||{};expedienteDetalleId=id;document.getElementById('exp-detalle-resumen').innerHTML='<dl class="row mb-0"><dt class="col-sm-3">Codigo</dt><dd class="col-sm-9">'+esc(x.codigo)+'</dd><dt class="col-sm-3">Cliente</dt><dd class="col-sm-9">'+esc(x.cliente_razon_social)+'<div class="text-muted small">'+esc(x.cliente_ruc||'Sin RUC')+'</div></dd><dt class="col-sm-3">Tipo</dt><dd class="col-sm-9">'+esc(x.tipo_seguro_nombre)+'</dd><dt class="col-sm-3">Estado</dt><dd class="col-sm-9">'+esc(x.estado_expediente_nombre)+'</dd><dt class="col-sm-3">Fecha apertura</dt><dd class="col-sm-9">'+esc(x.fecha_apertura)+'</dd><dt class="col-sm-3">Descripcion</dt><dd class="col-sm-9">'+esc(x.descripcion)+'</dd><dt class="col-sm-3">Observaciones</dt><dd class="col-sm-9">'+esc(x.observaciones||'-')+'</dd></dl>';var form=document.getElementById('formExpDocumento');if(form){form.reset();clearValidation(form);form.elements.expediente_id.value=id;}$('#expDetalleTabs a[href="#exp-tab-resumen"]').tab('show');loadDocs(id);loadActividad(id);$('#modalDetalleExpediente').modal('show');}).catch(function(e){toast(e.message||'No se pudo cargar detalle.','danger');});}
+  function viewDetail(id){fetchJson(endpoint+'?accion=obtener&id='+encodeURIComponent(id)).then(function(r){var x=(r.data||{}).record||{};expedienteDetalleId=id;document.getElementById('exp-detalle-resumen').innerHTML='<dl class="row mb-0"><dt class="col-sm-3">Codigo</dt><dd class="col-sm-9">'+esc(x.codigo)+'</dd><dt class="col-sm-3">Cliente</dt><dd class="col-sm-9">'+esc(x.cliente_razon_social)+'<div class="text-muted small">'+esc(x.cliente_ruc||'Sin RUC')+'</div></dd><dt class="col-sm-3">Tipo</dt><dd class="col-sm-9">'+esc(x.tipo_seguro_nombre)+'</dd><dt class="col-sm-3">Estado</dt><dd class="col-sm-9">'+esc(x.estado_expediente_nombre)+'</dd><dt class="col-sm-3">Fecha apertura</dt><dd class="col-sm-9">'+esc(x.fecha_apertura)+'</dd><dt class="col-sm-3">Descripcion</dt><dd class="col-sm-9">'+esc(x.descripcion)+'</dd><dt class="col-sm-3">Observaciones</dt><dd class="col-sm-9">'+esc(x.observaciones||'-')+'</dd></dl>';var form=document.getElementById('formExpDocumento');if(form){form.reset();clearValidation(form);form.elements.expediente_id.value=id;}document.getElementById('exp-req-filtro-estado').value='todos';$('#expDetalleTabs a[href="#exp-tab-resumen"]').tab('show');loadDocs(id);loadReqs(id);loadActividad(id);$('#modalDetalleExpediente').modal('show');}).catch(function(e){toast(e.message||'No se pudo cargar detalle.','danger');});}
   function loadDocs(id){document.getElementById('exp-docs-body').innerHTML='<tr><td colspan="7" class="text-muted text-center">Cargando documentos...</td></tr>';document.getElementById('exp-docs-empty').style.display='none';fetchJson(documentosEndpoint+'?accion=listar&expediente_id='+encodeURIComponent(id)).then(function(r){renderDocs((r.data||{}).rows||[]);}).catch(function(e){document.getElementById('exp-docs-body').innerHTML='';document.getElementById('exp-docs-empty').style.display='block';toast(e.message||'No se pudieron cargar documentos.','danger');});}
   function renderDocs(items){var h='';items.forEach(function(d){var activo=Number(d.vinculo_estado)===1&&Number(d.archivo_estado)===1;var acciones='<span class="exp-actions"><a class="btn btn-xs btn-outline-info" href="'+documentosEndpoint+'?accion=descargar&vinculo_id='+encodeURIComponent(d.vinculo_id)+'" title="Descargar" aria-label="Descargar"><i class="fas fa-download"></i></a>';if(permisos.puede_editar&&activo){acciones+='<button type="button" class="btn btn-xs btn-outline-secondary" data-doc-archive="'+esc(d.vinculo_id)+'" title="Archivar" aria-label="Archivar"><i class="fas fa-archive"></i></button>';}acciones+='</span>';h+='<tr><td>'+esc(d.tipo_documento_nombre||d.slot||'-')+'</td><td><strong>'+esc(d.nombre_original||'-')+'</strong><div class="text-muted small">'+esc(d.mime_type||'')+' '+esc(bytes(d.tamanio_bytes))+'</div></td><td>'+esc(d.descripcion||'-')+'</td><td>'+esc(d.cargado_en||'-')+'</td><td>'+esc(d.cargado_por_usuario_externo_id||'-')+'</td><td>'+badgeActivo(activo?1:0)+'</td><td class="text-center">'+acciones+'</td></tr>';});document.getElementById('exp-docs-body').innerHTML=h;document.getElementById('exp-docs-empty').style.display=items.length?'none':'block';}
+  function loadReqs(id){var estado=document.getElementById('exp-req-filtro-estado').value||'todos';document.getElementById('exp-req-body').innerHTML='<tr><td colspan="10" class="text-muted text-center">Cargando requisitos...</td></tr>';document.getElementById('exp-req-empty').style.display='none';var gen=document.getElementById('exp-req-generar');if(gen)gen.style.display='none';fetchJson(requisitosEndpoint+'?accion=listar&expediente_id='+encodeURIComponent(id)+'&estado='+encodeURIComponent(estado)).then(function(r){var d=r.data||{};reqRows=d.rows||[];renderReqs(reqRows,!!d.tiene_requisitos);}).catch(function(e){document.getElementById('exp-req-body').innerHTML='';document.getElementById('exp-req-empty').style.display='block';toast(e.message||'No se pudieron cargar requisitos.','danger');});}
+  function renderReqs(items,tieneRequisitos){var h='';items.forEach(function(r){var docs=renderReqDocs(r);var acciones='<span class="exp-actions">';if(permisos.puede_editar){acciones+='<button type="button" class="btn btn-xs btn-outline-primary" data-req-action="estado" data-id="'+r.id+'" title="Cambiar estado" aria-label="Cambiar estado"><i class="fas fa-edit"></i></button>';}if(permisos.puede_crear&&['pendiente','entregado','observado','rechazado'].indexOf(String(r.estado_requisito))!==-1){acciones+='<button type="button" class="btn btn-xs btn-outline-success" data-req-action="upload" data-id="'+r.id+'" title="Cargar documento" aria-label="Cargar documento"><i class="fas fa-upload"></i></button>';}acciones+='</span>';h+='<tr><td>'+esc(r.orden_visual_snapshot)+'</td><td><strong class="exp-text-clip" title="'+esc(r.nombre_snapshot||'')+'">'+esc(resumen(r.nombre_snapshot,100))+'</strong></td><td><span class="exp-text-clip" title="'+esc(r.descripcion_snapshot||'')+'">'+esc(resumen(r.descripcion_snapshot||'-',120))+'</span></td><td>'+(Number(r.es_obligatorio_snapshot)===1?'<span class="badge badge-danger">Obligatorio</span>':'<span class="badge badge-info">Opcional</span>')+'</td><td>'+badgeReqEstado(r.estado_requisito)+'</td><td><span class="exp-text-clip" title="'+esc(r.observacion_actual||'')+'">'+esc(resumen(r.observacion_actual||'-',100))+'</span></td><td>'+esc(r.fecha_entrega||'-')+'<div class="text-muted small">Usuario: '+esc(r.entregado_por_usuario_externo_id||'-')+'</div></td><td>'+esc(r.fecha_evaluacion||'-')+'<div class="text-muted small">Usuario: '+esc(r.evaluado_por_usuario_externo_id||'-')+'</div></td><td>'+esc(r.documentos_activos||0)+docs+'</td><td class="text-center">'+acciones+'</td></tr>';});document.getElementById('exp-req-body').innerHTML=h;document.getElementById('exp-req-empty').textContent=tieneRequisitos?'No hay requisitos para el filtro seleccionado.':'Este expediente no tiene requisitos generados.';document.getElementById('exp-req-empty').style.display=items.length?'none':'block';var gen=document.getElementById('exp-req-generar');if(gen)gen.style.display=!tieneRequisitos?'inline-block':'none';}
+  function renderReqDocs(r){var docs=r.documentos||[];if(!docs.length)return '';var h='<ul class="exp-req-docs">';docs.forEach(function(d){var activo=Number(d.vinculo_estado)===1&&Number(d.archivo_estado)===1;h+='<li><span title="'+esc(d.nombre_original||'')+'">'+esc(resumen(d.nombre_original||'-',42))+'</span> '+badgeActivo(activo?1:0)+'<div class="text-muted small">'+esc(d.cargado_en||'-')+' / Usuario: '+esc(d.cargado_por_usuario_externo_id||'-')+'</div><span class="exp-actions"><a class="btn btn-xs btn-outline-info" href="'+requisitosEndpoint+'?accion=descargar&expediente_id='+encodeURIComponent(expedienteDetalleId)+'&vinculo_id='+encodeURIComponent(d.vinculo_id)+'" title="Descargar" aria-label="Descargar"><i class="fas fa-download"></i></a>';if(permisos.puede_editar&&activo){h+='<button type="button" class="btn btn-xs btn-outline-secondary" data-req-doc-archive="'+esc(d.vinculo_id)+'" title="Archivar" aria-label="Archivar"><i class="fas fa-archive"></i></button>';}h+='</span></li>';});return h+'</ul>';}
+  function reqById(id){for(var i=0;i<reqRows.length;i++){if(Number(reqRows[i].id)===Number(id))return reqRows[i];}return null;}
+  function openReqEstado(id){var r=reqById(id);if(!r)return;var f=document.getElementById('formReqEstadoExp');f.reset();clearValidation(f);f.elements.id.value=r.id;f.elements.expediente_id.value=expedienteDetalleId;f.elements.estado_requisito.value=r.estado_requisito;f.elements.observacion_actual.value=r.observacion_actual||'';document.getElementById('req-estado-nombre').value=r.nombre_snapshot||'';$('#modalReqEstadoExp').modal('show');}
+  function openReqDoc(id){var r=reqById(id);if(!r)return;var f=document.getElementById('formReqDocExp');f.reset();clearValidation(f);f.elements.id.value=r.id;f.elements.expediente_id.value=expedienteDetalleId;document.getElementById('req-doc-nombre').value=r.nombre_snapshot||'';$('#modalReqDocExp').modal('show');}
+  function saveReqEstado(form){if(!form.checkValidity()){form.classList.add('was-validated');return;}clearValidation(form);postReq('cambiar_estado',new FormData(form)).then(function(r){$('#modalReqEstadoExp').modal('hide');toast(r.message||'Requisito actualizado.','success');loadReqs(expedienteDetalleId);loadActividad(expedienteDetalleId);}).catch(function(e){applyErrors(form,e.errors||{});toast(e.message||'No se pudo actualizar el requisito.','danger');});}
+  function uploadReqDocs(form){var files=form.elements.archivo.files;if(!files||!files.length){form.classList.add('was-validated');return;}clearValidation(form);var id=form.elements.id.value, expId=form.elements.expediente_id.value;var chain=Promise.resolve(), ok=0;Array.prototype.forEach.call(files,function(file){chain=chain.then(function(){var data=new FormData();data.set('id',id);data.set('expediente_id',expId);data.set('archivo',file);return postReq('cargar_documento',data).then(function(){ok++;});});});chain.then(function(){$('#modalReqDocExp').modal('hide');toast(ok+' documento(s) cargado(s).','success');loadReqs(expedienteDetalleId);loadActividad(expedienteDetalleId);}).catch(function(e){applyErrors(form,e.errors||{});toast(e.message||'No se pudo cargar uno de los documentos.','danger');});}
+  function postReq(action,data){data.set('_csrf',csrf);return fetchJson(requisitosEndpoint+'?accion='+encodeURIComponent(action),{method:'POST',body:data});}
+  function generarReqs(){var data=new FormData();data.set('expediente_id',expedienteDetalleId);postReq('generar',data).then(function(r){toast(r.message||'Requisitos generados.','success');loadReqs(expedienteDetalleId);loadActividad(expedienteDetalleId);}).catch(function(e){toast(e.message||'No se pudieron generar requisitos.','danger');});}
   function loadActividad(id){document.getElementById('exp-actividad-body').innerHTML='<div class="text-muted text-center py-2">Cargando actividad...</div>';document.getElementById('exp-actividad-empty').style.display='none';fetchJson(timelineEndpoint+'?accion=listar&expediente_id='+encodeURIComponent(id)).then(function(r){renderActividad((r.data||{}).rows||[]);}).catch(function(e){document.getElementById('exp-actividad-body').innerHTML='';document.getElementById('exp-actividad-empty').style.display='block';toast(e.message||'No se pudo cargar actividad.','danger');});}
   function renderActividad(items){var h='';items.forEach(function(ev){h+='<div class="border-bottom py-2"><div class="d-flex justify-content-between"><strong>'+esc(ev.descripcion||ev.codigo_evento)+'</strong><span class="text-muted small">'+esc(ev.fecha_evento||'-')+'</span></div><div class="text-muted small">Evento: '+esc(ev.codigo_evento||'-')+' - Usuario: '+esc(ev.actor_usuario_externo_id||'-')+'</div></div>';});document.getElementById('exp-actividad-body').innerHTML=h;document.getElementById('exp-actividad-empty').style.display=items.length?'none':'block';}
   function confirmAction(text,cb){document.getElementById('modalConfirmExpedienteText').textContent=text;confirmCallback=cb;$('#modalConfirmExpediente').modal('show');}
@@ -284,7 +396,12 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('formExpediente').addEventListener('submit',function(e){e.preventDefault();save(e.target);});
   var formDoc=document.getElementById('formExpDocumento');if(formDoc)formDoc.addEventListener('submit',function(e){e.preventDefault();var form=e.target;if(!form.checkValidity()){form.classList.add('was-validated');return;}clearValidation(form);var expedienteId=form.elements.expediente_id.value;postDocs('cargar',new FormData(form)).then(function(r){toast(r.message||'Documento cargado.','success');form.reset();form.elements.expediente_id.value=expedienteId;loadDocs(expedienteId);loadActividad(expedienteId);}).catch(function(e){applyErrors(form,e.errors||{});toast(e.message||'No se pudo cargar el documento.','danger');});});
   document.getElementById('exp-docs-body').addEventListener('click',function(e){var b=e.target.closest('[data-doc-archive]');if(!b)return;var id=b.getAttribute('data-doc-archive');confirmAction('Desea archivar este documento del expediente?',function(){var data=new FormData();data.set('vinculo_id',id);postDocs('archivar',data).then(function(r){toast(r.message||'Documento archivado.','success');if(expedienteDetalleId){loadDocs(expedienteDetalleId);loadActividad(expedienteDetalleId);}}).catch(function(e){toast(e.message||'No se pudo archivar el documento.','danger');});});});
+  document.getElementById('exp-req-filtro-estado').addEventListener('change',function(){if(expedienteDetalleId)loadReqs(expedienteDetalleId);});
+  var btnReqGenerar=document.getElementById('exp-req-generar');if(btnReqGenerar)btnReqGenerar.addEventListener('click',function(){confirmAction('Desea generar los requisitos para este expediente?',generarReqs);});
+  document.getElementById('exp-req-body').addEventListener('click',function(e){var b=e.target.closest('[data-req-action]');if(b){var id=b.dataset.id;if(b.dataset.reqAction==='estado')openReqEstado(id);else openReqDoc(id);return;}var a=e.target.closest('[data-req-doc-archive]');if(!a)return;var vinculoId=a.getAttribute('data-req-doc-archive');confirmAction('Desea archivar este documento de requisito?',function(){var data=new FormData();data.set('vinculo_id',vinculoId);data.set('expediente_id',expedienteDetalleId);postReq('archivar_documento',data).then(function(r){toast(r.message||'Documento archivado.','success');loadReqs(expedienteDetalleId);loadActividad(expedienteDetalleId);}).catch(function(e){toast(e.message||'No se pudo archivar el documento.','danger');});});});
+  document.getElementById('formReqEstadoExp').addEventListener('submit',function(e){e.preventDefault();saveReqEstado(e.target);});
+  document.getElementById('formReqDocExp').addEventListener('submit',function(e){e.preventDefault();uploadReqDocs(e.target);});
   document.getElementById('modalConfirmExpedienteOk').addEventListener('click',function(){var cb=confirmCallback;confirmCallback=null;$('#modalConfirmExpediente').modal('hide');if(typeof cb==='function')cb();});
-  Promise.all([loadContext(),loadDocTipos()]).then(load);
+  Promise.all([loadContext(),loadDocTipos(),loadReqEstados()]).then(load);
 });
 </script>

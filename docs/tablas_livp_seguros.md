@@ -431,11 +431,15 @@ Reglas de estado o eliminacion:
 Eventos iniciales:
 - `expediente_creado`
 - `expediente_editado`
-- `estado_comercial_modificado`
+- `estado_expediente_modificado`
 - `expediente_activado`
 - `expediente_desactivado`
 - `documento_cargado`
 - `documento_archivado`
+- `requisitos_generados`
+- `requisito_estado_modificado`
+- `requisito_documento_cargado`
+- `requisito_documento_archivado`
 
 Motivo del cambio:
 - Dar trazabilidad basica a expedientes, documentos y cambios comerciales sin implementar todavia un timeline avanzado.
@@ -479,6 +483,80 @@ Reglas de estado o eliminacion:
 
 Motivo del cambio:
 - Preparar la configuracion base de requisitos por tipo de seguro antes de implementarlos dentro de expedientes.
+
+### 2026-06-21 - seg_expediente_requisitos
+
+Tabla: `seg_expediente_requisitos`
+Tipo de cambio: creada
+Modulo relacionado: `expedientes`
+Proposito: guardar requisitos concretos de cada expediente generados desde la configuracion reusable de requisitos por tipo de seguro.
+
+Columnas principales:
+- `id`
+- `expediente_id`
+- `requisito_tipo_seguro_id`
+- `codigo_requisito_snapshot`
+- `nombre_snapshot`
+- `descripcion_snapshot`
+- `es_obligatorio_snapshot`
+- `orden_visual_snapshot`
+- `estado_requisito`
+- `observacion_actual`
+- `fecha_entrega`
+- `entregado_por_usuario_externo_id`
+- `fecha_evaluacion`
+- `evaluado_por_usuario_externo_id`
+- `creado_por_usuario_externo_id`
+- `actualizado_por_usuario_externo_id`
+- `creado_en`
+- `actualizado_en`
+
+Relaciones:
+- `expediente_id` referencia `seg_expedientes.id`.
+- `requisito_tipo_seguro_id` referencia `seg_requisitos_tipo_seguro.id`.
+
+Indices y unique:
+- Llave primaria `id`.
+- Combinacion unica `expediente_id` + `requisito_tipo_seguro_id` para evitar duplicados.
+- Indices en expediente, requisito base, estado de requisito y orden visual.
+
+Reglas de estado o eliminacion:
+- Estados permitidos: `pendiente`, `entregado`, `observado`, `aprobado`, `rechazado`, `no_aplica`.
+- No hay borrado fisico.
+- Al crear un expediente se generan los requisitos activos del tipo de seguro dentro de la misma transaccion.
+- Los expedientes antiguos pueden generar requisitos manualmente solo si aun no tienen requisitos.
+- No se permite cambiar el tipo de seguro de un expediente cuando ya tiene requisitos generados.
+- Para `observado`, `rechazado` y `no_aplica` se exige observacion o motivo.
+
+Regla de snapshots:
+- Los campos `*_snapshot` conservan la version historica del requisito al momento de generarse en el expediente.
+- Cambios posteriores en `seg_requisitos_tipo_seguro` no deben alterar expedientes ya creados.
+
+Motivo del cambio:
+- Permitir checklist operativo por expediente sin perder trazabilidad historica de los requisitos definidos al momento de crear el expediente.
+
+### 2026-06-21 - uso de seg_archivos_vinculos para respuestas de requisitos
+
+Tabla: `seg_archivos_vinculos`
+Tipo de cambio: uso documentado
+Modulo relacionado: `expedientes`
+Proposito: vincular documentos cargados como respuesta a un requisito concreto de expediente sin crear una tabla paralela de archivos.
+
+Valores operativos:
+- `codigo_uso = expediente_requisito_documento`
+- `entidad_tipo = expediente_requisito`
+- `entidad_id = seg_expediente_requisitos.id`
+- `slot = respuesta_requisito`
+
+Reglas de estado o eliminacion:
+- `estado = 1` Activo.
+- `estado = 0` Archivado.
+- No hay borrado fisico del archivo historico.
+- La descarga debe pasar por endpoint protegido de Expedientes.
+- Los documentos generales de expediente usan `codigo_uso = expediente_documento` y se mantienen separados de las respuestas de requisito.
+
+Motivo del cambio:
+- Permitir evidencia documental por requisito usando `almacen_core.php`, `seg_archivos` y `seg_archivos_vinculos`.
 
 ## Plantilla obligatoria para registros futuros
 

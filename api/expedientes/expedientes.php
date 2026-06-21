@@ -213,6 +213,11 @@ function exp_crear(): void
                 'estado_expediente_id' => (int) $data['estado_expediente_id'],
                 'estado_expediente' => (string) ($created['estado_expediente_nombre'] ?? ''),
             ], $userId, $now);
+            $reqCount = exp_generar_requisitos_expediente($pdo, $id, (int) $data['tipo_seguro_id'], $userId, $now);
+            exp_timeline_add($pdo, 'expediente', $id, 'requisitos_generados', 'Requisitos generados para el expediente.', [
+                'cantidad' => $reqCount,
+                'tipo_seguro_id' => (int) $data['tipo_seguro_id'],
+            ], $userId, $now);
             $pdo->commit();
             exp_json_success(['id' => $id, 'codigo' => $codigo], 'Expediente registrado correctamente.');
         } catch (PDOException $e) {
@@ -242,6 +247,11 @@ function exp_actualizar(): void
     $changes = exp_detect_changes($record, $data);
     if ($changes === []) {
         exp_json_success(['id' => $data['id']], 'No hubo cambios para guardar.');
+    }
+    if (isset($changes['tipo_seguro_id']) && exp_expediente_tiene_requisitos($pdo, (int) $data['id'])) {
+        exp_json_error('No se puede cambiar el tipo de seguro porque el expediente ya tiene requisitos generados.', 409, [
+            'tipo_seguro_id' => 'Mantener la coherencia del expediente requiere conservar el tipo de seguro actual.',
+        ]);
     }
 
     $userId = exp_user_id();
