@@ -324,6 +324,33 @@ function exp_expediente_tiene_requisitos(PDO $pdo, int $expedienteId): bool
     return (int) $stmt->fetchColumn() > 0;
 }
 
+function exp_table_exists(PDO $pdo, string $table): bool
+{
+    if (preg_match('/^[A-Za-z0-9_]{2,80}$/', $table) !== 1) {
+        return false;
+    }
+    try {
+        $stmt = $pdo->prepare('SELECT COUNT(*)
+            FROM information_schema.TABLES
+            WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = :table');
+        $stmt->execute([':table' => $table]);
+        return (int) $stmt->fetchColumn() > 0;
+    } catch (Throwable $e) {
+        return false;
+    }
+}
+
+function exp_expediente_tiene_polizas(PDO $pdo, int $expedienteId): bool
+{
+    if (!exp_table_exists($pdo, 'seg_polizas')) {
+        return false;
+    }
+    $stmt = $pdo->prepare('SELECT COUNT(*) FROM seg_polizas WHERE expediente_id = :id');
+    $stmt->execute([':id' => $expedienteId]);
+    return (int) $stmt->fetchColumn() > 0;
+}
+
 function exp_generar_requisitos_expediente(PDO $pdo, int $expedienteId, int $tipoSeguroId, ?int $userId, string $now): int
 {
     if ($expedienteId <= 0 || $tipoSeguroId <= 0) {
@@ -372,4 +399,48 @@ function exp_generar_requisitos_expediente(PDO $pdo, int $expedienteId, int $tip
     }
 
     return $count;
+}
+
+function exp_poliza_estados(): array
+{
+    return [
+        'borrador' => 'Borrador',
+        'emitida' => 'Emitida',
+        'vigente' => 'Vigente',
+        'cancelada' => 'Cancelada',
+        'anulada' => 'Anulada',
+    ];
+}
+
+function exp_poliza_estado_label(string $codigo): string
+{
+    $options = exp_poliza_estados();
+    return $options[$codigo] ?? $codigo;
+}
+
+function exp_poliza_estado_valido(string $codigo): bool
+{
+    return isset(exp_poliza_estados()[$codigo]);
+}
+
+function exp_poliza_documentos(): array
+{
+    return [
+        'poliza' => 'Poliza',
+        'carta_fianza' => 'Carta fianza',
+        'constancia' => 'Constancia',
+        'endoso' => 'Endoso',
+        'otro' => 'Otro',
+    ];
+}
+
+function exp_poliza_documento_label(string $codigo): string
+{
+    $options = exp_poliza_documentos();
+    return $options[$codigo] ?? $codigo;
+}
+
+function exp_poliza_documento_valido(string $codigo): bool
+{
+    return isset(exp_poliza_documentos()[$codigo]);
 }

@@ -253,6 +253,12 @@ function exp_actualizar(): void
             'tipo_seguro_id' => 'Mantener la coherencia del expediente requiere conservar el tipo de seguro actual.',
         ]);
     }
+    if ((isset($changes['cliente_id']) || isset($changes['tipo_seguro_id'])) && exp_expediente_tiene_polizas($pdo, (int) $data['id'])) {
+        exp_json_error('No se puede cambiar el cliente ni el tipo de seguro porque el expediente ya tiene polizas registradas.', 409, [
+            'cliente_id' => 'Las polizas conservan snapshots historicos del contratante.',
+            'tipo_seguro_id' => 'Las polizas dependen del tipo de seguro del expediente.',
+        ]);
+    }
 
     $userId = exp_user_id();
     $now = exp_now();

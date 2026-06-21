@@ -440,6 +440,13 @@ Eventos iniciales:
 - `requisito_estado_modificado`
 - `requisito_documento_cargado`
 - `requisito_documento_archivado`
+- `poliza_registrada`
+- `poliza_editada`
+- `poliza_estado_modificado`
+- `poliza_documento_principal_cargado`
+- `poliza_documento_principal_archivado`
+- `poliza_activada`
+- `poliza_desactivada`
 
 Motivo del cambio:
 - Dar trazabilidad basica a expedientes, documentos y cambios comerciales sin implementar todavia un timeline avanzado.
@@ -557,6 +564,136 @@ Reglas de estado o eliminacion:
 
 Motivo del cambio:
 - Permitir evidencia documental por requisito usando `almacen_core.php`, `seg_archivos` y `seg_archivos_vinculos`.
+
+### 2026-06-21 - seg_formatos_tipo_seguro
+
+Tabla: `seg_formatos_tipo_seguro`
+Tipo de cambio: creada
+Modulo relacionado: `formatos_tipo`
+Proposito: administrar formatos descargables reutilizables asociados a tipos de seguro y opcionalmente a requisitos del mismo tipo.
+
+Columnas principales:
+- `id`
+- `tipo_seguro_id`
+- `requisito_tipo_seguro_id`
+- `codigo`
+- `nombre`
+- `descripcion`
+- `orden_visual`
+- `estado`
+- `creado_por_usuario_externo_id`
+- `actualizado_por_usuario_externo_id`
+- `creado_en`
+- `actualizado_en`
+
+Relaciones:
+- `tipo_seguro_id` referencia `seg_tipos_seguro.id`.
+- `requisito_tipo_seguro_id` referencia opcionalmente `seg_requisitos_tipo_seguro.id`.
+- Si existe requisito relacionado, debe pertenecer al mismo tipo de seguro del formato.
+
+Indices y unique:
+- Llave primaria `id`.
+- `codigo` unico generado por backend.
+- Indices en tipo de seguro, requisito relacionado, estado, orden visual y nombre.
+
+Reglas de estado o eliminacion:
+- `estado = 1` Activo.
+- `estado = 0` Inactivo.
+- No hay borrado fisico.
+- Solo se permite crear o activar formatos de tipos de seguro activos.
+- No se permite activar un formato sin archivo principal activo.
+
+Uso de archivos:
+- El archivo principal usa `almacen_core.php`, `seg_archivos` y `seg_archivos_vinculos`.
+- Carpeta funcional: `almacen/formatos_tipo/archivos/YYYY/MM/DD/`.
+- `codigo_uso = formato_tipo_seguro_archivo`.
+- `entidad_tipo = formato_tipo_seguro`.
+- `entidad_id = seg_formatos_tipo_seguro.id`.
+- `slot = archivo_principal`.
+- Al reemplazar archivo se archiva el vinculo anterior; no se borra fisicamente el archivo historico.
+
+Motivo del cambio:
+- Permitir que los usuarios descarguen formatos configurados segun el tipo de seguro del expediente.
+
+### 2026-06-21 - seg_polizas
+
+Tabla: `seg_polizas`
+Tipo de cambio: creada
+Modulo relacionado: `expedientes`
+Proposito: registrar polizas, cartas fianza, constancias, endosos u otros documentos emitidos vinculados a un expediente.
+
+Columnas principales:
+- `id`
+- `codigo`
+- `expediente_id`
+- `cliente_id`
+- `tipo_seguro_id`
+- `aseguradora_id`
+- `tipo_documento_emitido`
+- `numero_documento`
+- `contratante_nombre_snapshot`
+- `contratante_ruc_snapshot`
+- `beneficiario_nombre`
+- `fecha_emision`
+- `vigencia_inicio`
+- `vigencia_fin`
+- `vigencia_dias`
+- `suma_asegurada`
+- `moneda`
+- `prima_comercial`
+- `igv`
+- `prima_total`
+- `estado_poliza`
+- `observaciones`
+- `estado`
+- `creado_por_usuario_externo_id`
+- `actualizado_por_usuario_externo_id`
+- `creado_en`
+- `actualizado_en`
+
+Relaciones:
+- `expediente_id` referencia `seg_expedientes.id`.
+- `cliente_id` referencia `seg_clientes.id` y se obtiene del expediente.
+- `tipo_seguro_id` referencia `seg_tipos_seguro.id` y se obtiene del expediente.
+- `aseguradora_id` referencia `seg_aseguradoras.id`.
+
+Indices y unique:
+- Llave primaria `id`.
+- `codigo` unico generado por backend con formato `POL-AAAA-000001`.
+- Indices en expediente, cliente, tipo de seguro, aseguradora, estado de poliza, vigencia y estado activo/inactivo.
+
+Reglas de estado o eliminacion:
+- Estados permitidos: `borrador`, `emitida`, `vigente`, `cancelada`, `anulada`.
+- Tipos de documento emitido permitidos: `poliza`, `carta_fianza`, `constancia`, `endoso`, `otro`.
+- `estado = 1` Activo.
+- `estado = 0` Inactivo.
+- No hay borrado fisico.
+- No se permite crear polizas en expedientes inactivos.
+- La fecha de fin de vigencia debe ser posterior al inicio.
+- `vigencia_dias` se calcula en backend.
+- Los montos deben ser no negativos.
+- Para `emitida` o `vigente`, el numero de documento es obligatorio.
+
+Regla de snapshots:
+- `contratante_nombre_snapshot` y `contratante_ruc_snapshot` conservan los datos del cliente al registrar la poliza.
+- Cuando un expediente ya tiene polizas, no se debe cambiar cliente ni tipo de seguro del expediente.
+
+Uso de archivos:
+- El PDF principal usa `almacen_core.php`, `seg_archivos` y `seg_archivos_vinculos`.
+- Carpeta funcional: `almacen/polizas/documentos/YYYY/MM/DD/`.
+- `codigo_uso = poliza_documento_principal`.
+- `entidad_tipo = poliza`.
+- `entidad_id = seg_polizas.id`.
+- `slot = documento_principal`.
+- Solo se acepta PDF para el documento principal.
+- Al reemplazar o archivar PDF se desactiva el vinculo anterior; no se borra fisicamente el archivo historico.
+
+Timeline:
+- Los eventos de poliza se registran sobre el expediente padre con `entidad_tipo = expediente`.
+- Eventos: `poliza_registrada`, `poliza_editada`, `poliza_estado_modificado`, `poliza_documento_principal_cargado`, `poliza_documento_principal_archivado`, `poliza_activada`, `poliza_desactivada`.
+
+Motivo del cambio:
+- Incorporar una primera gestion basica de documentos emitidos sin implementar cotizaciones, renovaciones, endosos avanzados, pagos ni garantias.
 
 ## Plantilla obligatoria para registros futuros
 

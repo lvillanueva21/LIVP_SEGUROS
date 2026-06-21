@@ -131,6 +131,7 @@ $permExpedientes = [
           <li class="nav-item"><a class="nav-link active" data-toggle="pill" href="#exp-tab-resumen" role="tab">Resumen</a></li>
           <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#exp-tab-documentos" role="tab">Documentos</a></li>
           <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#exp-tab-requisitos" role="tab">Requisitos</a></li>
+          <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#exp-tab-polizas" role="tab">Polizas</a></li>
           <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#exp-tab-actividad" role="tab">Actividad</a></li>
         </ul>
         <div class="tab-content border-left border-right border-bottom p-3 exp-detail-content">
@@ -179,6 +180,25 @@ $permExpedientes = [
             <div class="exp-empty mt-2" id="exp-docs-empty">No hay documentos vinculados.</div>
           </div>
           <div class="tab-pane fade" id="exp-tab-requisitos" role="tabpanel">
+            <div class="mb-3">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <h6 class="mb-0">Formatos disponibles</h6>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-bordered table-sm mb-0 exp-formatos-table">
+                  <thead>
+                    <tr>
+                      <th>Formato</th>
+                      <th>Descripcion</th>
+                      <th>Requisito relacionado</th>
+                      <th class="text-center" style="width:86px;">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="exp-formatos-body"></tbody>
+                </table>
+              </div>
+              <div class="exp-empty mt-2" id="exp-formatos-empty">No hay formatos activos para este tipo de seguro.</div>
+            </div>
             <div class="d-flex flex-wrap align-items-center justify-content-between mb-2">
               <div class="form-inline">
                 <label class="mr-2 mb-2" for="exp-req-filtro-estado">Estado</label>
@@ -210,6 +230,48 @@ $permExpedientes = [
               </table>
             </div>
             <div class="exp-empty mt-2" id="exp-req-empty">Este expediente no tiene requisitos generados.</div>
+          </div>
+          <div class="tab-pane fade" id="exp-tab-polizas" role="tabpanel">
+            <div class="pol-toolbar-detail mb-2">
+              <div class="input-group input-group-sm">
+                <input type="search" class="form-control" id="pol-search" placeholder="Buscar por codigo, numero, contratante o aseguradora">
+                <div class="input-group-append">
+                  <button class="btn btn-outline-secondary" type="button" id="pol-btn-buscar" title="Buscar" aria-label="Buscar"><i class="fas fa-search"></i></button>
+                </div>
+              </div>
+              <select class="form-control form-control-sm" id="pol-filtro-aseguradora"><option value="0">Todas las aseguradoras</option></select>
+              <select class="form-control form-control-sm" id="pol-filtro-estado-poliza"><option value="todos">Todos los estados</option></select>
+              <select class="form-control form-control-sm" id="pol-filtro-activo">
+                <option value="todos">Todos</option>
+                <option value="activo">Activas</option>
+                <option value="inactivo">Inactivas</option>
+              </select>
+              <?php if ($permExpedientes['puede_crear']): ?>
+                <button class="btn btn-primary btn-sm" type="button" id="pol-btn-nuevo"><i class="fas fa-plus"></i> Registrar poliza</button>
+              <?php endif; ?>
+            </div>
+            <div class="text-muted small mb-2" id="pol-counter">0 registros</div>
+            <div class="table-responsive">
+              <table class="table table-bordered table-sm mb-0 exp-pol-table">
+                <thead>
+                  <tr>
+                    <th>Codigo</th>
+                    <th>Documento</th>
+                    <th>Aseguradora</th>
+                    <th>Vigencia</th>
+                    <th>Suma asegurada</th>
+                    <th>Prima total</th>
+                    <th>Estado</th>
+                    <th>Activo</th>
+                    <th>PDF</th>
+                    <th class="text-center" style="width:96px;">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="pol-body"></tbody>
+              </table>
+            </div>
+            <div class="exp-empty mt-2" id="pol-empty">No hay polizas registradas para este expediente.</div>
+            <div class="exp-pagination" id="pol-pagination"></div>
           </div>
           <div class="tab-pane fade" id="exp-tab-actividad" role="tabpanel">
             <div id="exp-actividad-body"></div>
@@ -283,6 +345,148 @@ $permExpedientes = [
   </div>
 </div>
 
+<div class="modal fade" id="modalPolizaExp" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document">
+    <form class="modal-content" id="formPolizaExp" enctype="multipart/form-data" autocomplete="off" novalidate>
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalPolizaExpTitle">Poliza</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" name="id">
+        <input type="hidden" name="expediente_id">
+        <div class="form-row">
+          <div class="form-group col-lg-4 col-md-6">
+            <label>Aseguradora</label>
+            <select class="form-control" name="aseguradora_id" required></select>
+          </div>
+          <div class="form-group col-lg-4 col-md-6">
+            <label>Tipo de documento emitido</label>
+            <select class="form-control" name="tipo_documento_emitido" required></select>
+          </div>
+          <div class="form-group col-lg-4 col-md-6">
+            <label>Estado de poliza</label>
+            <select class="form-control" name="estado_poliza" required></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-lg-4 col-md-6">
+            <label>Numero de documento</label>
+            <input class="form-control" name="numero_documento" maxlength="80">
+          </div>
+          <div class="form-group col-lg-4 col-md-6">
+            <label>Beneficiario</label>
+            <input class="form-control" name="beneficiario_nombre" maxlength="180">
+          </div>
+          <div class="form-group col-lg-4 col-md-6">
+            <label>Fecha de emision</label>
+            <input class="form-control" name="fecha_emision" type="date" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-lg-4 col-md-6">
+            <label>Vigencia inicio</label>
+            <input class="form-control" name="vigencia_inicio" type="datetime-local" required>
+          </div>
+          <div class="form-group col-lg-4 col-md-6">
+            <label>Vigencia fin</label>
+            <input class="form-control" name="vigencia_fin" type="datetime-local" required>
+          </div>
+          <div class="form-group col-lg-2 col-md-3">
+            <label>Moneda</label>
+            <select class="form-control" name="moneda">
+              <option value="PEN">PEN</option>
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="OTRA">OTRA</option>
+            </select>
+          </div>
+          <div class="form-group col-lg-2 col-md-3">
+            <label>Activo</label>
+            <select class="form-control" name="estado">
+              <option value="1">Activo</option>
+              <option value="0">Inactivo</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-lg-3 col-md-6">
+            <label>Suma asegurada</label>
+            <input class="form-control" name="suma_asegurada" type="number" step="0.01" min="0">
+          </div>
+          <div class="form-group col-lg-3 col-md-6">
+            <label>Prima comercial</label>
+            <input class="form-control" name="prima_comercial" type="number" step="0.01" min="0">
+          </div>
+          <div class="form-group col-lg-3 col-md-6">
+            <label>IGV</label>
+            <input class="form-control" name="igv" type="number" step="0.01" min="0">
+          </div>
+          <div class="form-group col-lg-3 col-md-6">
+            <label>Prima total</label>
+            <input class="form-control" name="prima_total" type="number" step="0.01" min="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Observaciones</label>
+          <textarea class="form-control" name="observaciones" rows="3" maxlength="3000"></textarea>
+        </div>
+        <div class="form-group mb-0" id="pol-pdf-group">
+          <label>PDF principal</label>
+          <input class="form-control" name="archivo_pdf" type="file" accept="application/pdf,.pdf">
+          <small class="text-muted">Borrador puede guardarse sin PDF. Emitida o vigente requiere PDF principal activo.</small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal fade" id="modalPolizaPdfExp" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <form class="modal-content" id="formPolizaPdfExp" enctype="multipart/form-data" autocomplete="off" novalidate>
+      <div class="modal-header">
+        <h5 class="modal-title">Cargar PDF principal</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" name="id">
+        <input type="hidden" name="expediente_id">
+        <div class="form-group">
+          <label>Poliza</label>
+          <input class="form-control" id="pol-pdf-nombre" readonly>
+        </div>
+        <div class="form-group mb-0">
+          <label>PDF</label>
+          <input class="form-control" name="archivo_pdf" type="file" accept="application/pdf,.pdf" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-upload"></i> Cargar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal fade" id="modalPolizaDetalleExp" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Detalle de poliza</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body" id="pol-detalle-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal fade" id="modalConfirmExpediente" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
@@ -313,16 +517,21 @@ $permExpedientes = [
   .exp-detail-dialog .modal-body{overflow-y:auto}
   .exp-detail-content{min-height:360px}
   .exp-doc-table{min-width:1000px}
+  .exp-formatos-table{min-width:860px}
   .exp-req-table{min-width:1500px}
   .exp-req-docs{margin:.35rem 0 0 0;padding-left:1rem}
   .exp-req-docs li{margin-bottom:.2rem}
+  .pol-toolbar-detail{display:grid;gap:.5rem;grid-template-columns:minmax(240px,1fr) 210px 160px 120px auto;align-items:center}
+  .exp-pol-table{min-width:1280px}
+  .exp-pol-table th,.exp-pol-table td{vertical-align:middle}
   .exp-loading,.exp-empty{display:none;padding:1rem;border:1px dashed #ced4da;border-radius:.25rem;text-align:center;color:#6c757d;background:#f8f9fa}
   .exp-actions{display:inline-flex;flex-direction:column;gap:.25rem}
   .exp-pagination .btn{min-width:36px}
   .exp-toast-zone{position:fixed;right:1rem;bottom:1rem;z-index:1080;width:min(360px,calc(100vw - 2rem))}
   @media(max-width:575.98px){.exp-detail-dialog{max-width:calc(100vw - .5rem);margin:.25rem}.exp-detail-dialog .modal-content{max-height:calc(100vh - .5rem)}}
+  @media(max-width:1199.98px){.pol-toolbar-detail{grid-template-columns:1fr 1fr}}
   @media(max-width:1199.98px){.exp-toolbar{grid-template-columns:1fr 1fr}}
-  @media(max-width:767.98px){.exp-toolbar{grid-template-columns:1fr}}
+  @media(max-width:767.98px){.exp-toolbar,.pol-toolbar-detail{grid-template-columns:1fr}}
 </style>
 
 <script>
@@ -332,9 +541,12 @@ document.addEventListener('DOMContentLoaded', function () {
   var endpoint = 'api/expedientes/expedientes.php';
   var documentosEndpoint = 'api/expedientes/documentos.php';
   var requisitosEndpoint = 'api/expedientes/requisitos.php';
+  var formatosExpEndpoint = 'api/expedientes/formatos.php';
+  var polizasEndpoint = 'api/expedientes/polizas.php';
   var timelineEndpoint = 'api/expedientes/timeline.php';
   var rows = [], clientes = [], tipos = [], estados = [], estadoInicial = null, docTipos = [];
   var reqEstados = [], reqRows = [];
+  var polAseguradoras = [], polEstados = [], polTiposDoc = [], polRows = [], polPage = 1;
   var expedienteDetalleId = 0;
   var page = 1, timer = null, confirmCallback = null;
 
@@ -346,7 +558,10 @@ document.addEventListener('DOMContentLoaded', function () {
   function badgeActivo(v){return Number(v)===1?'<span class="badge badge-success">Activo</span>':'<span class="badge badge-secondary">Inactivo</span>';}
   function badgeEstado(row){var color=row.color_etiqueta||'#6c757d';return '<span class="badge" style="background:'+esc(color)+';color:#fff">'+esc(row.estado_expediente_nombre||'-')+'</span>';}
   function badgeReqEstado(v){var m={pendiente:'secondary',entregado:'primary',observado:'warning',aprobado:'success',rechazado:'danger',no_aplica:'info'};var label=reqEstadoLabel(v);return '<span class="badge badge-'+(m[v]||'secondary')+'">'+esc(label)+'</span>';}
+  function badgePolEstado(v){var m={borrador:'secondary',emitida:'primary',vigente:'success',cancelada:'warning',anulada:'danger'};return '<span class="badge badge-'+(m[v]||'secondary')+'">'+esc(polEstadoLabel(v))+'</span>';}
   function reqEstadoLabel(v){var out=v;reqEstados.forEach(function(e){if(e.codigo===v)out=e.nombre;});return out||'-';}
+  function polEstadoLabel(v){var out=v;polEstados.forEach(function(e){if(e.codigo===v)out=e.nombre;});return out||'-';}
+  function polTipoDocLabel(v){var out=v;polTiposDoc.forEach(function(e){if(e.codigo===v)out=e.nombre;});return out||'-';}
   function bytes(v){var n=Number(v||0);if(n<1024)return n+' B';if(n<1048576)return (n/1024).toFixed(1)+' KB';return (n/1048576).toFixed(1)+' MB';}
   function resumen(v,max){v=String(v==null?'':v);return v.length>max?v.slice(0,max-1)+'...':v;}
   function params(){var p=new URLSearchParams();p.set('accion','listar');p.set('page',page);p.set('q',document.getElementById('exp-search').value||'');p.set('cliente_id',document.getElementById('exp-filtro-cliente').value||'0');p.set('tipo_seguro_id',document.getElementById('exp-filtro-tipo').value||'0');p.set('estado_expediente_id',document.getElementById('exp-filtro-estado-exp').value||'0');p.set('estado',document.getElementById('exp-filtro-activo').value||'todos');return p;}
@@ -358,6 +573,11 @@ document.addEventListener('DOMContentLoaded', function () {
   function loadDocTipos(){return fetchJson(documentosEndpoint+'?accion=tipos').then(function(r){docTipos=(r.data||{}).rows||[];fillDocTipos();}).catch(function(e){toast(e.message||'No se pudo cargar tipos de documento.','danger');});}
   function fillReqEstados(){var filtro=document.getElementById('exp-req-filtro-estado');if(filtro){var h='<option value="todos">Todos</option>';reqEstados.forEach(function(e){h+='<option value="'+esc(e.codigo)+'">'+esc(e.nombre)+'</option>';});filtro.innerHTML=h;}var form=document.getElementById('formReqEstadoExp');if(form){var s='';reqEstados.forEach(function(e){s+='<option value="'+esc(e.codigo)+'">'+esc(e.nombre)+'</option>';});form.elements.estado_requisito.innerHTML=s;}}
   function loadReqEstados(){return fetchJson(requisitosEndpoint+'?accion=estados').then(function(r){reqEstados=(r.data||{}).rows||[];fillReqEstados();}).catch(function(e){toast(e.message||'No se pudo cargar estados de requisitos.','danger');});}
+  function optionPolAseguradoras(selected){var h='<option value="">Seleccione aseguradora</option>';polAseguradoras.forEach(function(a){var n=a.nombre_comercial||a.razon_social;h+='<option value="'+a.id+'" '+(Number(selected)===Number(a.id)?'selected':'')+'>'+esc(n)+'</option>';});return h;}
+  function optionPolEstados(selected,all){var h=all?'<option value="todos">Todos los estados</option>':'';polEstados.forEach(function(e){h+='<option value="'+esc(e.codigo)+'" '+(selected===e.codigo?'selected':'')+'>'+esc(e.nombre)+'</option>';});return h;}
+  function optionPolTipos(selected){var h='<option value="">Seleccione tipo</option>';polTiposDoc.forEach(function(t){h+='<option value="'+esc(t.codigo)+'" '+(selected===t.codigo?'selected':'')+'>'+esc(t.nombre)+'</option>';});return h;}
+  function fillPolContext(){document.getElementById('pol-filtro-aseguradora').innerHTML='<option value="0">Todas las aseguradoras</option>'+optionPolAseguradoras(0).replace('<option value="">Seleccione aseguradora</option>','');document.getElementById('pol-filtro-estado-poliza').innerHTML=optionPolEstados('todos',true);var f=document.getElementById('formPolizaExp');f.elements.aseguradora_id.innerHTML=optionPolAseguradoras();f.elements.estado_poliza.innerHTML=optionPolEstados('borrador',false);f.elements.tipo_documento_emitido.innerHTML=optionPolTipos('poliza');}
+  function loadPolContext(){return fetchJson(polizasEndpoint+'?accion=contexto').then(function(r){var d=r.data||{};polAseguradoras=d.aseguradoras||[];polEstados=d.estados||[];polTiposDoc=d.tipos_documento||[];csrf=d.csrf||csrf;fillPolContext();}).catch(function(e){toast(e.message||'No se pudo cargar contexto de polizas.','danger');});}
   function loadContext(){return fetchJson(endpoint+'?accion=contexto').then(function(r){var d=r.data||{};clientes=d.clientes||[];tipos=d.tipos_seguro||[];estados=d.estados_expediente||[];estadoInicial=d.estado_inicial||null;csrf=d.csrf||csrf;fillOptions();}).catch(function(e){toast(e.message||'No se pudo cargar contexto.','danger');});}
   function load(){document.getElementById('exp-loading').style.display='block';fetchJson(endpoint+'?'+params().toString()).then(function(r){var d=r.data||{};rows=d.rows||[];renderRows();renderPagination(d.pagination||{});}).catch(function(e){toast(e.message||'No se pudo cargar expedientes.','danger');}).finally(function(){document.getElementById('exp-loading').style.display='none';});}
   function renderRows(){var h='';rows.forEach(function(r){var cliente='<strong class="exp-text-clip" title="'+esc(r.cliente_razon_social||'')+'">'+esc(resumen(r.cliente_razon_social,90))+'</strong><div class="text-muted small">'+esc((r.cliente_ruc||'Sin RUC')+' / '+(r.tipo_cliente||''))+'</div>';var tipo='<span class="exp-text-clip" title="'+esc(r.tipo_seguro_nombre||'')+'">'+esc(resumen(r.tipo_seguro_nombre,90))+'</span>';var descripcion='<span class="exp-text-clip" title="'+esc(r.descripcion||'')+'">'+esc(resumen(r.descripcion||'-',110))+'</span>';h+='<tr><td><strong>'+esc(r.codigo)+'</strong></td><td>'+cliente+'</td><td>'+tipo+'</td><td>'+descripcion+'</td><td>'+badgeEstado(r)+'</td><td>'+esc(r.fecha_apertura)+'</td><td>'+badgeActivo(r.estado)+'</td><td class="text-center">'+actions(r)+'</td></tr>';});document.getElementById('exp-body').innerHTML=h;document.getElementById('exp-empty').style.display=rows.length?'none':'block';}
@@ -369,9 +589,11 @@ document.addEventListener('DOMContentLoaded', function () {
   function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
   function openModal(id){var form=document.getElementById('formExpediente');form.reset();clearValidation(form);form.dataset.mode=id?'edit':'create';form.elements.id.value='';form.elements.estado.value='1';form.elements.fecha_apertura.value=today();form.elements.estado_expediente_id.disabled=!id;document.getElementById('exp-estado-help').style.display=id?'none':'block';document.getElementById('modalExpedienteTitle').textContent=id?'Editar expediente':'Registrar expediente';if(!id){if(estadoInicial){form.elements.estado_expediente_id.value=estadoInicial.id;}$('#modalExpediente').modal('show');return;}fetchJson(endpoint+'?accion=obtener&id='+encodeURIComponent(id)).then(function(r){var rec=(r.data||{}).record||{};['id','cliente_id','tipo_seguro_id','estado_expediente_id','descripcion','observaciones','fecha_apertura','estado'].forEach(function(k){setVal(form,k,rec[k]);});$('#modalExpediente').modal('show');}).catch(function(e){toast(e.message||'No se pudo cargar el expediente.','danger');});}
   function save(form){if(!form.checkValidity()){form.classList.add('was-validated');return;}clearValidation(form);var creating=form.dataset.mode!=='edit';var data=new FormData(form);if(creating){data.delete('id');if(estadoInicial){data.set('estado_expediente_id',estadoInicial.id);}}post(creating?'crear':'actualizar',data).then(function(r){$('#modalExpediente').modal('hide');toast(r.message||'Expediente guardado.','success');loadContext().then(load);}).catch(function(e){applyErrors(form,e.errors||{});toast(e.message||'No se pudo guardar el expediente.','danger');});}
-  function viewDetail(id){fetchJson(endpoint+'?accion=obtener&id='+encodeURIComponent(id)).then(function(r){var x=(r.data||{}).record||{};expedienteDetalleId=id;document.getElementById('exp-detalle-resumen').innerHTML='<dl class="row mb-0"><dt class="col-sm-3">Codigo</dt><dd class="col-sm-9">'+esc(x.codigo)+'</dd><dt class="col-sm-3">Cliente</dt><dd class="col-sm-9">'+esc(x.cliente_razon_social)+'<div class="text-muted small">'+esc(x.cliente_ruc||'Sin RUC')+'</div></dd><dt class="col-sm-3">Tipo</dt><dd class="col-sm-9">'+esc(x.tipo_seguro_nombre)+'</dd><dt class="col-sm-3">Estado</dt><dd class="col-sm-9">'+esc(x.estado_expediente_nombre)+'</dd><dt class="col-sm-3">Fecha apertura</dt><dd class="col-sm-9">'+esc(x.fecha_apertura)+'</dd><dt class="col-sm-3">Descripcion</dt><dd class="col-sm-9">'+esc(x.descripcion)+'</dd><dt class="col-sm-3">Observaciones</dt><dd class="col-sm-9">'+esc(x.observaciones||'-')+'</dd></dl>';var form=document.getElementById('formExpDocumento');if(form){form.reset();clearValidation(form);form.elements.expediente_id.value=id;}document.getElementById('exp-req-filtro-estado').value='todos';$('#expDetalleTabs a[href="#exp-tab-resumen"]').tab('show');loadDocs(id);loadReqs(id);loadActividad(id);$('#modalDetalleExpediente').modal('show');}).catch(function(e){toast(e.message||'No se pudo cargar detalle.','danger');});}
+  function viewDetail(id){fetchJson(endpoint+'?accion=obtener&id='+encodeURIComponent(id)).then(function(r){var x=(r.data||{}).record||{};expedienteDetalleId=id;document.getElementById('exp-detalle-resumen').innerHTML='<dl class="row mb-0"><dt class="col-sm-3">Codigo</dt><dd class="col-sm-9">'+esc(x.codigo)+'</dd><dt class="col-sm-3">Cliente</dt><dd class="col-sm-9">'+esc(x.cliente_razon_social)+'<div class="text-muted small">'+esc(x.cliente_ruc||'Sin RUC')+'</div></dd><dt class="col-sm-3">Tipo</dt><dd class="col-sm-9">'+esc(x.tipo_seguro_nombre)+'</dd><dt class="col-sm-3">Estado</dt><dd class="col-sm-9">'+esc(x.estado_expediente_nombre)+'</dd><dt class="col-sm-3">Fecha apertura</dt><dd class="col-sm-9">'+esc(x.fecha_apertura)+'</dd><dt class="col-sm-3">Descripcion</dt><dd class="col-sm-9">'+esc(x.descripcion)+'</dd><dt class="col-sm-3">Observaciones</dt><dd class="col-sm-9">'+esc(x.observaciones||'-')+'</dd></dl>';var form=document.getElementById('formExpDocumento');if(form){form.reset();clearValidation(form);form.elements.expediente_id.value=id;}document.getElementById('exp-req-filtro-estado').value='todos';document.getElementById('pol-search').value='';document.getElementById('pol-filtro-aseguradora').value='0';document.getElementById('pol-filtro-estado-poliza').value='todos';document.getElementById('pol-filtro-activo').value='todos';polPage=1;$('#expDetalleTabs a[href="#exp-tab-resumen"]').tab('show');loadDocs(id);loadFormatos(id);loadReqs(id);loadPolizas(id);loadActividad(id);$('#modalDetalleExpediente').modal('show');}).catch(function(e){toast(e.message||'No se pudo cargar detalle.','danger');});}
   function loadDocs(id){document.getElementById('exp-docs-body').innerHTML='<tr><td colspan="7" class="text-muted text-center">Cargando documentos...</td></tr>';document.getElementById('exp-docs-empty').style.display='none';fetchJson(documentosEndpoint+'?accion=listar&expediente_id='+encodeURIComponent(id)).then(function(r){renderDocs((r.data||{}).rows||[]);}).catch(function(e){document.getElementById('exp-docs-body').innerHTML='';document.getElementById('exp-docs-empty').style.display='block';toast(e.message||'No se pudieron cargar documentos.','danger');});}
   function renderDocs(items){var h='';items.forEach(function(d){var activo=Number(d.vinculo_estado)===1&&Number(d.archivo_estado)===1;var acciones='<span class="exp-actions"><a class="btn btn-xs btn-outline-info" href="'+documentosEndpoint+'?accion=descargar&vinculo_id='+encodeURIComponent(d.vinculo_id)+'" title="Descargar" aria-label="Descargar"><i class="fas fa-download"></i></a>';if(permisos.puede_editar&&activo){acciones+='<button type="button" class="btn btn-xs btn-outline-secondary" data-doc-archive="'+esc(d.vinculo_id)+'" title="Archivar" aria-label="Archivar"><i class="fas fa-archive"></i></button>';}acciones+='</span>';h+='<tr><td>'+esc(d.tipo_documento_nombre||d.slot||'-')+'</td><td><strong>'+esc(d.nombre_original||'-')+'</strong><div class="text-muted small">'+esc(d.mime_type||'')+' '+esc(bytes(d.tamanio_bytes))+'</div></td><td>'+esc(d.descripcion||'-')+'</td><td>'+esc(d.cargado_en||'-')+'</td><td>'+esc(d.cargado_por_usuario_externo_id||'-')+'</td><td>'+badgeActivo(activo?1:0)+'</td><td class="text-center">'+acciones+'</td></tr>';});document.getElementById('exp-docs-body').innerHTML=h;document.getElementById('exp-docs-empty').style.display=items.length?'none':'block';}
+  function loadFormatos(id){document.getElementById('exp-formatos-body').innerHTML='<tr><td colspan="4" class="text-muted text-center">Cargando formatos...</td></tr>';document.getElementById('exp-formatos-empty').style.display='none';fetchJson(formatosExpEndpoint+'?accion=listar&expediente_id='+encodeURIComponent(id)).then(function(r){renderFormatos((r.data||{}).rows||[]);}).catch(function(e){document.getElementById('exp-formatos-body').innerHTML='';document.getElementById('exp-formatos-empty').style.display='block';toast(e.message||'No se pudieron cargar formatos.','danger');});}
+  function renderFormatos(items){var h='';items.forEach(function(f){h+='<tr><td><strong class="exp-text-clip" title="'+esc(f.nombre||'')+'">'+esc(resumen(f.nombre||'',90))+'</strong><div class="text-muted small">'+esc(f.nombre_original||'')+'</div></td><td><span class="exp-text-clip" title="'+esc(f.descripcion||'')+'">'+esc(resumen(f.descripcion||'-',120))+'</span></td><td>'+esc(f.requisito_nombre||'-')+'</td><td class="text-center"><span class="exp-actions"><a class="btn btn-xs btn-outline-info" href="'+formatosExpEndpoint+'?accion=descargar&expediente_id='+encodeURIComponent(expedienteDetalleId)+'&vinculo_id='+encodeURIComponent(f.vinculo_id)+'" title="Descargar" aria-label="Descargar"><i class="fas fa-download"></i></a></span></td></tr>';});document.getElementById('exp-formatos-body').innerHTML=h;document.getElementById('exp-formatos-empty').style.display=items.length?'none':'block';}
   function loadReqs(id){var estado=document.getElementById('exp-req-filtro-estado').value||'todos';document.getElementById('exp-req-body').innerHTML='<tr><td colspan="10" class="text-muted text-center">Cargando requisitos...</td></tr>';document.getElementById('exp-req-empty').style.display='none';var gen=document.getElementById('exp-req-generar');if(gen)gen.style.display='none';fetchJson(requisitosEndpoint+'?accion=listar&expediente_id='+encodeURIComponent(id)+'&estado='+encodeURIComponent(estado)).then(function(r){var d=r.data||{};reqRows=d.rows||[];renderReqs(reqRows,!!d.tiene_requisitos);}).catch(function(e){document.getElementById('exp-req-body').innerHTML='';document.getElementById('exp-req-empty').style.display='block';toast(e.message||'No se pudieron cargar requisitos.','danger');});}
   function renderReqs(items,tieneRequisitos){var h='';items.forEach(function(r){var docs=renderReqDocs(r);var acciones='<span class="exp-actions">';if(permisos.puede_editar){acciones+='<button type="button" class="btn btn-xs btn-outline-primary" data-req-action="estado" data-id="'+r.id+'" title="Cambiar estado" aria-label="Cambiar estado"><i class="fas fa-edit"></i></button>';}if(permisos.puede_crear&&['pendiente','entregado','observado','rechazado'].indexOf(String(r.estado_requisito))!==-1){acciones+='<button type="button" class="btn btn-xs btn-outline-success" data-req-action="upload" data-id="'+r.id+'" title="Cargar documento" aria-label="Cargar documento"><i class="fas fa-upload"></i></button>';}acciones+='</span>';h+='<tr><td>'+esc(r.orden_visual_snapshot)+'</td><td><strong class="exp-text-clip" title="'+esc(r.nombre_snapshot||'')+'">'+esc(resumen(r.nombre_snapshot,100))+'</strong></td><td><span class="exp-text-clip" title="'+esc(r.descripcion_snapshot||'')+'">'+esc(resumen(r.descripcion_snapshot||'-',120))+'</span></td><td>'+(Number(r.es_obligatorio_snapshot)===1?'<span class="badge badge-danger">Obligatorio</span>':'<span class="badge badge-info">Opcional</span>')+'</td><td>'+badgeReqEstado(r.estado_requisito)+'</td><td><span class="exp-text-clip" title="'+esc(r.observacion_actual||'')+'">'+esc(resumen(r.observacion_actual||'-',100))+'</span></td><td>'+esc(r.fecha_entrega||'-')+'<div class="text-muted small">Usuario: '+esc(r.entregado_por_usuario_externo_id||'-')+'</div></td><td>'+esc(r.fecha_evaluacion||'-')+'<div class="text-muted small">Usuario: '+esc(r.evaluado_por_usuario_externo_id||'-')+'</div></td><td>'+esc(r.documentos_activos||0)+docs+'</td><td class="text-center">'+acciones+'</td></tr>';});document.getElementById('exp-req-body').innerHTML=h;document.getElementById('exp-req-empty').textContent=tieneRequisitos?'No hay requisitos para el filtro seleccionado.':'Este expediente no tiene requisitos generados.';document.getElementById('exp-req-empty').style.display=items.length?'none':'block';var gen=document.getElementById('exp-req-generar');if(gen)gen.style.display=!tieneRequisitos?'inline-block':'none';}
   function renderReqDocs(r){var docs=r.documentos||[];if(!docs.length)return '';var h='<ul class="exp-req-docs">';docs.forEach(function(d){var activo=Number(d.vinculo_estado)===1&&Number(d.archivo_estado)===1;h+='<li><span title="'+esc(d.nombre_original||'')+'">'+esc(resumen(d.nombre_original||'-',42))+'</span> '+badgeActivo(activo?1:0)+'<div class="text-muted small">'+esc(d.cargado_en||'-')+' / Usuario: '+esc(d.cargado_por_usuario_externo_id||'-')+'</div><span class="exp-actions"><a class="btn btn-xs btn-outline-info" href="'+requisitosEndpoint+'?accion=descargar&expediente_id='+encodeURIComponent(expedienteDetalleId)+'&vinculo_id='+encodeURIComponent(d.vinculo_id)+'" title="Descargar" aria-label="Descargar"><i class="fas fa-download"></i></a>';if(permisos.puede_editar&&activo){h+='<button type="button" class="btn btn-xs btn-outline-secondary" data-req-doc-archive="'+esc(d.vinculo_id)+'" title="Archivar" aria-label="Archivar"><i class="fas fa-archive"></i></button>';}h+='</span></li>';});return h+'</ul>';}
@@ -382,6 +604,22 @@ document.addEventListener('DOMContentLoaded', function () {
   function uploadReqDocs(form){var files=form.elements.archivo.files;if(!files||!files.length){form.classList.add('was-validated');return;}clearValidation(form);var id=form.elements.id.value, expId=form.elements.expediente_id.value;var chain=Promise.resolve(), ok=0;Array.prototype.forEach.call(files,function(file){chain=chain.then(function(){var data=new FormData();data.set('id',id);data.set('expediente_id',expId);data.set('archivo',file);return postReq('cargar_documento',data).then(function(){ok++;});});});chain.then(function(){$('#modalReqDocExp').modal('hide');toast(ok+' documento(s) cargado(s).','success');loadReqs(expedienteDetalleId);loadActividad(expedienteDetalleId);}).catch(function(e){applyErrors(form,e.errors||{});toast(e.message||'No se pudo cargar uno de los documentos.','danger');});}
   function postReq(action,data){data.set('_csrf',csrf);return fetchJson(requisitosEndpoint+'?accion='+encodeURIComponent(action),{method:'POST',body:data});}
   function generarReqs(){var data=new FormData();data.set('expediente_id',expedienteDetalleId);postReq('generar',data).then(function(r){toast(r.message||'Requisitos generados.','success');loadReqs(expedienteDetalleId);loadActividad(expedienteDetalleId);}).catch(function(e){toast(e.message||'No se pudieron generar requisitos.','danger');});}
+  function polParams(){var p=new URLSearchParams();p.set('accion','listar');p.set('expediente_id',expedienteDetalleId);p.set('page',polPage);p.set('q',document.getElementById('pol-search').value||'');p.set('aseguradora_id',document.getElementById('pol-filtro-aseguradora').value||'0');p.set('estado_poliza',document.getElementById('pol-filtro-estado-poliza').value||'todos');p.set('estado',document.getElementById('pol-filtro-activo').value||'todos');return p;}
+  function loadPolizas(id){if(id)expedienteDetalleId=id;document.getElementById('pol-body').innerHTML='<tr><td colspan="10" class="text-muted text-center">Cargando polizas...</td></tr>';document.getElementById('pol-empty').style.display='none';fetchJson(polizasEndpoint+'?'+polParams().toString()).then(function(r){var d=r.data||{};polRows=d.rows||[];renderPolizas(polRows);renderPolPagination(d.pagination||{});}).catch(function(e){document.getElementById('pol-body').innerHTML='';document.getElementById('pol-empty').style.display='block';toast(e.message||'No se pudieron cargar polizas.','danger');});}
+  function renderPolizas(items){var h='';items.forEach(function(p){var aseg=p.aseguradora_nombre_comercial||p.aseguradora_razon_social||'-';var doc='<strong>'+esc(polTipoDocLabel(p.tipo_documento_emitido))+'</strong><div class="text-muted small">'+esc(p.numero_documento||'Sin numero')+'</div>';var vig=esc((p.vigencia_inicio||'-')+' / '+(p.vigencia_fin||'-'))+'<div class="text-muted small">'+esc(p.vigencia_dias||0)+' dias</div>';var pdf=p.pdf_vinculo_id?'<span class="badge badge-success">PDF</span>':'<span class="badge badge-warning">Sin PDF</span>';h+='<tr><td><strong>'+esc(p.codigo)+'</strong></td><td>'+doc+'</td><td><span class="exp-text-clip" title="'+esc(aseg)+'">'+esc(resumen(aseg,80))+'</span></td><td>'+vig+'</td><td>'+esc(p.moneda||'')+' '+esc(p.suma_asegurada||'-')+'</td><td>'+esc(p.moneda||'')+' '+esc(p.prima_total||'-')+'</td><td>'+badgePolEstado(p.estado_poliza)+'</td><td>'+badgeActivo(p.estado)+'</td><td>'+pdf+'</td><td class="text-center">'+polActions(p)+'</td></tr>';});document.getElementById('pol-body').innerHTML=h;document.getElementById('pol-empty').style.display=items.length?'none':'block';}
+  function polActions(p){var h='<span class="exp-actions"><button type="button" class="btn btn-xs btn-outline-info" data-pol-action="view" data-id="'+p.id+'" title="Ver detalle" aria-label="Ver detalle"><i class="fas fa-eye"></i></button>';if(permisos.puede_editar){h+='<button type="button" class="btn btn-xs btn-outline-primary" data-pol-action="edit" data-id="'+p.id+'" title="Editar" aria-label="Editar"><i class="fas fa-edit"></i></button><button type="button" class="btn btn-xs btn-outline-success" data-pol-action="pdf" data-id="'+p.id+'" title="Cargar PDF" aria-label="Cargar PDF"><i class="fas fa-upload"></i></button>';}if(p.pdf_vinculo_id){h+='<a class="btn btn-xs btn-outline-info" href="'+polizasEndpoint+'?accion=descargar_pdf&expediente_id='+encodeURIComponent(expedienteDetalleId)+'&vinculo_id='+encodeURIComponent(p.pdf_vinculo_id)+'" title="Descargar PDF" aria-label="Descargar PDF"><i class="fas fa-download"></i></a>';if(permisos.puede_editar){h+='<button type="button" class="btn btn-xs btn-outline-secondary" data-pol-pdf-archive="'+p.pdf_vinculo_id+'" title="Archivar PDF" aria-label="Archivar PDF"><i class="fas fa-archive"></i></button>';}}if(permisos.puede_eliminar){var title=Number(p.estado)===1?'Desactivar':'Activar';h+='<button type="button" class="btn btn-xs btn-outline-secondary" data-pol-action="toggle" data-id="'+p.id+'" data-state="'+p.estado+'" title="'+title+'" aria-label="'+title+'"><i class="fas '+(Number(p.estado)===1?'fa-toggle-on':'fa-toggle-off')+'"></i></button>';}return h+'</span>';}
+  function renderPolPagination(pag){var total=Number(pag.total||0),cur=Number(pag.page||1),last=Number(pag.last_page||1),wrap=document.getElementById('pol-pagination');document.getElementById('pol-counter').textContent=total+(total===1?' registro':' registros');if(last<=1){wrap.innerHTML='';return;}wrap.innerHTML='<div class="btn-group btn-group-sm"><button type="button" class="btn btn-outline-secondary" data-pol-page="'+(cur-1)+'" '+(cur<=1?'disabled':'')+' title="Anterior" aria-label="Anterior"><i class="fas fa-chevron-left"></i></button><button type="button" class="btn btn-outline-secondary" disabled>'+cur+' / '+last+'</button><button type="button" class="btn btn-outline-secondary" data-pol-page="'+(cur+1)+'" '+(cur>=last?'disabled':'')+' title="Siguiente" aria-label="Siguiente"><i class="fas fa-chevron-right"></i></button></div>';}
+  function polById(id){for(var i=0;i<polRows.length;i++){if(Number(polRows[i].id)===Number(id))return polRows[i];}return null;}
+  function postPol(action,data){data.set('_csrf',csrf);return fetchJson(polizasEndpoint+'?accion='+encodeURIComponent(action),{method:'POST',body:data});}
+  function nowLocal(){var d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16);}
+  function todayDate(){return nowLocal().slice(0,10);}
+  function toLocalInput(v){v=String(v||'').replace(' ','T');return v.slice(0,16);}
+  function openPolModal(id){var f=document.getElementById('formPolizaExp');f.reset();clearValidation(f);f.dataset.mode=id?'edit':'create';f.elements.id.value='';f.elements.expediente_id.value=expedienteDetalleId;f.elements.fecha_emision.value=todayDate();f.elements.vigencia_inicio.value=nowLocal();f.elements.vigencia_fin.value=nowLocal();f.elements.moneda.value='PEN';f.elements.estado.value='1';f.elements.tipo_documento_emitido.innerHTML=optionPolTipos('poliza');f.elements.estado_poliza.innerHTML=optionPolEstados('borrador',false);f.elements.aseguradora_id.innerHTML=optionPolAseguradoras();document.getElementById('pol-pdf-group').style.display=id?'none':'block';document.getElementById('modalPolizaExpTitle').textContent=id?'Editar poliza':'Registrar poliza';if(!id){$('#modalPolizaExp').modal('show');return;}fetchJson(polizasEndpoint+'?accion=obtener&expediente_id='+encodeURIComponent(expedienteDetalleId)+'&id='+encodeURIComponent(id)).then(function(r){var x=(r.data||{}).record||{};['id','expediente_id','aseguradora_id','tipo_documento_emitido','numero_documento','beneficiario_nombre','fecha_emision','moneda','suma_asegurada','prima_comercial','igv','prima_total','estado_poliza','observaciones','estado'].forEach(function(k){setVal(f,k,x[k]);});f.elements.vigencia_inicio.value=toLocalInput(x.vigencia_inicio);f.elements.vigencia_fin.value=toLocalInput(x.vigencia_fin);$('#modalPolizaExp').modal('show');}).catch(function(e){toast(e.message||'No se pudo cargar la poliza.','danger');});}
+  function savePol(form){if(!form.checkValidity()){form.classList.add('was-validated');return;}clearValidation(form);var creating=form.dataset.mode!=='edit';var data=new FormData(form);if(creating){data.delete('id');}postPol(creating?'crear':'actualizar',data).then(function(r){$('#modalPolizaExp').modal('hide');toast(r.message||'Poliza guardada.','success');loadPolizas(expedienteDetalleId);loadActividad(expedienteDetalleId);}).catch(function(e){applyErrors(form,e.errors||{});toast(e.message||'No se pudo guardar la poliza.','danger');});}
+  function openPolPdf(id){var p=polById(id);if(!p)return;var f=document.getElementById('formPolizaPdfExp');f.reset();clearValidation(f);f.elements.id.value=id;f.elements.expediente_id.value=expedienteDetalleId;document.getElementById('pol-pdf-nombre').value=p.codigo+' - '+polTipoDocLabel(p.tipo_documento_emitido);$('#modalPolizaPdfExp').modal('show');}
+  function savePolPdf(form){if(!form.checkValidity()){form.classList.add('was-validated');return;}clearValidation(form);postPol('cargar_pdf',new FormData(form)).then(function(r){$('#modalPolizaPdfExp').modal('hide');toast(r.message||'PDF cargado.','success');loadPolizas(expedienteDetalleId);loadActividad(expedienteDetalleId);}).catch(function(e){applyErrors(form,e.errors||{});toast(e.message||'No se pudo cargar el PDF.','danger');});}
+  function viewPol(id){fetchJson(polizasEndpoint+'?accion=obtener&expediente_id='+encodeURIComponent(expedienteDetalleId)+'&id='+encodeURIComponent(id)).then(function(r){var p=(r.data||{}).record||{};var pdf=p.pdf&&p.pdf.vinculo_id?'<a class="btn btn-sm btn-outline-info" href="'+polizasEndpoint+'?accion=descargar_pdf&expediente_id='+encodeURIComponent(expedienteDetalleId)+'&vinculo_id='+encodeURIComponent(p.pdf.vinculo_id)+'"><i class="fas fa-download"></i> Descargar PDF</a>':'<span class="badge badge-warning">Sin PDF activo</span>';document.getElementById('pol-detalle-body').innerHTML='<dl class="row mb-0"><dt class="col-sm-4">Codigo</dt><dd class="col-sm-8">'+esc(p.codigo)+'</dd><dt class="col-sm-4">Documento</dt><dd class="col-sm-8">'+esc(polTipoDocLabel(p.tipo_documento_emitido))+'<div class="text-muted small">'+esc(p.numero_documento||'Sin numero')+'</div></dd><dt class="col-sm-4">Aseguradora</dt><dd class="col-sm-8">'+esc(p.aseguradora_nombre_comercial||p.aseguradora_razon_social||'-')+'</dd><dt class="col-sm-4">Contratante snapshot</dt><dd class="col-sm-8">'+esc(p.contratante_nombre_snapshot||'-')+'<div class="text-muted small">'+esc(p.contratante_ruc_snapshot||'Sin RUC')+'</div></dd><dt class="col-sm-4">Beneficiario</dt><dd class="col-sm-8">'+esc(p.beneficiario_nombre||'-')+'</dd><dt class="col-sm-4">Emision</dt><dd class="col-sm-8">'+esc(p.fecha_emision||'-')+'</dd><dt class="col-sm-4">Vigencia</dt><dd class="col-sm-8">'+esc((p.vigencia_inicio||'-')+' a '+(p.vigencia_fin||'-'))+'<div class="text-muted small">'+esc(p.vigencia_dias||0)+' dias</div></dd><dt class="col-sm-4">Montos</dt><dd class="col-sm-8">'+esc(p.moneda||'')+' suma '+esc(p.suma_asegurada||'-')+' | prima total '+esc(p.prima_total||'-')+'</dd><dt class="col-sm-4">Estado</dt><dd class="col-sm-8">'+badgePolEstado(p.estado_poliza)+' '+badgeActivo(p.estado)+'</dd><dt class="col-sm-4">PDF</dt><dd class="col-sm-8">'+pdf+'</dd><dt class="col-sm-4">Observaciones</dt><dd class="col-sm-8">'+esc(p.observaciones||'-')+'</dd></dl>';$('#modalPolizaDetalleExp').modal('show');}).catch(function(e){toast(e.message||'No se pudo cargar detalle de poliza.','danger');});}
+  function togglePol(id){var data=new FormData();data.set('id',id);data.set('expediente_id',expedienteDetalleId);postPol('cambiar_estado',data).then(function(r){toast(r.message||'Estado actualizado.','success');loadPolizas(expedienteDetalleId);loadActividad(expedienteDetalleId);}).catch(function(e){toast(e.message||'No se pudo actualizar estado.','danger');});}
   function loadActividad(id){document.getElementById('exp-actividad-body').innerHTML='<div class="text-muted text-center py-2">Cargando actividad...</div>';document.getElementById('exp-actividad-empty').style.display='none';fetchJson(timelineEndpoint+'?accion=listar&expediente_id='+encodeURIComponent(id)).then(function(r){renderActividad((r.data||{}).rows||[]);}).catch(function(e){document.getElementById('exp-actividad-body').innerHTML='';document.getElementById('exp-actividad-empty').style.display='block';toast(e.message||'No se pudo cargar actividad.','danger');});}
   function renderActividad(items){var h='';items.forEach(function(ev){h+='<div class="border-bottom py-2"><div class="d-flex justify-content-between"><strong>'+esc(ev.descripcion||ev.codigo_evento)+'</strong><span class="text-muted small">'+esc(ev.fecha_evento||'-')+'</span></div><div class="text-muted small">Evento: '+esc(ev.codigo_evento||'-')+' - Usuario: '+esc(ev.actor_usuario_externo_id||'-')+'</div></div>';});document.getElementById('exp-actividad-body').innerHTML=h;document.getElementById('exp-actividad-empty').style.display=items.length?'none':'block';}
   function confirmAction(text,cb){document.getElementById('modalConfirmExpedienteText').textContent=text;confirmCallback=cb;$('#modalConfirmExpediente').modal('show');}
@@ -401,7 +639,14 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('exp-req-body').addEventListener('click',function(e){var b=e.target.closest('[data-req-action]');if(b){var id=b.dataset.id;if(b.dataset.reqAction==='estado')openReqEstado(id);else openReqDoc(id);return;}var a=e.target.closest('[data-req-doc-archive]');if(!a)return;var vinculoId=a.getAttribute('data-req-doc-archive');confirmAction('Desea archivar este documento de requisito?',function(){var data=new FormData();data.set('vinculo_id',vinculoId);data.set('expediente_id',expedienteDetalleId);postReq('archivar_documento',data).then(function(r){toast(r.message||'Documento archivado.','success');loadReqs(expedienteDetalleId);loadActividad(expedienteDetalleId);}).catch(function(e){toast(e.message||'No se pudo archivar el documento.','danger');});});});
   document.getElementById('formReqEstadoExp').addEventListener('submit',function(e){e.preventDefault();saveReqEstado(e.target);});
   document.getElementById('formReqDocExp').addEventListener('submit',function(e){e.preventDefault();uploadReqDocs(e.target);});
+  document.getElementById('pol-btn-buscar').addEventListener('click',function(){polPage=1;loadPolizas(expedienteDetalleId);});
+  ['pol-search','pol-filtro-aseguradora','pol-filtro-estado-poliza','pol-filtro-activo'].forEach(function(id){document.getElementById(id).addEventListener(id==='pol-search'?'input':'change',function(){clearTimeout(timer);timer=setTimeout(function(){polPage=1;loadPolizas(expedienteDetalleId);},id==='pol-search'?300:0);});});
+  var btnPolNuevo=document.getElementById('pol-btn-nuevo');if(btnPolNuevo)btnPolNuevo.addEventListener('click',function(){openPolModal(null);});
+  document.getElementById('pol-pagination').addEventListener('click',function(e){var b=e.target.closest('[data-pol-page]');if(!b)return;polPage=Number(b.dataset.polPage)||1;loadPolizas(expedienteDetalleId);});
+  document.getElementById('pol-body').addEventListener('click',function(e){var b=e.target.closest('[data-pol-action]');if(b){var id=b.dataset.id;if(b.dataset.polAction==='view')viewPol(id);else if(b.dataset.polAction==='edit')openPolModal(id);else if(b.dataset.polAction==='pdf')openPolPdf(id);else confirmAction(Number(b.dataset.state)===1?'Desea desactivar esta poliza?':'Desea activar esta poliza?',function(){togglePol(id);});return;}var a=e.target.closest('[data-pol-pdf-archive]');if(!a)return;var vinculoId=a.getAttribute('data-pol-pdf-archive');confirmAction('Desea archivar el PDF principal de esta poliza?',function(){var data=new FormData();data.set('vinculo_id',vinculoId);data.set('expediente_id',expedienteDetalleId);postPol('archivar_pdf',data).then(function(r){toast(r.message||'PDF archivado.','success');loadPolizas(expedienteDetalleId);loadActividad(expedienteDetalleId);}).catch(function(e){toast(e.message||'No se pudo archivar el PDF.','danger');});});});
+  document.getElementById('formPolizaExp').addEventListener('submit',function(e){e.preventDefault();savePol(e.target);});
+  document.getElementById('formPolizaPdfExp').addEventListener('submit',function(e){e.preventDefault();savePolPdf(e.target);});
   document.getElementById('modalConfirmExpedienteOk').addEventListener('click',function(){var cb=confirmCallback;confirmCallback=null;$('#modalConfirmExpediente').modal('hide');if(typeof cb==='function')cb();});
-  Promise.all([loadContext(),loadDocTipos(),loadReqEstados()]).then(load);
+  Promise.all([loadContext(),loadDocTipos(),loadReqEstados(),loadPolContext()]).then(load);
 });
 </script>
