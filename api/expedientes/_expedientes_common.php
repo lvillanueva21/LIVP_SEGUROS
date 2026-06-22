@@ -241,7 +241,9 @@ function exp_next_codigo(PDO $pdo, string $year): string
 function exp_db_error(Throwable $e): void
 {
     $ref = 'EXP-' . date('YmdHis') . '-' . substr(bin2hex(random_bytes(3)), 0, 6);
-    error_log('[expedientes][' . $ref . '] ' . get_class($e) . ' ' . $e->getCode() . ': ' . $e->getMessage() . ' en ' . $e->getFile() . ':' . $e->getLine());
+    $script = basename((string) ($_SERVER['SCRIPT_NAME'] ?? ''));
+    $accion = (string) ($_GET['accion'] ?? $_POST['accion'] ?? '');
+    error_log('[expedientes][' . $ref . '][' . $script . '][' . $accion . '] ' . get_class($e) . ' ' . $e->getCode() . ': ' . $e->getMessage() . ' en ' . $e->getFile() . ':' . $e->getLine());
     exp_json_error('No se pudo completar la operacion solicitada. Referencia: ' . $ref, 500);
 }
 

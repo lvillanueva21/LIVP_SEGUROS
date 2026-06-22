@@ -826,7 +826,7 @@ Motivo del cambio:
 ### 2026-06-21 - seg_poliza_extracciones
 
 Tabla: `seg_poliza_extracciones`
-Tipo de cambio: pendiente de creacion manual
+Tipo de cambio: creada
 Modulo relacionado: `expedientes`
 Proposito: guardar evidencia auxiliar del analisis de PDF usado para prellenar una poliza, sin reemplazar los campos estructurados de `seg_polizas`.
 
@@ -866,7 +866,7 @@ Reglas de estado o eliminacion:
 
 Motivo del cambio:
 - Permitir trazabilidad de campos y texto extraido al subir una poliza en PDF, preparando una base para OCR completo futuro sin crear almacenamiento paralelo.
-- En el dump local `u517204426_in5vRANce_01.sql` revisado el 2026-06-21 esta tabla no aparece todavia; debe crearse manualmente en phpMyAdmin antes de considerar esta evidencia auxiliar como instalada.
+- Verificada en el dump local `u517204426_in5vRANce_01.sql` actualizado el 2026-06-21.
 
 ## Plantilla obligatoria para registros futuros
 
