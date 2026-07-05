@@ -1,5 +1,5 @@
 # Cliente Base V1 — Servicios Externos LSISTEMAS
-
+aaaaaaaaaaaaaaaaaaaaaaa 4 de julio
 ## 1) ¿Qué es?
 `cliente_base/` es una plantilla para sistemas cliente que autentican contra LSISTEMAS con API central, pero mantienen su propia sesión local y sus módulos de negocio.
 
