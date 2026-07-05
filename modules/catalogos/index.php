@@ -15,14 +15,14 @@ $permCatalogos = [
       <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
         <div>
           <h1 class="h4 mb-1">Catálogos</h1>
-          <p class="text-muted mb-0">Gestión de aseguradoras, ramos, productos, tipos de seguro y estados de expediente.</p>
+          <p class="text-muted mb-0">Gestión de aseguradoras, ramos y productos o planes.</p>
         </div>
       </div>
     </div>
   </div>
 
   <div class="row">
-    <div class="col-md-4 col-xl">
+    <div class="col-md-4">
       <div class="small-box bg-info">
         <div class="inner">
           <h3 id="cat-kpi-aseguradoras">0</h3>
@@ -31,7 +31,7 @@ $permCatalogos = [
         <div class="icon"><i class="fas fa-building"></i></div>
       </div>
     </div>
-    <div class="col-md-4 col-xl">
+    <div class="col-md-4">
       <div class="small-box bg-success">
         <div class="inner">
           <h3 id="cat-kpi-ramos">0</h3>
@@ -40,31 +40,13 @@ $permCatalogos = [
         <div class="icon"><i class="fas fa-layer-group"></i></div>
       </div>
     </div>
-    <div class="col-md-4 col-xl">
+    <div class="col-md-4">
       <div class="small-box bg-warning">
         <div class="inner">
           <h3 id="cat-kpi-productos">0</h3>
           <p>Productos o planes activos</p>
         </div>
         <div class="icon"><i class="fas fa-file-contract"></i></div>
-      </div>
-    </div>
-    <div class="col-md-4 col-xl">
-      <div class="small-box bg-secondary">
-        <div class="inner">
-          <h3 id="cat-kpi-tipos-seguro">0</h3>
-          <p>Tipos de seguro activos</p>
-        </div>
-        <div class="icon"><i class="fas fa-shield-alt"></i></div>
-      </div>
-    </div>
-    <div class="col-md-4 col-xl">
-      <div class="small-box bg-primary">
-        <div class="inner">
-          <h3 id="cat-kpi-estados-expediente">0</h3>
-          <p>Estados de expediente activos</p>
-        </div>
-        <div class="icon"><i class="fas fa-clipboard-check"></i></div>
       </div>
     </div>
   </div>
@@ -80,12 +62,6 @@ $permCatalogos = [
         </li>
         <li class="nav-item">
           <a class="nav-link" id="tab-productos-link" data-toggle="pill" href="#tab-productos" role="tab" aria-controls="tab-productos" aria-selected="false">Productos / Planes</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" id="tab-tipos-seguro-link" data-toggle="pill" href="#tab-tipos-seguro" role="tab" aria-controls="tab-tipos-seguro" aria-selected="false">Tipos de seguro</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" id="tab-estados-expediente-link" data-toggle="pill" href="#tab-estados-expediente" role="tab" aria-controls="tab-estados-expediente" aria-selected="false">Estados de expediente</a>
         </li>
       </ul>
     </div>
@@ -218,103 +194,6 @@ $permCatalogos = [
           <div class="catalogos-loading" id="productos-loading">Cargando productos...</div>
           <div class="catalogos-empty" id="productos-empty">No hay productos o planes para mostrar.</div>
           <div class="catalogos-pagination" id="productos-pagination"></div>
-        </div>
-
-        <div class="tab-pane fade" id="tab-tipos-seguro" role="tabpanel" aria-labelledby="tab-tipos-seguro-link">
-          <div class="mb-3">
-            <h2 class="h6 mb-1">Tipos de seguro</h2>
-            <p class="text-muted small mb-1">Configura los tipos que luego podran usarse en expedientes, cotizaciones y polizas.</p>
-            <p class="text-muted small mb-0">Ejemplos: CAR para obras de construccion, EAR para montaje, TREC para maquinaria pesada, SCTR Salud, SCTR Pension, Vida Ley, SOAT, Seguro Vehicular, Responsabilidad Civil, Carta Fianza.</p>
-          </div>
-          <div class="catalogos-toolbar">
-            <div class="input-group input-group-sm">
-              <input type="search" class="form-control" id="tipos-seguro-search" placeholder="Buscar tipo de seguro">
-              <div class="input-group-append">
-                <button class="btn btn-outline-secondary" type="button" data-action="search" data-entity="tipos-seguro" title="Buscar" aria-label="Buscar"><i class="fas fa-search"></i></button>
-              </div>
-            </div>
-            <select class="form-control form-control-sm" id="tipos-seguro-estado" aria-label="Filtro de estado">
-              <option value="todos">Todos</option>
-              <option value="activo">Activos</option>
-              <option value="desactivado">Desactivados</option>
-            </select>
-            <button class="btn btn-outline-secondary btn-sm" type="button" data-action="clear" data-entity="tipos-seguro">
-              <i class="fas fa-eraser"></i> Limpiar
-            </button>
-            <?php if ($permCatalogos['puede_crear']): ?>
-              <button class="btn btn-primary btn-sm ml-md-auto" type="button" data-action="new" data-entity="tipos-seguro">
-                <i class="fas fa-plus"></i> Nuevo
-              </button>
-            <?php endif; ?>
-          </div>
-          <div class="text-muted small mb-2" id="tipos-seguro-counter">0 registros</div>
-          <div class="table-responsive">
-            <table class="table table-bordered table-hover table-sm">
-              <thead>
-                <tr>
-                  <th>Codigo</th>
-                  <th>Tipo de seguro</th>
-                  <th>Ramo</th>
-                  <th>Orden</th>
-                  <th>Estado</th>
-                  <th class="text-center" style="width:72px;">Acciones</th>
-                </tr>
-              </thead>
-              <tbody id="tipos-seguro-body"></tbody>
-            </table>
-          </div>
-          <div class="catalogos-loading" id="tipos-seguro-loading">Cargando tipos de seguro...</div>
-          <div class="catalogos-empty" id="tipos-seguro-empty">No hay tipos de seguro configurados. Crea primero un ramo activo si aun no existe.</div>
-          <div class="catalogos-pagination" id="tipos-seguro-pagination"></div>
-        </div>
-
-        <div class="tab-pane fade" id="tab-estados-expediente" role="tabpanel" aria-labelledby="tab-estados-expediente-link">
-          <div class="mb-3">
-            <h2 class="h6 mb-1">Estados de expediente</h2>
-            <p class="text-muted small mb-1">Define los estados configurables para el ciclo futuro de expedientes.</p>
-            <p class="text-muted small mb-0">Ejemplos: Nuevo, Pendiente de documentacion, En cotizacion, Cotizacion enviada, Aceptado, Cancelado y Cerrado.</p>
-          </div>
-          <div class="catalogos-toolbar">
-            <div class="input-group input-group-sm">
-              <input type="search" class="form-control" id="estados-expediente-search" placeholder="Buscar estado de expediente">
-              <div class="input-group-append">
-                <button class="btn btn-outline-secondary" type="button" data-action="search" data-entity="estados-expediente" title="Buscar" aria-label="Buscar"><i class="fas fa-search"></i></button>
-              </div>
-            </div>
-            <select class="form-control form-control-sm" id="estados-expediente-estado" aria-label="Filtro de estado">
-              <option value="todos">Todos</option>
-              <option value="activo">Activos</option>
-              <option value="desactivado">Desactivados</option>
-            </select>
-            <button class="btn btn-outline-secondary btn-sm" type="button" data-action="clear" data-entity="estados-expediente">
-              <i class="fas fa-eraser"></i> Limpiar
-            </button>
-            <?php if ($permCatalogos['puede_crear']): ?>
-              <button class="btn btn-primary btn-sm ml-md-auto" type="button" data-action="new" data-entity="estados-expediente">
-                <i class="fas fa-plus"></i> Nuevo
-              </button>
-            <?php endif; ?>
-          </div>
-          <div class="text-muted small mb-2" id="estados-expediente-counter">0 registros</div>
-          <div class="table-responsive">
-            <table class="table table-bordered table-hover table-sm">
-              <thead>
-                <tr>
-                  <th>Codigo</th>
-                  <th>Estado</th>
-                  <th>Etiqueta</th>
-                  <th>Inicial</th>
-                  <th>Orden</th>
-                  <th>Estado</th>
-                  <th class="text-center" style="width:72px;">Acciones</th>
-                </tr>
-              </thead>
-              <tbody id="estados-expediente-body"></tbody>
-            </table>
-          </div>
-          <div class="catalogos-loading" id="estados-expediente-loading">Cargando estados de expediente...</div>
-          <div class="catalogos-empty" id="estados-expediente-empty">No hay estados de expediente configurados.</div>
-          <div class="catalogos-pagination" id="estados-expediente-pagination"></div>
         </div>
       </div>
     </div>
@@ -502,117 +381,6 @@ $permCatalogos = [
   </div>
 </div>
 
-<div class="modal fade" id="modalTipoSeguro" tabindex="-1" role="dialog" aria-labelledby="modalTipoSeguroTitle" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
-    <form class="modal-content" id="formTipoSeguro">
-      <input type="hidden" name="id">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalTipoSeguroTitle">Tipo de seguro</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
-      </div>
-      <div class="modal-body">
-        <div class="alert alert-info py-2 small" role="status">
-          Ejemplos: CAR para obras de construccion, EAR para montaje, TREC para maquinaria pesada, SCTR Salud, SCTR Pension, Vida Ley, SOAT, Seguro Vehicular, Responsabilidad Civil, Carta Fianza.
-        </div>
-        <div class="form-row">
-          <div class="form-group col-md-8">
-            <label>Ramo activo</label>
-            <select name="ramo_id" class="form-control" required></select>
-          </div>
-          <div class="form-group col-md-4">
-            <label>Orden visual</label>
-            <input type="number" name="orden_visual" class="form-control" min="0" max="9999" step="1" value="0">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group col-md-8">
-            <label>Nombre</label>
-            <input type="text" name="nombre" class="form-control" maxlength="160" required>
-          </div>
-          <div class="form-group col-md-4">
-            <label>Estado</label>
-            <select name="estado" class="form-control">
-              <option value="1">Activo</option>
-              <option value="0">Desactivado</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Descripcion</label>
-          <textarea name="descripcion" class="form-control" rows="3"></textarea>
-        </div>
-        <div class="form-group mb-0">
-          <label>Ejemplo de uso</label>
-          <input type="text" name="ejemplo_uso" class="form-control" maxlength="255">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button>
-        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<div class="modal fade" id="modalEstadoExpediente" tabindex="-1" role="dialog" aria-labelledby="modalEstadoExpedienteTitle" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
-    <form class="modal-content" id="formEstadoExpediente">
-      <input type="hidden" name="id">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalEstadoExpedienteTitle">Estado de expediente</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
-      </div>
-      <div class="modal-body">
-        <div class="alert alert-info py-2 small" role="status">
-          Ejemplos: Nuevo, Pendiente de documentacion, En cotizacion, Cotizacion enviada, Aceptado, Cancelado y Cerrado.
-        </div>
-        <div class="form-row">
-          <div class="form-group col-md-8">
-            <label>Nombre</label>
-            <input type="text" name="nombre" class="form-control" maxlength="120" required>
-          </div>
-          <div class="form-group col-md-4">
-            <label>Orden visual</label>
-            <input type="number" name="orden_visual" class="form-control" min="0" max="9999" step="1" value="0">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group col-md-4">
-            <label>Color de etiqueta</label>
-            <input type="color" name="color_etiqueta" class="form-control p-1" value="#6c757d" required>
-          </div>
-          <div class="form-group col-md-4">
-            <label>Estado inicial</label>
-            <select name="es_inicial" class="form-control">
-              <option value="0">No</option>
-              <option value="1">Si</option>
-            </select>
-          </div>
-          <div class="form-group col-md-4">
-            <label>Estado</label>
-            <select name="estado" class="form-control">
-              <option value="1">Activo</option>
-              <option value="0">Desactivado</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Descripcion</label>
-          <textarea name="descripcion" class="form-control" rows="3"></textarea>
-        </div>
-        <div class="form-group mb-0">
-          <label>Ejemplo de uso</label>
-          <input type="text" name="ejemplo_uso" class="form-control" maxlength="255">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button>
-        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar</button>
-      </div>
-    </form>
-  </div>
-</div>
-
 <div class="modal fade" id="modalConfirmCatalogos" tabindex="-1" role="dialog" aria-labelledby="modalConfirmCatalogosTitle" aria-hidden="true">
   <div class="modal-dialog modal-sm" role="document">
     <div class="modal-content">
@@ -656,13 +424,6 @@ $permCatalogos = [
     display: inline-flex;
     flex-direction: column;
     gap: .25rem;
-  }
-  .catalogos-color-badge {
-    min-width: 72px;
-    max-width: 180px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
   .catalogos-logo-thumb,
   .catalogos-logo-preview {
@@ -710,19 +471,10 @@ document.addEventListener('DOMContentLoaded', function () {
     aseguradoras: 'api/catalogos/aseguradoras.php',
     ramos: 'api/catalogos/ramos.php',
     productos: 'api/catalogos/productos.php',
-    'tipos-seguro': 'api/catalogos/tipos_seguro.php',
-    'estados-expediente': 'api/catalogos/estados_expediente.php',
     resumen: 'api/catalogos/resumen.php',
     logo: 'api/catalogos/aseguradora_logo.php'
   };
-  var entities = ['aseguradoras', 'ramos', 'productos', 'tipos-seguro', 'estados-expediente'];
-  var state = {
-    aseguradoras: { page: 1 },
-    ramos: { page: 1 },
-    productos: { page: 1 },
-    'tipos-seguro': { page: 1 },
-    'estados-expediente': { page: 1 }
-  };
+  var state = { aseguradoras: { page: 1 }, ramos: { page: 1 }, productos: { page: 1 } };
   var searchTimers = {};
   var saveInFlight = false;
   var logoPreviewUrl = '';
@@ -739,13 +491,6 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   function badgeEstado(estado) {
     return Number(estado) === 1 ? '<span class="badge badge-success">Activo</span>' : '<span class="badge badge-secondary">Desactivado</span>';
-  }
-  function badgeInicial(value) {
-    return Number(value) === 1 ? '<span class="badge badge-primary">Inicial</span>' : '<span class="badge badge-light">No</span>';
-  }
-  function badgeColor(row) {
-    var color = /^#[0-9A-Fa-f]{6}$/.test(String(row.color_etiqueta || '')) ? row.color_etiqueta : '#6c757d';
-    return '<span class="badge catalogos-color-badge" style="background-color:' + escapeHtml(color) + ';color:#fff;">' + escapeHtml(row.nombre || 'Estado') + '</span>';
   }
   function logoHtml(row) {
     if (row.logo_id) {
@@ -825,15 +570,9 @@ document.addEventListener('DOMContentLoaded', function () {
         html += '<tr><td>' + logoHtml(row) + '</td><td>' + escapeHtml(row.codigo) + '</td><td>' + escapeHtml(row.razon_social) + '</td><td>' + escapeHtml(row.nombre_comercial || '-') + '</td><td>' + escapeHtml(row.ruc || '-') + '</td><td>' + badgeEstado(row.estado) + '</td><td class="text-center">' + actionButtons(entity, row) + '</td></tr>';
       } else if (entity === 'ramos') {
         html += '<tr><td>' + escapeHtml(row.codigo) + '</td><td>' + escapeHtml(row.nombre) + '</td><td>' + escapeHtml(truncate(row.descripcion || '-', 80)) + '</td><td>' + badgeEstado(row.estado) + '</td><td class="text-center">' + actionButtons(entity, row) + '</td></tr>';
-      } else if (entity === 'productos') {
+      } else {
         var producto = escapeHtml(row.nombre_producto) + (row.nombre_plan ? '<br><small class="text-muted">' + escapeHtml(row.nombre_plan) + '</small>' : '');
         html += '<tr><td>' + escapeHtml(row.codigo) + '</td><td>' + producto + '</td><td>' + escapeHtml(row.aseguradora_nombre) + '</td><td>' + escapeHtml(row.ramo_nombre) + '</td><td>' + badgeEstado(row.estado) + '</td><td class="text-center">' + actionButtons(entity, row) + '</td></tr>';
-      } else if (entity === 'tipos-seguro') {
-        var tipo = escapeHtml(row.nombre) + (row.ejemplo_uso ? '<br><small class="text-muted">' + escapeHtml(truncate(row.ejemplo_uso, 90)) + '</small>' : '');
-        html += '<tr><td>' + escapeHtml(row.codigo) + '</td><td>' + tipo + '</td><td>' + escapeHtml(row.ramo_nombre || '-') + '</td><td>' + escapeHtml(row.orden_visual || 0) + '</td><td>' + badgeEstado(row.estado) + '</td><td class="text-center">' + actionButtons(entity, row) + '</td></tr>';
-      } else if (entity === 'estados-expediente') {
-        var estadoNombre = escapeHtml(row.nombre) + (row.ejemplo_uso ? '<br><small class="text-muted">' + escapeHtml(truncate(row.ejemplo_uso, 90)) + '</small>' : '');
-        html += '<tr><td>' + escapeHtml(row.codigo) + '</td><td>' + estadoNombre + '</td><td>' + badgeColor(row) + '</td><td>' + badgeInicial(row.es_inicial) + '</td><td>' + escapeHtml(row.orden_visual || 0) + '</td><td>' + badgeEstado(row.estado) + '</td><td class="text-center">' + actionButtons(entity, row) + '</td></tr>';
       }
     });
     document.getElementById(entity + '-body').innerHTML = html;
@@ -864,14 +603,10 @@ document.addEventListener('DOMContentLoaded', function () {
       document.getElementById('cat-kpi-aseguradoras').textContent = data.aseguradoras_activas || 0;
       document.getElementById('cat-kpi-ramos').textContent = data.ramos_activos || 0;
       document.getElementById('cat-kpi-productos').textContent = data.productos_activos || 0;
-      document.getElementById('cat-kpi-tipos-seguro').textContent = data.tipos_seguro_activos || 0;
-      document.getElementById('cat-kpi-estados-expediente').textContent = data.estados_expediente_activos || 0;
     }).catch(function () {
       document.getElementById('cat-kpi-aseguradoras').textContent = '-';
       document.getElementById('cat-kpi-ramos').textContent = '-';
       document.getElementById('cat-kpi-productos').textContent = '-';
-      document.getElementById('cat-kpi-tipos-seguro').textContent = '-';
-      document.getElementById('cat-kpi-estados-expediente').textContent = '-';
     });
   }
   function clearValidation(form) {
@@ -918,30 +653,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
   function openModal(entity, id) {
-    var modalMap = {
-      aseguradoras: 'modalAseguradora',
-      ramos: 'modalRamo',
-      productos: 'modalProducto',
-      'tipos-seguro': 'modalTipoSeguro',
-      'estados-expediente': 'modalEstadoExpediente'
-    };
-    var formMap = {
-      aseguradoras: 'formAseguradora',
-      ramos: 'formRamo',
-      productos: 'formProducto',
-      'tipos-seguro': 'formTipoSeguro',
-      'estados-expediente': 'formEstadoExpediente'
-    };
-    var modalId = modalMap[entity];
-    var formId = formMap[entity];
+    var modalId = entity === 'aseguradoras' ? 'modalAseguradora' : (entity === 'ramos' ? 'modalRamo' : 'modalProducto');
+    var formId = entity === 'aseguradoras' ? 'formAseguradora' : (entity === 'ramos' ? 'formRamo' : 'formProducto');
     var form = document.getElementById(formId);
     form.reset();
     clearValidation(form);
     if (form.elements.id) form.elements.id.value = '';
     if (entity === 'aseguradoras') { form.elements.logo_quitar.value = '0'; clearLogoPreview(); }
-    if (entity === 'estados-expediente' && form.elements.color_etiqueta) form.elements.color_etiqueta.value = '#6c757d';
-    if ((entity === 'tipos-seguro' || entity === 'estados-expediente') && form.elements.orden_visual) form.elements.orden_visual.value = '0';
-    var ready = entity === 'productos' ? loadProductOptions() : (entity === 'tipos-seguro' ? loadTipoSeguroOptions() : Promise.resolve());
+    var ready = entity === 'productos' ? loadProductOptions() : Promise.resolve();
     ready.then(function () {
       if (!id) { $('#' + modalId).modal('show'); return; }
       fetchJson(endpoints[entity] + '?action=get&id=' + encodeURIComponent(id)).then(function (data) {
@@ -962,18 +681,6 @@ document.addEventListener('DOMContentLoaded', function () {
       ramoSelect.innerHTML = '<option value="">Seleccione ramo</option>' + (responses[1].rows || []).map(function (row) {
         return '<option value="' + row.id + '">' + escapeHtml(row.nombre) + '</option>';
       }).join('');
-    });
-  }
-  function loadTipoSeguroOptions() {
-    return fetchJson(endpoints.ramos + '?action=options').then(function (data) {
-      var ramoSelect = document.querySelector('#formTipoSeguro [name="ramo_id"]');
-      var rows = data.rows || [];
-      ramoSelect.innerHTML = '<option value="">Seleccione ramo activo</option>' + rows.map(function (row) {
-        return '<option value="' + row.id + '">' + escapeHtml(row.nombre) + '</option>';
-      }).join('');
-      if (!rows.length) {
-        showToast('No existen ramos activos. Cree primero un ramo desde la pestana Ramos.', 'warning');
-      }
     });
   }
   function saveEntity(entity, form, modalId) {
@@ -1034,7 +741,7 @@ document.addEventListener('DOMContentLoaded', function () {
       confirmAction(text, function () { toggleEntity(entity, btn.getAttribute('data-id')); });
     } else if (action === 'page') { state[entity].page = Number(btn.getAttribute('data-page')) || 1; loadEntity(entity); }
   });
-  entities.forEach(function (entity) {
+  ['aseguradoras', 'ramos', 'productos'].forEach(function (entity) {
     document.getElementById(entity + '-estado').addEventListener('change', function () { state[entity].page = 1; loadEntity(entity); });
     document.getElementById(entity + '-search').addEventListener('input', function () {
       clearTimeout(searchTimers[entity]);
@@ -1063,9 +770,9 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('formAseguradora').addEventListener('submit', function (event) { event.preventDefault(); saveEntity('aseguradoras', event.target, 'modalAseguradora'); });
   document.getElementById('formRamo').addEventListener('submit', function (event) { event.preventDefault(); saveEntity('ramos', event.target, 'modalRamo'); });
   document.getElementById('formProducto').addEventListener('submit', function (event) { event.preventDefault(); saveEntity('productos', event.target, 'modalProducto'); });
-  document.getElementById('formTipoSeguro').addEventListener('submit', function (event) { event.preventDefault(); saveEntity('tipos-seguro', event.target, 'modalTipoSeguro'); });
-  document.getElementById('formEstadoExpediente').addEventListener('submit', function (event) { event.preventDefault(); saveEntity('estados-expediente', event.target, 'modalEstadoExpediente'); });
   loadResumen();
-  entities.forEach(function (entity) { loadEntity(entity); });
+  loadEntity('aseguradoras');
+  loadEntity('ramos');
+  loadEntity('productos');
 });
 </script>

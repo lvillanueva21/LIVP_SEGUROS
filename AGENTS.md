@@ -61,7 +61,6 @@ Un requerimiento puntual del desarrollador puede ampliar funcionalidades, campos
 - Usar modales, toasts/notificaciones, loading y estados vacios coherentes.
 - Las tablas deben paginar en 10 registros cuando aplique.
 - Los botones de acciones en tablas deben ser icon-only, apilados verticalmente, con `title` y `aria-label`.
-- Toda subida nueva de archivos de negocio debe usar `includes/almacen_core.php` y guardar fisicamente bajo `almacen/{carpeta}/YYYY/MM/DD/`, con metadatos en BD local y sin BLOB/Base64.
 - No tocar `pizzarra/`, `dist/`, `plugins/` ni `includes/config_cliente.php` sin justificacion explicita.
 - La plantilla tecnica oficial de modulos vive en `modules/_plantilla/`.
 

@@ -1,7 +1,6 @@
 <?php
 require_once __DIR__ . '/../../includes/session_guard.php';
 require_once __DIR__ . '/../../includes/conexion_cliente.php';
-require_once __DIR__ . '/../../includes/almacen_core.php';
 
 function cat_db()
 {
@@ -58,45 +57,6 @@ function cat_codigo($value)
 {
     $value = strtoupper(cat_trim($value));
     return preg_match('/^[A-Z0-9_-]{2,40}$/', $value) === 1 ? $value : '';
-}
-
-function cat_codigo_from_nombre($value)
-{
-    $value = strtoupper(cat_trim($value));
-    $value = strtr($value, [
-        'Á' => 'A', 'É' => 'E', 'Í' => 'I', 'Ó' => 'O', 'Ú' => 'U',
-        'Ä' => 'A', 'Ë' => 'E', 'Ï' => 'I', 'Ö' => 'O', 'Ü' => 'U',
-        'À' => 'A', 'È' => 'E', 'Ì' => 'I', 'Ò' => 'O', 'Ù' => 'U',
-        'Ñ' => 'N', 'Ç' => 'C',
-        'á' => 'A', 'é' => 'E', 'í' => 'I', 'ó' => 'O', 'ú' => 'U',
-        'ä' => 'A', 'ë' => 'E', 'ï' => 'I', 'ö' => 'O', 'ü' => 'U',
-        'à' => 'A', 'è' => 'E', 'ì' => 'I', 'ò' => 'O', 'ù' => 'U',
-        'ñ' => 'N', 'ç' => 'C',
-    ]);
-    $value = preg_replace('/[^A-Z0-9]+/', '_', $value);
-    $value = trim((string) preg_replace('/_+/', '_', (string) $value), '_');
-    if ($value === '') {
-        $value = 'CATALOGO';
-    }
-    return substr($value, 0, 40);
-}
-
-function cat_codigo_unico_desde_nombre(PDO $pdo, $table, $nombre)
-{
-    $base = cat_codigo_from_nombre($nombre);
-    $codigo = $base;
-    $suffix = 2;
-
-    while (cat_value_exists($pdo, $table, 'codigo', $codigo)) {
-        $tail = '_' . $suffix;
-        $codigo = substr($base, 0, 40 - strlen($tail)) . $tail;
-        $suffix++;
-        if ($suffix > 999) {
-            cb_json_error('codigo_no_disponible', 'No se pudo generar un codigo tecnico unico.', 409);
-        }
-    }
-
-    return $codigo;
 }
 
 function cat_estado_value($value, $default = 1)
@@ -164,7 +124,7 @@ function cat_require_post_change($accion)
 
 function cat_bind_like($value)
 {
-    return '%' . trim((string) $value) . '%';
+    return '%' . str_replace(['%', '_'], ['\\%', '\\_'], $value) . '%';
 }
 
 function cat_db_error()
@@ -249,37 +209,6 @@ function cat_abort_if_errors(array $errors)
     }
 }
 
-function cat_int_range($value, $default, $min, $max)
-{
-    if ($value === null || $value === '') {
-        return (int) $default;
-    }
-    $value = (int) $value;
-    if ($value < (int) $min) {
-        return (int) $min;
-    }
-    if ($value > (int) $max) {
-        return (int) $max;
-    }
-    return $value;
-}
-
-function cat_bool_value($value, $default = 0)
-{
-    if ($value === null || $value === '') {
-        return (int) $default;
-    }
-    return in_array((string) $value, ['1', 'true', 'on', 'yes'], true) ? 1 : 0;
-}
-
-function cat_validate_hex_color($value, $field, array &$errors)
-{
-    $value = cat_trim($value);
-    if ($value !== '' && preg_match('/^#[0-9A-Fa-f]{6}$/', $value) !== 1) {
-        $errors[$field] = 'Seleccione un color valido.';
-    }
-}
-
 function cat_logo_table_exists(PDO $pdo)
 {
     static $exists = null;
@@ -347,7 +276,6 @@ function cat_validate_logo_upload($fieldName = 'logo_archivo')
 
     return [
         'nombre_original' => substr(basename((string) ($file['name'] ?? 'logo')), 0, 255),
-        'file_info' => $file,
         'tmp_name' => $tmpName,
         'extension' => $allowed[$mime],
         'mime_type' => $mime,
@@ -386,7 +314,7 @@ function cat_random_hex($bytes = 8)
 
 function cat_logo_rel_dir()
 {
-    return cb_almacen_rel_dir('aseguradoras/logos');
+    return cat_storage_rel_base() . '/imagenes/aseguradoras/logos/' . date('Y') . '/' . date('m') . '/' . date('d');
 }
 
 function cat_abs_from_rel($rutaRelativa)
@@ -399,58 +327,57 @@ function cat_abs_from_rel($rutaRelativa)
 
 function cat_is_safe_storage_path($absolutePath)
 {
-    $storageBase = realpath(cat_storage_abs_base());
-    $almacenBase = realpath(cb_almacen_abs_base());
+    $base = realpath(cat_storage_abs_base());
     $target = realpath($absolutePath);
-    if ($target === false) {
+    if ($base === false || $target === false) {
         return false;
     }
-
-    if ($storageBase !== false && strpos($target, rtrim($storageBase, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR) === 0) {
-        return true;
-    }
-
-    return $almacenBase !== false && strpos($target, rtrim($almacenBase, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR) === 0;
+    return strpos($target, rtrim($base, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR) === 0;
 }
 
-function cat_logo_store_file(PDO $pdo, array $logo, $aseguradoraId, $userId)
+function cat_logo_store_file(array $logo)
 {
-    if (!cb_almacen_schema_ready($pdo)) {
-        if ($pdo->inTransaction()) {
-            $pdo->rollBack();
-        }
-        cb_json_error('almacen_schema_pendiente', 'La estructura de almacen todavia no existe. Ejecute los querys de esta fase en phpMyAdmin.', 409);
+    $relDir = cat_logo_rel_dir();
+    $absDir = cat_abs_from_rel($relDir);
+    if (!is_dir($absDir)) {
+        @mkdir($absDir, 0775, true);
+    }
+    if (!is_dir($absDir) || !is_writable($absDir)) {
+        cb_json_error('storage_no_disponible', 'No se pudo preparar la carpeta de logos.', 500);
     }
 
-    $errors = [];
-    $stored = cb_almacen_guardar_upload($pdo, (array) ($logo['file_info'] ?? []), [
-        'carpeta' => 'aseguradoras/logos',
-        'usuario_id' => (int) $userId,
-        'descripcion' => 'Logo de aseguradora',
-        'vinculo' => [
-            'codigo_uso' => 'aseguradora_logo',
-            'entidad_tipo' => 'seg_aseguradoras',
-            'entidad_id' => (int) $aseguradoraId,
-            'slot' => 'logo',
-            'orden' => 1,
-        ],
-    ], $errors);
-
-    if (!$stored) {
-        if ($pdo->inTransaction()) {
-            $pdo->rollBack();
-        }
-        $message = 'No se pudo guardar el logo en almacen.';
-        if ($errors) {
-            $first = reset($errors);
-            if (is_string($first) && $first !== '') {
-                $message = $first;
-            }
-        }
-        cb_json_error('storage_error', $message, 500, $errors);
+    $baseName = cat_slug(pathinfo((string) $logo['nombre_original'], PATHINFO_FILENAME));
+    if ($baseName === '') {
+        $baseName = 'logo';
+    }
+    $nombreInterno = date('Ymd_His') . '_' . $baseName . '_' . cat_random_hex(8) . '.' . $logo['extension'];
+    if (strlen($nombreInterno) > 255) {
+        $nombreInterno = substr($nombreInterno, 0, 255);
     }
 
-    return $stored;
+    $absPath = rtrim($absDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $nombreInterno;
+    if (!@move_uploaded_file($logo['tmp_name'], $absPath)) {
+        cb_json_error('storage_error', 'No se pudo guardar el logo en el servidor.', 500);
+    }
+
+    $checksum = @hash_file('sha256', $absPath);
+    if (!is_string($checksum) || strlen($checksum) !== 64) {
+        @unlink($absPath);
+        cb_json_error('storage_error', 'No se pudo validar el logo guardado.', 500);
+    }
+
+    return [
+        'nombre_original' => $logo['nombre_original'],
+        'nombre_interno' => $nombreInterno,
+        'extension' => $logo['extension'],
+        'mime_type' => $logo['mime_type'],
+        'tamanio_bytes' => (int) $logo['tamanio_bytes'],
+        'ancho_px' => (int) $logo['ancho_px'],
+        'alto_px' => (int) $logo['alto_px'],
+        'checksum_sha256' => $checksum,
+        'ruta_relativa' => $relDir . '/' . $nombreInterno,
+        'absolute_path' => $absPath,
+    ];
 }
 
 function cat_logo_delete_file($rutaRelativa)
@@ -458,20 +385,6 @@ function cat_logo_delete_file($rutaRelativa)
     $rutaRelativa = trim((string) $rutaRelativa);
     if ($rutaRelativa === '') {
         return;
-    }
-    if (strpos($rutaRelativa, cb_almacen_rel_base() . '/') === 0) {
-        try {
-            $pdo = cat_db();
-            if (cb_almacen_schema_ready($pdo)) {
-                $errors = [];
-                $deleted = cb_almacen_delete_by_ruta($pdo, $rutaRelativa, cat_user_id(), $errors);
-                if ($deleted) {
-                    return;
-                }
-            }
-        } catch (Throwable $e) {
-            return;
-        }
     }
     $absPath = cat_abs_from_rel($rutaRelativa);
     if (is_file($absPath) && cat_is_safe_storage_path($absPath)) {
@@ -490,7 +403,7 @@ function cat_logo_current(PDO $pdo, $aseguradoraId)
 function cat_save_logo(PDO $pdo, $aseguradoraId, array $logoFile, $userId, $now)
 {
     cat_require_logo_table($pdo);
-    $stored = cat_logo_store_file($pdo, $logoFile, $aseguradoraId, $userId);
+    $stored = cat_logo_store_file($logoFile);
     $previous = cat_logo_current($pdo, $aseguradoraId);
 
     try {

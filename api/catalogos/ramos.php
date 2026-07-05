@@ -20,11 +20,8 @@ function ramo_listar(PDO $pdo)
         $params[':estado'] = $estado === 'activo' ? 1 : 0;
     }
     if ($q !== '') {
-        $where[] = "(codigo LIKE :q_codigo OR nombre LIKE :q_nombre OR descripcion LIKE :q_descripcion)";
-        $like = cat_bind_like($q);
-        $params[':q_codigo'] = $like;
-        $params[':q_nombre'] = $like;
-        $params[':q_descripcion'] = $like;
+        $where[] = "(codigo LIKE :q ESCAPE '\\\\' OR nombre LIKE :q ESCAPE '\\\\' OR descripcion LIKE :q ESCAPE '\\\\')";
+        $params[':q'] = cat_bind_like($q);
     }
 
     $whereSql = $where ? ' WHERE ' . implode(' AND ', $where) : '';
@@ -165,12 +162,6 @@ function ramo_cambiar_estado(PDO $pdo)
         $stmt->execute([':id' => $id]);
         if ((int) $stmt->fetchColumn() > 0) {
             cb_json_error('dependencia_activa', 'No se puede desactivar un ramo con productos activos.', 409);
-        }
-
-        $stmt = $pdo->prepare('SELECT COUNT(*) FROM seg_tipos_seguro WHERE ramo_id = :id AND estado = 1');
-        $stmt->execute([':id' => $id]);
-        if ((int) $stmt->fetchColumn() > 0) {
-            cb_json_error('dependencia_activa', 'No se puede desactivar un ramo con tipos de seguro activos.', 409);
         }
     }
 

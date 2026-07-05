@@ -1,10 +1,6 @@
 <?php
 require_once __DIR__ . '/includes/session_guard.php';
 
-if (cb_cliente_puede_ver_pagina('inicio')) {
-    cb_redirect('modulo.php?m=inicio');
-}
-
 $auth = cb_get_auth();
 $usuario = is_array($auth['usuario'] ?? null) ? $auth['usuario'] : [];
 $servicio = is_array($auth['servicio'] ?? null) ? $auth['servicio'] : [];
