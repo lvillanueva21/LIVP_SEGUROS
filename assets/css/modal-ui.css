@@ -1,0 +1,62 @@
+/* Capa visual segura para formularios dentro de modales: no altera valores con negrita. */
+dialog.client-dialog *,
+dialog.catalog-dialog *,
+dialog.expedient-dialog *{box-sizing:border-box}
+
+dialog.client-dialog,
+dialog.catalog-dialog,
+dialog.expedient-dialog{color:#344054}
+
+dialog.client-dialog label,
+dialog.catalog-dialog label,
+dialog.expedient-dialog label{color:#344054;font-size:.79rem;line-height:1.35;font-weight:600}
+
+dialog.client-dialog input,
+dialog.client-dialog select,
+dialog.client-dialog textarea,
+dialog.catalog-dialog input,
+dialog.catalog-dialog select,
+dialog.catalog-dialog textarea,
+dialog.expedient-dialog input,
+dialog.expedient-dialog select,
+dialog.expedient-dialog textarea{font-weight:400!important;letter-spacing:normal;transition:border-color .15s ease,box-shadow .15s ease,background-color .15s ease}
+
+dialog.client-dialog input:focus,
+dialog.client-dialog select:focus,
+dialog.client-dialog textarea:focus,
+dialog.catalog-dialog input:focus,
+dialog.catalog-dialog select:focus,
+dialog.catalog-dialog textarea:focus,
+dialog.expedient-dialog input:focus,
+dialog.expedient-dialog select:focus,
+dialog.expedient-dialog textarea:focus{border-color:#155eef;outline:0;box-shadow:0 0 0 3px rgba(21,94,239,.12)}
+
+dialog.client-dialog input:hover,
+dialog.client-dialog select:hover,
+dialog.client-dialog textarea:hover,
+dialog.catalog-dialog input:hover,
+dialog.catalog-dialog select:hover,
+dialog.catalog-dialog textarea:hover,
+dialog.expedient-dialog input:hover,
+dialog.expedient-dialog select:hover,
+dialog.expedient-dialog textarea:hover{border-color:#b7c6d8}
+
+dialog.client-dialog input[type="checkbox"],
+dialog.expedient-dialog input[type="checkbox"]{width:16px;min-height:16px;margin:0 6px 0 0;padding:0;accent-color:#155eef}
+
+dialog.client-dialog .form-grid > label,
+dialog.client-dialog .field,
+dialog.catalog-dialog form > label,
+dialog.expedient-dialog .expedient-form-grid > label,
+dialog.expedient-dialog .expedient-description-field{font-weight:600}
+
+dialog.client-dialog .rel-row,
+dialog.client-dialog .part-row{min-width:0;border-color:#dfe7f0;background:#f9fbfd}
+dialog.client-dialog .rel-row label,
+dialog.client-dialog .part-row label{min-height:39px;display:flex;align-items:center;color:#475467;font-weight:600}
+
+dialog.client-dialog .dialog-actions,
+dialog.catalog-dialog .catalog-dialog-actions,
+dialog.expedient-dialog .expedient-dialog-actions{position:sticky;bottom:-1px;z-index:1;padding-top:14px;background:inherit}
+
+@media(max-width:680px){dialog.client-dialog .dialog-actions,dialog.catalog-dialog .catalog-dialog-actions,dialog.expedient-dialog .expedient-dialog-actions{position:static;padding-top:0}}

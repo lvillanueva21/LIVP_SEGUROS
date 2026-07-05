@@ -1,0 +1,16 @@
+/* Corrección visual específica de Expedientes y Pólizas */
+.expedient-dialog .expedient-form-grid label,
+.expedient-dialog .expedient-description-field{font-weight:600!important}
+
+.expedient-dialog .expedient-form-grid select,
+.expedient-dialog .expedient-form-grid input,
+.expedient-dialog .expedient-description-field textarea,
+.expedient-dialog .expedient-detail-edit select,
+.expedient-dialog .expedient-detail-edit input,
+.expedient-dialog .expedient-detail-edit textarea{font-weight:400!important}
+
+.expedient-detail-state-actions{display:flex!important;justify-content:flex-end;gap:9px;flex-wrap:wrap}
+.expedient-detail-state-actions .expedient-secondary-button{min-height:39px}
+.expedient-dialog-content{min-height:120px}
+.expedient-detail-edit > p,.expedient-quotes-placeholder p{font-weight:400}
+@media(max-width:680px){.expedient-detail-state-actions{flex-direction:column-reverse}.expedient-detail-state-actions button{width:100%}}

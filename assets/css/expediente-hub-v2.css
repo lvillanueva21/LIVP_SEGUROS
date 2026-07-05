@@ -1,0 +1,32 @@
+/* Hub operativo V2: organiza la ficha sin alterar la independencia entre cotizaciones y pólizas. */
+.expedient-hub-tabs{display:flex;gap:7px;overflow-x:auto;margin:16px 0 14px;padding-bottom:3px;border-bottom:1px solid #dce7f3}
+.expedient-hub-tab{white-space:nowrap;min-height:35px;padding:8px 11px;border:1px solid transparent;border-radius:8px;background:transparent;color:#667085;font-size:.74rem;font-weight:750}
+.expedient-hub-tab:hover{background:#f8fafc;color:#344054}.expedient-hub-tab.is-active{border-color:#bfd4ff;background:#eff4ff;color:#175cd3}
+.expedient-hub-panel{display:none}.expedient-hub-panel.is-active{display:block}
+.expedient-hub-panel .expedient-detail-grid,.expedient-hub-panel .expedient-detail-description{margin-top:0}
+.expedient-hub-panel .expedient-detail-edit{margin-top:18px}
+.expedient-hub-card{margin:0;padding:17px;border:1px solid #dce7f3;border-radius:13px;background:#fff}
+.expedient-hub-heading{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:13px}
+.expedient-hub-heading h3{margin:3px 0 0;color:#1d2939;font-size:1rem}.expedient-hub-heading p:last-child{margin:6px 0 0;color:#667085;font-size:.76rem;line-height:1.45}
+.expedient-hub-actions{display:flex;gap:7px;flex-wrap:wrap}.expedient-hub-note{margin:0 0 13px;padding:10px;border-radius:8px;background:#f8fafc;color:#475467;font-size:.74rem;line-height:1.45}
+.expedient-quote-hub-list,.expedient-document-list,.expedient-alert-hub-list{display:grid;gap:10px}
+.expedient-quote-hub-card,.expedient-document-card,.expedient-alert-hub-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:12px;border:1px solid #e2e8f0;border-radius:10px;background:#fbfdff}
+.expedient-quote-hub-card h4,.expedient-document-card h4,.expedient-alert-hub-card h4{margin:3px 0 0;color:#1d2939;font-size:.85rem}
+.expedient-quote-hub-card p,.expedient-document-card p,.expedient-alert-hub-card p{margin:5px 0 0;color:#667085;font-size:.73rem;line-height:1.4}
+.expedient-hub-code{margin:0;color:#175cd3;font-size:.68rem;font-weight:800}.expedient-hub-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.expedient-hub-badge{display:inline-flex;padding:4px 7px;border-radius:999px;background:#f2f4f7;color:#475467;font-size:.65rem;font-weight:750}
+.expedient-hub-badge.is-warning{background:#fffaeb;color:#b54708}.expedient-hub-badge.is-success{background:#ecfdf3;color:#067647}.expedient-hub-badge.is-muted{background:#f2f4f7;color:#667085}
+.expedient-hub-empty{margin:0;padding:16px;border:1px dashed #cbd5e1;border-radius:10px;color:#667085;font-size:.77rem;text-align:center}
+.expedient-hub-filter{min-height:34px;padding:7px 9px;border:1px solid #d9e1ec;border-radius:8px;background:#fff;color:#475467;font-size:.73rem;font-weight:600}
+.expedient-document-toolbar{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:12px}
+.expedient-document-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:14px;padding:13px;border:1px solid #cfe1ff;border-radius:11px;background:#f8fbff}
+.expedient-document-form label{display:grid;gap:6px;color:#344054;font-size:.75rem;font-weight:650}.expedient-document-form .wide{grid-column:span 2}
+.expedient-document-form input,.expedient-document-form select,.expedient-document-form textarea{min-height:38px;padding:8px 9px;border:1px solid #d9e1ec;border-radius:8px;background:#fff;color:#182230;font:inherit;font-size:.78rem;font-weight:400!important}
+.expedient-document-form textarea{resize:vertical}.expedient-document-form-actions{display:flex;justify-content:flex-end;gap:8px;grid-column:span 2}
+.expedient-document-file{margin-top:8px;color:#667085;font-size:.69rem}.expedient-document-meta{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.expedient-tab-count{display:inline-grid;place-items:center;min-width:18px;height:18px;margin-left:4px;padding:0 4px;border-radius:999px;background:#dbeafe;color:#175cd3;font-size:.62rem}
+.expedient-hub-panel .policy-section,.expedient-hub-panel .activity-timeline{margin:0}
+.expedient-policy-filter-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 11px}
+.expedient-alert-filter-row{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:0 0 11px}
+.expedient-alert-hub-card[data-alert-tone="warning"]{border-color:#fedf89;background:#fffaeb}.expedient-alert-hub-card[data-alert-tone="success"]{border-color:#abefc6;background:#f6fef9}
+@media(max-width:680px){.expedient-hub-heading,.expedient-document-toolbar,.expedient-policy-filter-row,.expedient-alert-filter-row{flex-direction:column;align-items:stretch}.expedient-quote-hub-card,.expedient-document-card,.expedient-alert-hub-card{grid-template-columns:1fr}.expedient-document-form{grid-template-columns:1fr}.expedient-document-form .wide,.expedient-document-form-actions{grid-column:auto}.expedient-document-form-actions{flex-direction:column-reverse}.expedient-document-form-actions button{width:100%}}

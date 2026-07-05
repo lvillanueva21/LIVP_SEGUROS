@@ -1,0 +1,27 @@
+# Almacenamiento operativo del servidor
+/almacen/**
+!/almacen/
+!/almacen/.htaccess
+
+# Sesiones locales de PHP
+/sessions/
+/session/
+/tmp/
+
+# Archivos de entorno y secretos locales
+.env
+.env.*
+!.env.example
+
+# Artefactos temporales
+*.log
+*.tmp
+*.temp
+*.bak
+*.orig
+
+# Archivos del sistema operativo y editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

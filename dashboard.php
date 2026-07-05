@@ -1,46 +1,27 @@
 <?php
-require_once __DIR__ . '/includes/session_guard.php';
+declare(strict_types=1);
 
-$auth = cb_get_auth();
-$usuario = is_array($auth['usuario'] ?? null) ? $auth['usuario'] : [];
-$servicio = is_array($auth['servicio'] ?? null) ? $auth['servicio'] : [];
-$rol = is_array($auth['rol'] ?? null) ? $auth['rol'] : [];
-$timeout = cb_get_timeout_minutes();
+require __DIR__ . '/config/bootstrap.php';
 
-$nombreCompleto = trim((string) ($usuario['nombres'] ?? '') . ' ' . (string) ($usuario['apellidos'] ?? ''));
-if ($nombreCompleto === '') {
-    $nombreCompleto = 'Usuario externo';
-}
-
-$servicioNombre = trim((string) ($servicio['nombre'] ?? ''));
-if ($servicioNombre === '') {
-    $servicioNombre = CLIENTE_NOMBRE;
-}
-
-$servicioCodigo = trim((string) ($servicio['codigo_servicio'] ?? ''));
-$documentoVisible = trim((string) ($usuario['documento_tipo'] ?? '') . ' ' . (string) ($usuario['documento_numero'] ?? ''));
-if ($documentoVisible === '') {
-    $documentoVisible = 'Sin documento';
-}
-$rolVisible = trim((string) ($rol['nombre'] ?? ''));
-if ($rolVisible === '') {
-    $rolVisible = 'Usuario externo';
-}
-
-$cbPageTitle = 'Inicio';
-require_once __DIR__ . '/includes/layout_header.php';
-require_once __DIR__ . '/includes/layout_sidebar.php';
+$user = requireAuth();
+$menu = modulesForRole((string) $user['role']);
+$activeModule = 'inicio';
+$pageTitle = 'Inicio';
+$dashboardDataSource = require __DIR__ . '/config/demo_dashboard_data.php';
+$dashboard = $dashboardDataSource[(string) $user['id']] ?? $dashboardDataSource['default'];
+$today = (new DateTimeImmutable('now', new DateTimeZone('America/Lima')))->format('d/m/Y · H:i');
+$sessionStartedAt = formatSessionStartedAt($user['session_started_at'] ?? null);
+$metrics = is_array($dashboard['metrics'] ?? null) ? $dashboard['metrics'] : [];
+$alerts = is_array($dashboard['alerts'] ?? null) ? $dashboard['alerts'] : [];
+$primaryTable = is_array($dashboard['primary_table'] ?? null) ? $dashboard['primary_table'] : [];
+$secondaryTable = is_array($dashboard['secondary_table'] ?? null) ? $dashboard['secondary_table'] : [];
+$companySummary = is_array($dashboard['company_summary'] ?? null) ? $dashboard['company_summary'] : [];
 ?>
-<div class="card card-primary card-outline">
-  <div class="card-header">
-    <h3 class="card-title">Panel inicial</h3>
-  </div>
-  <div class="card-body">
-    <p class="mb-2">Bienvenido, <strong><?php echo cb_e($nombreCompleto); ?></strong>.</p>
-    <p class="mb-2">Usuario: <strong><?php echo cb_e($documentoVisible); ?></strong></p>
-    <p class="mb-2">Rol activo: <strong><?php echo cb_e($rolVisible); ?></strong></p>
-    <p class="mb-2">Servicio: <strong><?php echo cb_e($servicioNombre); ?></strong><?php if ($servicioCodigo !== ''): ?> <small class="text-muted">(<?php echo cb_e($servicioCodigo); ?>)</small><?php endif; ?></p>
-    <p class="mb-0">Timeout de sesión local: <strong><?php echo cb_e((string) $timeout); ?> minutos</strong></p>
-  </div>
-</div>
-<?php require_once __DIR__ . '/includes/layout_footer.php'; ?>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title><?= e(APP_NAME) ?> | <?= e($user['role_label']) ?></title><link rel="stylesheet" href="assets/css/app.css?v=BS-20260627-231256-PREDEMO"><link rel="stylesheet" href="assets/css/dashboard.css?v=BS-20260627-231256-PREDEMO"><link rel="stylesheet" href="assets/css/modules.css?v=BS-20260627-231256-PREDEMO"><link rel="stylesheet" href="assets/css/policy-alerts.css?v=BS-20260627-231256-PREDEMO"><link rel="stylesheet" href="assets/css/live-dashboard.css?v=BS-20260627-231256-PREDEMO"><link rel="stylesheet" href="assets/css/demo-showcase.css?v=BS-20260627-231256-PREDEMO"></head>
+<body class="app-body" data-role="<?= e($user['role']) ?>" data-user="<?= e((string) $user['id']) ?>"><div class="app-shell"><?php require __DIR__ . '/views/partials/sidebar.php'; ?><div class="sidebar-overlay" id="sidebar-overlay"></div><main class="workspace"><?php require __DIR__ . '/views/partials/topbar.php'; ?><section class="workspace-content" id="workspace-content"><div class="page-view"><div class="welcome-banner"><div><p class="eyebrow">PANEL DE <?= e(strtoupper($user['role_label'])) ?></p><h2>Bienvenido, <?= e($user['name']) ?></h2><p><?= e((string) ($dashboard['summary'] ?? 'Esta pantalla resume los datos principales del perfil que ingresó al sistema.')) ?></p></div><div class="welcome-date"><span>Hora Perú</span><strong><?= e($today) ?></strong></div></div>
+<div class="dashboard-metrics"><?php foreach ($metrics as $metric): ?><?php $metricTone=(string)($metric['tone']??'primary');$allowedTones=['primary','warning','danger','success'];$metricTone=in_array($metricTone,$allowedTones,true)?$metricTone:'primary'; ?><article class="dashboard-metric metric-<?= e($metricTone) ?>"><div class="dashboard-metric-top"><span class="dashboard-metric-icon" aria-hidden="true"><?= e((string)($metric['icon']??'•')) ?></span><span class="dashboard-metric-status" aria-hidden="true"></span></div><p><?= e((string)($metric['label']??'Indicador')) ?></p><h3><?= e((string)($metric['value']??'—')) ?></h3><small><?= e((string)($metric['note']??'')) ?></small></article><?php endforeach; ?></div>
+<div class="dashboard-main-grid"><section class="dashboard-panel"><div class="section-heading"><div><p class="eyebrow">ATENCIÓN REQUERIDA</p><h2>Alertas principales</h2></div></div><?php if ($alerts !== []): ?><ul class="alert-list"><?php foreach ($alerts as $alert): ?><?php $alertLevel=(string)($alert['level']??'primary');$allowedLevels=['primary','warning','danger','success'];$alertLevel=in_array($alertLevel,$allowedLevels,true)?$alertLevel:'primary'; ?><li class="alert-item alert-<?= e($alertLevel) ?>"><p class="alert-item-title"><?= e((string)($alert['title']??'Alerta registrada')) ?></p><p class="alert-item-description"><?= e((string)($alert['description']??'')) ?></p><span class="alert-item-meta"><?= e((string)($alert['meta']??'')) ?></span></li><?php endforeach; ?></ul><?php else: ?><p class="dashboard-empty">No hay alertas configuradas para este perfil.</p><?php endif; ?></section><section class="detail-card cache-card"><div class="section-heading"><div><p class="eyebrow">ESTADO TEMPORAL</p><h2>Acciones en caché</h2></div><span class="cache-status">Activo</span></div><p>Las acciones de navegación se mantienen durante esta sesión y también en el navegador, sin base de datos.</p><ul id="cache-list" class="cache-list"><li>Cargando acciones recientes...</li></ul><dl class="details-list"><div><dt>Tipo de cuenta</dt><dd><?= e((string)($user['account_type_label']??'No registrado')) ?></dd></div><div><dt>Sesión iniciada</dt><dd><?= e($sessionStartedAt) ?></dd></div></dl></section></div>
+<section class="dashboard-panel"><div class="section-heading"><div><p class="eyebrow"><?= e((string)($primaryTable['eyebrow']??'INFORMACIÓN')) ?></p><h2><?= e((string)($primaryTable['title']??'Información principal')) ?></h2></div></div><p class="dashboard-panel-description"><?= e((string)($primaryTable['description']??'')) ?></p><?php if (!empty($primaryTable['columns']) && !empty($primaryTable['rows'])): ?><div class="dashboard-table-wrap"><table class="dashboard-table"><thead><tr><?php foreach($primaryTable['columns'] as $column): ?><th scope="col"><?= e((string)$column) ?></th><?php endforeach; ?></tr></thead><tbody><?php foreach($primaryTable['rows'] as $row): ?><tr><?php foreach($row as $cell): ?><td><?= e((string)$cell) ?></td><?php endforeach; ?></tr><?php endforeach; ?></tbody></table></div><?php else: ?><p class="dashboard-empty">No hay datos disponibles para esta sección.</p><?php endif; ?></section>
+<?php if ($companySummary !== []): ?><section class="dashboard-panel"><div class="section-heading"><div><p class="eyebrow">EMPRESAS PARTICIPANTES</p><h2>Resumen por empresa</h2></div></div><div class="company-summary-grid"><?php foreach($companySummary as $company): ?><article class="company-summary-card"><h3><?= e((string)($company['name']??'Empresa')) ?></h3><p><?= e((string)($company['ruc']??'')) ?></p><p><?= e((string)($company['policies']??'')) ?></p><p class="company-summary-pending"><?= e((string)($company['pending']??'')) ?></p></article><?php endforeach; ?></div></section><?php endif; ?>
+<section class="dashboard-panel"><div class="section-heading"><div><p class="eyebrow"><?= e((string)($secondaryTable['eyebrow']??'SEGUIMIENTO')) ?></p><h2><?= e((string)($secondaryTable['title']??'Información complementaria')) ?></h2></div></div><p class="dashboard-panel-description"><?= e((string)($secondaryTable['description']??'')) ?></p><?php if (!empty($secondaryTable['columns']) && !empty($secondaryTable['rows'])): ?><div class="dashboard-table-wrap"><table class="dashboard-table"><thead><tr><?php foreach($secondaryTable['columns'] as $column): ?><th scope="col"><?= e((string)$column) ?></th><?php endforeach; ?></tr></thead><tbody><?php foreach($secondaryTable['rows'] as $row): ?><tr><?php foreach($row as $cell): ?><td><?= e((string)$cell) ?></td><?php endforeach; ?></tr><?php endforeach; ?></tbody></table></div><?php else: ?><p class="dashboard-empty">No hay datos disponibles para esta sección.</p><?php endif; ?></section>
+<?php if (!empty($user['consortium_members'])): ?><section class="detail-card consortium-card"><div class="section-heading"><div><p class="eyebrow">CONSORCIO</p><h2>Empresas participantes registradas</h2></div></div><ul class="member-list"><?php foreach($user['consortium_members'] as $member): ?><li><?= e($member) ?></li><?php endforeach; ?></ul></section><?php endif; ?></div></section></main></div><script src="assets/js/cache-migrations.js?v=BS-20260627-231256-PREDEMO"></script><script src="assets/js/app.js?v=BS-20260627-231256-PREDEMO"></script><script src="assets/js/policy-alerts.js?v=BS-20260627-231256-PREDEMO"></script><script src="assets/js/policy-alerts-dashboard.js?v=BS-20260627-231256-PREDEMO"></script><script src="assets/js/live-dashboard.js?v=BS-20260627-231256-PREDEMO"></script><script src="assets/js/demo-showcase.js?v=BS-20260627-231256-PREDEMO"></script></body></html>

@@ -1,0 +1,562 @@
+/* Expedientes demo: proceso flexible, contacto de gestión y cliente opcional. */
+.expedients-app { margin-top: 20px; }
+
+.expedients-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.expedient-summary-card,
+.expedients-panel {
+  border: 1px solid #e2e9f1;
+  border-radius: var(--radius);
+  background: #fff;
+  box-shadow: 0 7px 20px rgba(16, 42, 67, .04);
+}
+
+.expedient-summary-card { min-height: 156px; padding: 18px; }
+
+.expedient-summary-icon {
+  width: 31px;
+  height: 31px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  color: #155eef;
+  background: #e8f0ff;
+  font-weight: 900;
+}
+
+.expedient-summary-card p {
+  margin: 16px 0 5px;
+  color: var(--muted);
+  font-size: .75rem;
+}
+
+.expedient-summary-card strong {
+  display: block;
+  color: #1f2937;
+  font-size: 1.34rem;
+  letter-spacing: -.025em;
+}
+
+.expedient-summary-card small {
+  display: block;
+  margin-top: 7px;
+  color: #98a2b3;
+  font-size: .71rem;
+}
+
+.summary-warning .expedient-summary-icon { color: #b54708; background: #fffaeb; }
+.summary-primary .expedient-summary-icon { color: #155eef; background: #eff4ff; }
+.summary-success .expedient-summary-icon { color: #067647; background: #ecfdf3; }
+
+.expedients-panel { margin-top: 20px; padding: 22px; }
+
+.expedients-panel-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.expedients-panel-heading h2 {
+  margin: 0;
+  color: #1d2939;
+  font-size: 1.15rem;
+  letter-spacing: -.025em;
+}
+
+.expedients-panel-heading p:last-child {
+  max-width: 680px;
+  margin: 9px 0 0;
+  color: var(--muted);
+  font-size: .84rem;
+  line-height: 1.55;
+}
+
+.expedient-primary-button,
+.expedient-secondary-button,
+.expedient-row-button,
+.expedient-link-button {
+  border-radius: 9px;
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.expedient-primary-button {
+  padding: 10px 13px;
+  border: 1px solid #155eef;
+  color: #fff;
+  background: #155eef;
+}
+
+.expedient-primary-button:hover { background: #004eea; }
+
+.expedient-secondary-button {
+  padding: 10px 12px;
+  border: 1px solid #d7e1ee;
+  color: #475467;
+  background: #fff;
+}
+
+.expedient-secondary-button:hover {
+  border-color: #aebfd3;
+  background: #f8fafc;
+}
+
+.expedient-link-button {
+  padding: 0;
+  border: 0;
+  color: #155eef;
+  background: transparent;
+  text-align: left;
+  text-decoration: underline;
+}
+
+.expedient-link-button:hover { color: #004eea; }
+
+.expedient-filters {
+  margin-top: 20px;
+  padding: 15px;
+  display: grid;
+  grid-template-columns: minmax(240px, 1.8fr) repeat(2, minmax(150px, 1fr)) auto;
+  gap: 11px;
+  border: 1px solid #edf1f5;
+  border-radius: 12px;
+  background: #fbfcfe;
+}
+
+.expedient-filters label,
+.expedient-form-grid label,
+.expedient-description-field {
+  display: grid;
+  gap: 6px;
+}
+
+.expedient-filters label > span {
+  color: #667085;
+  font-size: .7rem;
+  font-weight: 800;
+}
+
+.expedient-filters input,
+.expedient-filters select,
+.expedient-form-grid select,
+.expedient-form-grid input,
+.expedient-description-field textarea,
+.expedient-detail-edit select,
+.expedient-detail-edit input,
+.expedient-detail-edit textarea {
+  width: 100%;
+  min-height: 39px;
+  padding: 10px 11px;
+  border: 1px solid #d9e1ec;
+  border-radius: 8px;
+  color: #182230;
+  background: #fff;
+  font: inherit;
+  font-size: .8rem;
+}
+
+.expedient-filters input:focus,
+.expedient-filters select:focus,
+.expedient-form-grid select:focus,
+.expedient-form-grid input:focus,
+.expedient-description-field textarea:focus,
+.expedient-detail-edit select:focus,
+.expedient-detail-edit input:focus,
+.expedient-detail-edit textarea:focus {
+  border-color: #155eef;
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(21, 94, 239, .12);
+}
+
+.expedient-filters .expedient-secondary-button {
+  align-self: end;
+  min-height: 39px;
+}
+
+.expedient-table-wrap {
+  margin-top: 18px;
+  overflow-x: auto;
+  border: 1px solid #edf1f5;
+  border-radius: 12px;
+}
+
+.expedient-table {
+  width: 100%;
+  min-width: 1160px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.expedient-table th,
+.expedient-table td {
+  padding: 12px 13px;
+  border-bottom: 1px solid #edf1f5;
+  vertical-align: middle;
+  font-size: .77rem;
+}
+
+.expedient-table th {
+  color: #667085;
+  background: #f8fafc;
+  font-size: .67rem;
+  font-weight: 800;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+}
+
+.expedient-table td { color: #475467; }
+.expedient-table tbody tr:last-child td { border-bottom: 0; }
+.expedient-table tbody tr:hover td { background: #fbfdff; }
+
+.expedient-code {
+  color: #344054;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .72rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.expedient-contact-name,
+.expedient-client-name,
+.expedient-title {
+  display: block;
+  min-width: 170px;
+  color: #344054;
+  font-weight: 800;
+}
+
+.expedient-contact-meta,
+.expedient-client-document {
+  display: block;
+  margin-top: 4px;
+  color: #98a2b3;
+  font-size: .68rem;
+}
+
+.expedient-client-name.is-pending {
+  color: #b54708;
+  font-style: italic;
+}
+
+.expedient-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: .69rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.expedient-state::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.state-abierto { color: #475467; background: #f2f4f7; }
+.state-abierto::before { background: #98a2b3; }
+.state-en-seguimiento { color: #175cd3; background: #eff4ff; }
+.state-en-seguimiento::before { background: #2e90fa; }
+.state-en-espera { color: #b54708; background: #fffaeb; }
+.state-en-espera::before { background: #f79009; }
+.state-cerrado { color: #067647; background: #ecfdf3; }
+.state-cerrado::before { background: #12b76a; }
+.state-cancelado { color: #b42318; background: #fef3f2; }
+.state-cancelado::before { background: #f04438; }
+
+.expedient-quote-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #667085;
+  font-size: .73rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.expedient-quote-count.has-quotes { color: #175cd3; }
+.expedient-quote-count::before { content: "◈"; color: #b54708; }
+
+.expedient-row-button {
+  padding: 8px 10px;
+  border: 1px solid #cbdcff;
+  color: #155eef;
+  background: #eff4ff;
+}
+
+.expedient-row-button:hover {
+  border-color: #9ab9fa;
+  background: #dbe7ff;
+}
+
+.expedient-empty {
+  margin: 18px 0 0;
+  padding: 16px;
+  border: 1px dashed #c9d4e2;
+  border-radius: 10px;
+  color: #667085;
+  background: #fbfdff;
+  text-align: center;
+  font-size: .82rem;
+}
+
+.expedient-dialog {
+  width: min(780px, calc(100% - 32px));
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  box-shadow: 0 24px 70px rgba(16, 42, 67, .26);
+}
+
+.expedient-detail-dialog { width: min(860px, calc(100% - 32px)); }
+.expedient-dialog::backdrop { background: rgba(7, 26, 44, .54); }
+
+.expedient-dialog form,
+.expedient-dialog-content { padding: 24px; }
+
+.expedient-dialog-heading,
+.quick-contact-heading,
+.expedient-detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.expedient-dialog-heading { margin-bottom: 18px; }
+
+.expedient-dialog-heading h2,
+.quick-contact-heading h3 {
+  margin: 0;
+  color: #1d2939;
+  font-size: 1.22rem;
+}
+
+.quick-contact-heading h3 { font-size: .98rem; }
+
+.expedient-dialog-close {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  color: #667085;
+  background: #f2f4f7;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.expedient-form-help {
+  margin: -4px 0 18px;
+  padding: 12px 13px;
+  border: 1px solid #dbe7ff;
+  border-radius: 10px;
+  color: #175cd3;
+  background: #eff4ff;
+  font-size: .79rem;
+  line-height: 1.5;
+}
+
+.expedient-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.expedient-form-grid span,
+.expedient-description-field > span,
+.expedient-contact-create > span {
+  color: #344054;
+  font-size: .79rem;
+  font-weight: 800;
+}
+
+.expedient-form-grid b,
+.expedient-description-field b { color: #b42318; }
+
+.expedient-field-wide { grid-column: span 2; }
+
+.expedient-contact-create {
+  display: grid;
+  align-content: end;
+  gap: 7px;
+  padding-bottom: 2px;
+}
+
+.quick-contact-panel {
+  margin-top: 15px;
+  padding: 16px;
+  border: 1px dashed #9ab9fa;
+  border-radius: 12px;
+  background: #f8fbff;
+}
+
+.quick-contact-panel > p {
+  margin: 10px 0 14px;
+  color: #667085;
+  font-size: .78rem;
+  line-height: 1.5;
+}
+
+.quick-contact-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.expedient-description-field { margin-top: 14px; }
+.expedient-description-field textarea,
+.expedient-detail-edit textarea { resize: vertical; }
+
+.expedient-code-note {
+  margin: 14px 0 0;
+  color: #667085;
+  font-size: .75rem;
+  line-height: 1.45;
+}
+
+.expedient-dialog-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+}
+
+.expedient-detail-header {
+  padding-bottom: 17px;
+  border-bottom: 1px solid #edf1f5;
+}
+
+.expedient-detail-code {
+  margin: 0;
+  color: #344054;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .81rem;
+  font-weight: 800;
+}
+
+.expedient-detail-title {
+  margin: 7px 0 0;
+  color: #1d2939;
+  font-size: 1.1rem;
+  letter-spacing: -.02em;
+}
+
+.expedient-detail-description {
+  margin: 18px 0 0;
+  padding: 14px;
+  border-radius: 10px;
+  color: #475467;
+  background: #f8fafc;
+  font-size: .84rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.expedient-detail-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 18px;
+}
+
+.expedient-detail-grid div {
+  padding: 12px 0;
+  border-bottom: 1px solid #edf1f5;
+}
+
+.expedient-detail-grid dt {
+  color: #667085;
+  font-size: .73rem;
+}
+
+.expedient-detail-grid dd {
+  margin: 5px 0 0;
+  color: #344054;
+  font-size: .82rem;
+  font-weight: 700;
+}
+
+.expedient-quotes-placeholder,
+.expedient-detail-edit {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.expedient-quotes-placeholder {
+  border: 1px dashed #c3d2e2;
+  background: #fbfdff;
+}
+
+.expedient-detail-edit {
+  border: 1px solid #cbdcff;
+  background: #f8fbff;
+}
+
+.expedient-quotes-placeholder h3,
+.expedient-detail-edit h3 {
+  margin: 0;
+  color: #1d2939;
+  font-size: .96rem;
+}
+
+.expedient-quotes-placeholder p,
+.expedient-detail-edit > p {
+  margin: 7px 0 14px;
+  color: #667085;
+  font-size: .78rem;
+  line-height: 1.5;
+}
+
+.expedient-quote-placeholder-status {
+  margin-top: 13px !important;
+  padding: 10px 11px;
+  border-radius: 9px;
+  color: #475467 !important;
+  background: #f2f4f7;
+}
+
+.expedient-detail-state-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 1180px) {
+  .expedient-filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .expedient-filters .filter-search { grid-column: span 2; }
+}
+
+@media (max-width: 960px) {
+  .expedients-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 680px) {
+  .expedients-panel { padding: 18px; }
+  .expedients-panel-heading { flex-direction: column; }
+  .expedient-primary-button { width: 100%; }
+  .expedient-filters,
+  .expedient-form-grid,
+  .expedient-detail-grid { grid-template-columns: 1fr; }
+  .expedient-filters .filter-search,
+  .expedient-field-wide { grid-column: auto; }
+  .expedient-dialog form,
+  .expedient-dialog-content { padding: 20px; }
+  .expedient-dialog-actions,
+  .quick-contact-actions { flex-direction: column-reverse; }
+  .expedient-dialog-actions button,
+  .quick-contact-actions button { width: 100%; }
+  .expedient-detail-grid { gap: 0; }
+}
+
+@media (max-width: 480px) {
+  .expedients-summary-grid { grid-template-columns: 1fr; }
+}

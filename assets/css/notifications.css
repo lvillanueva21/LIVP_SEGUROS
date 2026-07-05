@@ -1,0 +1,22 @@
+/* Notificaciones contextuales de BROKER SEGUROS */
+.broker-notification-host{display:grid;gap:10px;pointer-events:none}
+.broker-notification-host-global{position:fixed;z-index:2147483647;right:18px;top:18px;width:min(420px,calc(100vw - 36px))}
+.broker-dialog-notification-host{position:relative;z-index:5;width:100%;margin:0 0 14px}
+.broker-notification{display:grid;grid-template-columns:32px minmax(0,1fr) 28px;gap:10px;align-items:flex-start;padding:12px;border:1px solid #d9e1ec;border-radius:11px;background:#fff;color:#344054;box-shadow:0 12px 28px rgba(16,42,67,.16);pointer-events:auto;animation:broker-in .17s ease-out}
+.broker-dialog-notification-host .broker-notification{box-shadow:none}
+.broker-notification.is-leaving{animation:broker-out .17s ease-in forwards}
+.broker-notification-icon{width:30px;height:30px;display:grid;place-items:center;border-radius:9px;font-weight:800}
+.broker-notification-title{margin:1px 0 3px;color:#1d2939;font-size:.81rem;font-weight:700}
+.broker-notification-message{margin:0;color:#667085;font-size:.77rem;line-height:1.45;font-weight:400}
+.broker-notification-close{width:28px;height:28px;border:0;border-radius:8px;background:transparent;color:#667085;font-size:1.1rem}
+.broker-notification-close:hover,.broker-notification-close:focus-visible{outline:0;background:#f2f4f7}
+.broker-notification-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+.broker-notification-action{min-height:30px;border:1px solid #cbd5e1;border-radius:8px;padding:6px 10px;background:#fff;color:#344054;font-size:.74rem;font-weight:650}
+.broker-notification-action.is-danger{border-color:#fecdca;background:#fff1f0;color:#b42318}
+.broker-notification-success{border-color:#a6f4c5;background:#f6fef9}.broker-notification-success .broker-notification-icon{background:#d1fadf;color:#067647}
+.broker-notification-error{border-color:#fecdca;background:#fffafa}.broker-notification-error .broker-notification-icon{background:#fee4e2;color:#b42318}
+.broker-notification-warning{border-color:#fedf89;background:#fffcf5}.broker-notification-warning .broker-notification-icon{background:#fef0c7;color:#b54708}
+.broker-notification-info{border-color:#b2ddff;background:#f5fbff}.broker-notification-info .broker-notification-icon{background:#d1e9ff;color:#175cd3}
+@keyframes broker-in{from{opacity:0;transform:translateY(-7px)}to{opacity:1;transform:translateY(0)}}
+@keyframes broker-out{to{opacity:0;transform:translateX(12px)}}
+@media(max-width:580px){.broker-notification-host-global{right:12px;top:12px;width:calc(100vw - 24px)}}

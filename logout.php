@@ -1,7 +1,10 @@
 <?php
-require_once __DIR__ . '/includes/helpers.php';
+declare(strict_types=1);
 
-cb_boot_session();
-cb_destroy_session();
-cb_redirect('login.php');
+require __DIR__ . '/config/bootstrap.php';
 
+sendNoCacheHeaders();
+destroyCurrentSession();
+
+header('Location: ' . appRelativeUrl('index.php'));
+exit;
