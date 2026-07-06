@@ -1,62 +1,68 @@
 # Control vivo del proyecto — Broker Seguros
 
-> Este documento se debe actualizar junto con toda mejora, corrección, tabla, regla o decisión relevante. No sustituye las pruebas ni los README específicos; mantiene el mapa general del sistema.
+> Este documento se actualiza con cada mejora, corrección, tabla, regla técnica o decisión relevante. Mantiene el mapa general del proyecto y no reemplaza las pruebas específicas.
 
 ## Estado actual
 
 - Sistema: **Broker Seguros**.
-- Entorno actual: maqueta PHP/JavaScript con datos principalmente en `localStorage`, JSON temporal y archivos en `almacen/`.
+- Entorno: maqueta PHP/JavaScript con datos principalmente en `localStorage`, JSON temporal y archivos en `almacen/`.
 - Base visual interna: se conserva la maqueta existente.
-- Autenticación Desarrollo V1: implementada como primera capa real con PDO/MySQL.
-- Ajuste actual: **Navegación Desarrollo V1.1** pendiente de subir y probar.
+- Autenticación real inicial: rol `desarrollo` mediante MySQL/PDO.
 
-## Implementación actual: Autenticación Desarrollo V1
+## Autenticación Desarrollo V1
 
 ### Funcionalidades reales
 
-- Login real para rol `desarrollo` mediante **DNI de 8 dígitos + contraseña**.
-- Registro temporal abierto en `registro.php` para crear más usuarios Desarrollo.
+- Login real para `desarrollo` usando DNI de ocho dígitos y contraseña.
+- Registro temporal abierto en `registro.php` para crear usuarios Desarrollo.
 - Contraseñas con `password_hash()` y `password_verify()`.
 - Consultas PDO preparadas.
-- Sesión PHP con regeneración de ID al iniciar sesión.
+- Sesión PHP con regeneración de ID al iniciar.
 - CSRF en login, registro y cierre de sesión.
 - Auditoría de intentos de acceso.
-- Bloqueo temporal: 5 fallos dentro de 15 minutos bloquean por 15 minutos, controlado por documento + IP.
-- Validación de usuario activo en cada página protegida para sesiones de base de datos.
-- Logout por POST con token CSRF.
+- Bloqueo temporal: cinco fallos dentro de 15 minutos bloquean por 15 minutos.
+- Validación de usuario activo en páginas protegidas.
+- Logout exclusivamente por `POST` con token CSRF.
 - Protección de acceso web directo para `config/` mediante `.htaccess`.
 
-### Compatibilidad que no debe romperse
+### Compatibilidad obligatoria
 
-- Los accesos demo existentes siguen disponibles:
-  - Gerente demo: DNI `12345678`.
-  - Ejecutivo demo: DNI `87654321`.
-  - Empresa demo: RUC `20123456789`.
-  - Consorcio demo: RUC `20698765432`.
-- Los DNI demo están reservados: `registro.php` no permite crear Desarrollo con ellos.
-- Las cuentas Cliente temporales almacenadas en JSON siguen funcionando.
-- La sesión debe conservar `$_SESSION['livp_user']`, porque la maqueta usa esa estructura.
-- Las rutas deben seguir usando `appRelativeUrl()` para funcionar en dominio, subdominio o subcarpeta.
+- Siguen funcionando demos: Gerente, Ejecutivo, Empresa y Consorcio.
+- DNI reservados para demos: `12345678` y `87654321`.
+- Siguen funcionando cuentas Cliente temporales almacenadas en JSON.
+- La sesión conserva `$_SESSION['livp_user']`.
+- Las rutas usan `appRelativeUrl()` para funcionar en dominio, subdominio o subcarpeta.
 
-### Rol Desarrollo
+## Corrección UI y navegación V1.2
 
-- Menú permitido tras Navegación Desarrollo V1.1: `Inicio`, `Usuarios`, `Sesión` y `Configuración`.
-- `Usuarios` y `Sesión` son páginas temporales protegidas, todavía sin lógica operativa.
-- `Configuración` tendrá tres submenús protegidos: Gestión de Archivos, Gestión de Correos y Gestión de WhatsApp.
-- Los tres submenús no se muestran en el sidebar: se abren desde Configuración.
-- Si Desarrollo intenta abrir módulos de Gerente, Ejecutivo o Cliente por URL directa, el sistema debe enviar a `acceso_denegado.php`.
-- El dashboard muestra la fuente `default` porque el identificador de sesión de Desarrollo se guarda como `development-{id}` y no choca con IDs demo.
+- El logout superior se corrige mediante formulario `POST` con CSRF; no se usa enlace `GET`.
+- El botón de navegación lateral ahora es solo un icono con tooltip, sin texto literal.
+- El sidebar comprimido se guarda en `localStorage` y en modo comprimido muestra solo iconos.
+- Los estilos y JavaScript del sidebar se cargan desde archivos dedicados con versión propia para evitar caché antigua.
+- El carrusel del login ya **no abre modal al hacer clic**. Solo permite deslizar o rotar imágenes, evitando overlays que bloqueen el login.
+- El login ya no pide seleccionar tipo de documento:
+  - ocho dígitos: DNI;
+  - once dígitos: RUC;
+  - otro formato: CE.
+- Se agregan páginas iniciales para Desarrollo:
+  - Usuarios;
+  - Sesión;
+  - Configuración.
+- Configuración contiene submenús sin funcionalidad aún:
+  - Gestión de Archivos;
+  - Gestión de Correos;
+  - Gestión de WhatsApp.
 
-## Tablas MySQL requeridas para esta fase
+## Tablas MySQL actuales
 
 - `seg_roles`
 - `seg_usuarios`
 - `seg_usuario_roles`
 - `seg_login_intentos`
 
-## Recursos visuales del login
+**No se requieren queries adicionales para Corrección UI y navegación V1.2.**
 
-El login y registro usan un paquete aislado inspirado en el login de LIVP_LSISTEMAS. No cargan `assets/css/app.css` de la maqueta.
+## Recursos del login
 
 Carpetas controladas manualmente:
 
@@ -66,42 +72,33 @@ Carpetas controladas manualmente:
 
 Reglas:
 
-- El sistema decide por carpeta y extensión, no por nombre fijo.
+- Se decide por carpeta y extensión, no por nombre fijo.
 - Se usa el primer favicon/logo por orden natural.
-- El carrusel ordena de forma natural; para definir el orden conviene `01.webp`, `02.webp`, `03.webp`.
-- Si las carpetas están vacías, ese recurso no se muestra.
-- Si no hay carrusel, no queda una columna visual vacía.
+- El carrusel se ordena de forma natural; para controlarlo conviene `01.webp`, `02.webp`, `03.webp`.
+- Una carpeta vacía no muestra ese recurso.
+- Las imágenes del carrusel no son botones ni abren modales.
 
 ## Preferencias de programación vigentes
 
-- PHP actual + MySQL/MariaDB con PDO.
+- PHP actual + MySQL/MariaDB mediante PDO.
 - Zona horaria `America/Lima`.
-- Rutas relativas, sin URL base fija ni dependencia del dominio.
-- Cambios incrementales: no reemplazar toda la maqueta para implementar una funcionalidad real.
-- Una entidad o módulo debe tener una fuente oficial de datos cuando se convierta a MySQL; evitar mezclar datos nuevos MySQL con duplicados de caché para la misma entidad.
-- Entregar siempre pruebas de humo y funcionales antes de avanzar.
-- Mantener este archivo actualizado en cada entrega.
+- Rutas relativas; sin URL base fija ni dependencia del dominio.
+- Cambios incrementales: no reemplazar la maqueta completa para añadir una función real.
+- Una entidad que pase a MySQL debe tener una única fuente oficial; evitar duplicados entre MySQL y caché.
+- Entregar siempre pruebas de humo y funcionales.
+- Entregar siempre un nombre de commit recomendado.
+- Mantener este archivo actualizado.
 
 ## Cosas a evitar
 
 - No copiar AdminLTE, `dist`, Tesseract ni módulos completos de LIVP_LSISTEMAS para el login.
-- No cambiar los roles demo ni los nombres de sesión actuales sin revisar las interfaces existentes.
-- No crear un usuario Desarrollo con DNI de los demos reservados.
-- No eliminar `config/client_accounts.php` ni `config/demo_users.php` mientras existan accesos demo y cuentas Cliente temporales.
+- No cambiar roles demo ni estructura de sesión sin revisar las interfaces existentes.
+- No crear Desarrollo con DNI reservados para demos.
+- No eliminar `config/client_accounts.php` ni `config/demo_users.php` mientras existan demos.
 - No usar GET para logout.
-- No aplicar estilos del login a las páginas internas de Broker Seguros.
+- No aplicar los estilos del login a páginas internas.
+- No volver a usar clic de imágenes de carrusel para abrir modal sin una prueba completa de cierre, foco y navegación.
 
-## Ajuste implementado: Navegación Desarrollo V1.1
+## Próximo paso recomendado
 
-- Corregido el logout del header: ahora usa `POST` y token CSRF, igual que el cierre de sesión del sidebar.
-- El login ya no pide tipo de documento. Detecta: 8 dígitos = DNI, 11 dígitos = RUC y otros formatos = CE.
-- Nuevo botón persistente de compresión del sidebar. En escritorio guarda la preferencia en `localStorage` y deja visibles solo íconos para ampliar el área de trabajo.
-- Nuevas páginas protegidas para Desarrollo: `Usuarios`, `Sesión`, `Configuración`, Gestión de Archivos, Gestión de Correos y Gestión de WhatsApp.
-- No se crean ni modifican tablas en este ajuste.
-
-## Próximos pasos sugeridos
-
-1. Subir el pack Navegación Desarrollo V1.1 y probar logout desde header y sidebar.
-2. Probar la compresión del sidebar, recargar y comprobar que se conserva la preferencia.
-3. Probar cada nueva ruta como Desarrollo y validar que Gerente/Ejecutivo/Cliente no puedan abrirlas.
-4. Implementar la primera funcionalidad real dentro de Configuración cuando se defina qué datos deberán guardarse.
+Implementar dentro de Desarrollo la primera función real: creador/administrador de usuarios, reemplazando después `registro.php` temporal.

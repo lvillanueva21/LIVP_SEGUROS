@@ -191,12 +191,13 @@ function canAccessModule(string $role, string $moduleId): bool
 function modulesForRole(string $role): array
 {
     $allowed = [];
+
     foreach (modulesCatalog() as $module) {
         if (!is_array($module) || !isset($module['id'])) {
             continue;
         }
 
-        if (($module['show_in_menu'] ?? true) !== true) {
+        if (($module['menu'] ?? true) === false) {
             continue;
         }
 
@@ -224,11 +225,8 @@ function moduleUrl(string $moduleId): string
         'mis-pagos' => 'mis_pagos.php',
         'mis-siniestros' => 'mis_siniestros.php',
         'desarrollo-usuarios' => 'desarrollo_usuarios.php',
-        'sesion' => 'desarrollo_sesion.php',
+        'desarrollo-sesion' => 'desarrollo_sesion.php',
         'configuracion' => 'configuracion.php',
-        'gestion-archivos' => 'configuracion_archivos.php',
-        'gestion-correos' => 'configuracion_correos.php',
-        'gestion-whatsapp' => 'configuracion_whatsapp.php',
     ];
 
     return isset($custom[$moduleId])

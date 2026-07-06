@@ -1,0 +1,333 @@
+/*
+ * Navegación interna Broker Seguros.
+ * Este archivo se carga desde el sidebar con versión propia para evitar estilos
+ * desactualizados del navegador durante los despliegues Git.
+ */
+
+.sidebar-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sidebar-collapse-toggle,
+.sidebar-close {
+  width: 36px;
+  height: 36px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 9px;
+  color: #dce9f6;
+  background: rgba(255,255,255,.06);
+  cursor: pointer;
+}
+
+.sidebar-collapse-toggle:hover,
+.sidebar-collapse-toggle:focus-visible,
+.sidebar-close:hover,
+.sidebar-close:focus-visible {
+  color: #fff;
+  background: rgba(255,255,255,.13);
+  outline: 3px solid rgba(246,196,84,.22);
+  outline-offset: 2px;
+}
+
+.sidebar-collapse-toggle svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.9;
+}
+
+.sidebar-close {
+  display: none;
+  font-size: 1.55rem;
+}
+
+.sidebar-profile-copy {
+  min-width: 0;
+}
+
+.sidebar-brand-label,
+.nav-label,
+.logout-label {
+  min-width: 0;
+}
+
+.sidebar-logout-form {
+  margin: 0;
+}
+
+.sidebar-logout-button {
+  width: 100%;
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 0 !important;
+  border: 0 !important;
+  color: #b9c9da !important;
+  background: transparent !important;
+  font: inherit !important;
+  text-align: left;
+  box-shadow: none !important;
+}
+
+.sidebar-logout-button:hover,
+.sidebar-logout-button:focus-visible {
+  color: #fff !important;
+  outline: 3px solid rgba(246,196,84,.22);
+  outline-offset: 2px;
+}
+
+.topbar-logout-form {
+  margin: 0;
+  display: inline-flex;
+}
+
+.topbar-logout {
+  appearance: none;
+  min-height: 38px;
+  padding: 8px 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #d7e1ee;
+  border-radius: 10px;
+  color: #475467;
+  background: #fff;
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color .15s, color .15s, box-shadow .15s, transform .15s;
+}
+
+.topbar-logout:hover {
+  color: #b42318;
+  border-color: #fecdca;
+  box-shadow: 0 5px 13px rgba(180,35,24,.08);
+  transform: translateY(-1px);
+}
+
+.topbar-logout:focus-visible {
+  outline: 3px solid rgba(21,94,239,.25);
+  outline-offset: 2px;
+}
+
+.topbar-logout svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+/* Configuración Desarrollo */
+.development-placeholder {
+  min-height: 320px;
+  padding: 44px 28px;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  text-align: center;
+  border: 1px dashed #b6c4d7;
+  border-radius: 16px;
+  background: #fbfdff;
+}
+
+.development-placeholder .development-mark {
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  border-radius: 22px;
+  color: #fff;
+  background: linear-gradient(140deg, #155eef, #102a43);
+  font-size: 2rem;
+}
+
+.development-placeholder h2 {
+  margin: 20px 0 0;
+  color: #1d2939;
+  font-size: 1.45rem;
+}
+
+.development-placeholder p {
+  max-width: 520px;
+  margin: 10px 0 0;
+  color: #667085;
+  line-height: 1.55;
+}
+
+.configuration-menu-grid {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.configuration-menu-card {
+  min-height: 190px;
+  padding: 20px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  border: 1px solid #dfe7f0;
+  border-radius: 15px;
+  color: #182230;
+  background: #fff;
+  text-decoration: none;
+  box-shadow: 0 10px 24px rgba(16,42,67,.06);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+.configuration-menu-card:hover,
+.configuration-menu-card:focus-visible {
+  color: #182230;
+  border-color: #9dbcf1;
+  box-shadow: 0 14px 28px rgba(16,42,67,.12);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+.configuration-menu-card:focus-visible {
+  outline: 3px solid rgba(21,94,239,.22);
+  outline-offset: 2px;
+}
+
+.configuration-menu-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  color: #155eef;
+  background: #e8f0ff;
+  font-size: 1.15rem;
+}
+
+.configuration-menu-card h3 {
+  margin: 4px 0 0;
+  font-size: 1rem;
+}
+
+.configuration-menu-card p {
+  margin: 0;
+  color: #667085;
+  font-size: .84rem;
+  line-height: 1.5;
+}
+
+/* Sidebar comprimido: escritorio y tablets grandes */
+@media (min-width: 801px) {
+  .app-body.sidebar-is-collapsed .sidebar {
+    width: 78px !important;
+    flex-basis: 78px !important;
+    padding-right: 11px;
+    padding-left: 11px;
+  }
+
+  .app-body.sidebar-is-collapsed .sidebar-top {
+    justify-content: center;
+  }
+
+  .app-body.sidebar-is-collapsed .sidebar-brand {
+    justify-content: center;
+    gap: 0;
+  }
+
+  .app-body.sidebar-is-collapsed .sidebar-brand-label,
+  .app-body.sidebar-is-collapsed .sidebar-profile-copy,
+  .app-body.sidebar-is-collapsed .profile-meta,
+  .app-body.sidebar-is-collapsed .nav-label,
+  .app-body.sidebar-is-collapsed .sidebar-footer small,
+  .app-body.sidebar-is-collapsed .logout-label {
+    display: none !important;
+  }
+
+  .app-body.sidebar-is-collapsed .sidebar-top-actions {
+    position: absolute;
+    top: 64px;
+    left: 0;
+    right: 0;
+    justify-content: center;
+  }
+
+  .app-body.sidebar-is-collapsed .sidebar-collapse-toggle {
+    transform: rotate(180deg);
+  }
+
+  .app-body.sidebar-is-collapsed .profile-panel {
+    margin-top: 72px;
+    padding: 11px;
+    display: grid;
+    justify-items: center;
+  }
+
+  .app-body.sidebar-is-collapsed .profile-avatar {
+    margin: 0;
+  }
+
+  .app-body.sidebar-is-collapsed .main-nav {
+    margin-top: 19px;
+  }
+
+  .app-body.sidebar-is-collapsed .nav-item {
+    min-height: 44px;
+    justify-content: center;
+    gap: 0;
+    padding: 11px 8px;
+  }
+
+  .app-body.sidebar-is-collapsed .nav-icon {
+    width: auto;
+    font-size: 1.05rem;
+  }
+
+  .app-body.sidebar-is-collapsed .sidebar-footer {
+    align-items: center;
+  }
+
+  .app-body.sidebar-is-collapsed .sidebar-logout-button {
+    min-height: 42px;
+    justify-content: center;
+    padding: 8px !important;
+    border: 1px solid rgba(255,255,255,.11) !important;
+    border-radius: 10px;
+  }
+}
+
+@media (max-width: 800px) {
+  .sidebar-collapse-toggle {
+    display: none;
+  }
+
+  .sidebar-close {
+    display: inline-grid;
+  }
+
+  .configuration-menu-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 580px) {
+  .topbar-logout {
+    width: 38px;
+    padding: 8px;
+  }
+
+  .topbar-logout-label {
+    display: none;
+  }
+}

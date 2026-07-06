@@ -1,47 +1,46 @@
-LIVP_SEGUROS — FIX NAVEGACIÓN DESARROLLO V1.1
+LIVP_SEGUROS — Corrección UI y navegación Desarrollo V1.2
 
-Este pack contiene SOLO archivos nuevos o modificados para copiar encima del repositorio local.
-No elimina archivos existentes.
+OBJETIVO
+- Corregir salida de sesión del header.
+- Rehacer navegación lateral sin botón textual "Comprimir".
+- Eliminar bloqueo por modal al tocar imágenes del carrusel.
+- Dejar el login sin selector de tipo de documento.
+- Agregar páginas Desarrollo: Usuarios, Sesión y Configuración con tres submenús.
 
-ARCHIVOS MODIFICADOS
-- config/auth.php
+ARCHIVOS PARA REEMPLAZAR
+- index.php
+- registro.php
 - config/bootstrap.php
 - config/modules.php
-- index.php
-- assets/login/js/login-ui.js
-- assets/js/app.js
 - views/partials/sidebar.php
 - views/partials/topbar.php
+- assets/login/js/login-ui.js
 - docs/00_control_proyecto.md
 
 ARCHIVOS NUEVOS
-- assets/css/sidebar-compact.css
-- assets/css/development.css
-- config/development_page.php
-- configuracion.php
-- configuracion_archivos.php
-- configuracion_correos.php
-- configuracion_whatsapp.php
+- assets/css/navigation-shell.css
+- assets/js/navigation-shell.js
 - desarrollo_usuarios.php
 - desarrollo_sesion.php
+- configuracion.php
 
-NO TOCAR / NO REEMPLAZAR EN ESTE PACK
+NO REEMPLAZAR
 - config/database.php
+- config/auth.php
+- config/security.php
 - config/client_accounts.php
 - config/demo_users.php
-- logout.php
 - almacen/
-- assets/login/default/
+- assets/login/default/ (tus imágenes, favicon y logo)
 
-BASE DE DATOS
-No hay queries nuevas. Se reutilizan las tablas de Autenticación Desarrollo V1.
+SQL
+- No ejecutar queries nuevas.
 
 PRUEBA RÁPIDA
-1. Cierra sesión desde el botón del header: debe redirigir a index.php?m=logout.
-2. En login usa solo documento y contraseña. Prueba DNI demo 12345678 y RUC demo 20123456789.
-3. Entra con Desarrollo y confirma: Inicio, Usuarios, Sesión y Configuración.
-4. Dentro de Configuración abre los tres submenús.
-5. Presiona el botón de compresión del sidebar y recarga: debe conservarse.
-
-COMMIT RECOMENDADO
-fix(navigation): corrige logout y agrega módulos desarrollo
+1. Haz recarga forzada: Ctrl + F5.
+2. Ingresa como Desarrollo.
+3. Cierra sesión desde el header.
+4. Prueba el icono de navegación lateral.
+5. Entra a Usuarios, Sesión y Configuración.
+6. En Configuración entra a sus tres tarjetas.
+7. En login, pulsa/arrastra las imágenes del carrusel: no debe aparecer modal ni overlay.
