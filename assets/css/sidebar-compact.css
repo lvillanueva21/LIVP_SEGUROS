@@ -1,0 +1,49 @@
+
+/* Control de ancho del menú lateral. Se carga desde app.js para no mezclarlo con el login. */
+.sidebar-compact-toggle {
+  margin-left: auto;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 8px;
+  color: #d5e1ef;
+  background: rgba(255,255,255,.05);
+  font: inherit;
+  font-size: .69rem;
+}
+.sidebar-compact-toggle:hover { color: #fff; background: rgba(255,255,255,.12); }
+.sidebar-compact-icon { font-size: 1.15rem; line-height: 1; transition: transform .18s ease; }
+.sidebar-footer form { margin: 0; }
+.logout-link { width: 100%; display: flex; align-items: center; gap: 9px; border: 0; background: transparent; padding: 0; color: #b9c9da; text-align: left; font: inherit; font-size: .82rem; }
+.logout-link:hover { color: #fff; }
+.logout-icon { font-size: 1rem; line-height: 1; }
+.topbar-logout-form { margin: 0; }
+.role-desarrollo { background: rgba(155, 89, 255, .20); color: #dfc8ff; }
+
+@media (min-width: 801px) {
+  .app-body.sidebar-is-collapsed .sidebar { width: 82px; flex-basis: 82px; padding-right: 11px; padding-left: 11px; overflow-x: visible; }
+  .app-body.sidebar-is-collapsed .sidebar-top { justify-content: center; }
+  .app-body.sidebar-is-collapsed .sidebar-brand-copy,
+  .app-body.sidebar-is-collapsed .sidebar-compact-label,
+  .app-body.sidebar-is-collapsed .profile-copy,
+  .app-body.sidebar-is-collapsed .profile-meta,
+  .app-body.sidebar-is-collapsed .nav-label,
+  .app-body.sidebar-is-collapsed .logout-label,
+  .app-body.sidebar-is-collapsed .sidebar-footer small { display: none; }
+  .app-body.sidebar-is-collapsed .sidebar-brand { width: 34px; }
+  .app-body.sidebar-is-collapsed .sidebar-compact-toggle { position: absolute; top: 21px; right: -14px; z-index: 4; width: 28px; min-height: 28px; justify-content: center; padding: 4px; border-color: #d7e1ee; color: #344054; background: #fff; box-shadow: 0 4px 12px rgba(16,42,67,.14); }
+  .app-body.sidebar-is-collapsed .sidebar-compact-icon { transform: rotate(180deg); }
+  .app-body.sidebar-is-collapsed .profile-panel { margin-top: 28px; padding: 10px; display: grid; place-items: center; }
+  .app-body.sidebar-is-collapsed .main-nav { margin-top: 20px; }
+  .app-body.sidebar-is-collapsed .nav-item { justify-content: center; min-height: 43px; padding: 10px; }
+  .app-body.sidebar-is-collapsed .nav-icon { width: 22px; font-size: 1.08rem; }
+  .app-body.sidebar-is-collapsed .sidebar-footer { align-items: center; }
+  .app-body.sidebar-is-collapsed .sidebar-footer form { width: auto; }
+  .app-body.sidebar-is-collapsed .logout-link { width: 34px; min-height: 34px; justify-content: center; padding: 7px; border-radius: 9px; background: rgba(255,255,255,.07); }
+}
+@media (max-width: 800px) {
+  .sidebar-compact-toggle { display: none; }
+}

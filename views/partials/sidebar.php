@@ -18,14 +18,18 @@ $isDatabaseUser = ($user['auth_source'] ?? '') === 'database';
     <div class="sidebar-top">
         <a class="sidebar-brand" href="<?= e(moduleUrl('inicio')) ?>" aria-label="<?= e(APP_NAME) ?>, Inicio">
             <span class="brand-mini">B</span>
-            <span><?= e(APP_SHORT_NAME) ?> <b>SEGUROS</b></span>
+            <span class="sidebar-brand-copy"><?= e(APP_SHORT_NAME) ?> <b>SEGUROS</b></span>
         </a>
+        <button id="sidebar-compact-toggle" class="sidebar-compact-toggle" type="button" aria-label="Comprimir menú" title="Comprimir menú" aria-pressed="false">
+            <span class="sidebar-compact-icon" aria-hidden="true">‹</span>
+            <span class="sidebar-compact-label">Comprimir</span>
+        </button>
         <button class="sidebar-close" id="sidebar-close" type="button" aria-label="Cerrar menú">×</button>
     </div>
 
     <div class="profile-panel">
         <div class="profile-avatar" aria-hidden="true"><?= e($sidebarInitials ?: 'U') ?></div>
-        <div>
+        <div class="profile-copy">
             <p class="profile-name"><?= e((string) ($user['name'] ?? 'Usuario')) ?></p>
             <p class="profile-role"><?= e((string) ($user['profile_title'] ?? 'Perfil')) ?></p>
         </div>
@@ -38,9 +42,9 @@ $isDatabaseUser = ($user['auth_source'] ?? '') === 'database';
     <nav class="main-nav" aria-label="Navegación principal">
         <?php foreach ($menu as $item): ?>
             <?php $itemId = (string) ($item['id'] ?? ''); ?>
-            <a href="<?= e(moduleUrl($itemId)) ?>" class="nav-item <?= $itemId === $activeModule ? 'is-active' : '' ?>" data-module-id="<?= e($itemId) ?>" data-module-label="<?= e((string) ($item['label'] ?? 'Módulo')) ?>">
+            <a href="<?= e(moduleUrl($itemId)) ?>" class="nav-item <?= $itemId === $activeModule ? 'is-active' : '' ?>" data-module-id="<?= e($itemId) ?>" data-module-label="<?= e((string) ($item['label'] ?? 'Módulo')) ?>" title="<?= e((string) ($item['label'] ?? 'Módulo')) ?>">
                 <span class="nav-icon" aria-hidden="true"><?= e((string) ($item['icon'] ?? '•')) ?></span>
-                <span><?= e((string) ($item['label'] ?? 'Módulo')) ?></span>
+                <span class="nav-label"><?= e((string) ($item['label'] ?? 'Módulo')) ?></span>
             </a>
         <?php endforeach; ?>
     </nav>
@@ -48,7 +52,10 @@ $isDatabaseUser = ($user['auth_source'] ?? '') === 'database';
     <div class="sidebar-footer">
         <form method="post" action="<?= e(appRelativeUrl('logout.php')) ?>">
             <input type="hidden" name="csrf_token" value="<?= e(csrfToken('logout_form')) ?>">
-            <button type="submit" class="logout-link" style="display:block;width:100%;border:0;background:transparent;padding:0;text-align:left;font:inherit;">Cerrar sesión <span>→</span></button>
+            <button type="submit" class="logout-link" title="Cerrar sesión">
+                <span class="logout-icon" aria-hidden="true">↪</span>
+                <span class="logout-label">Cerrar sesión</span>
+            </button>
         </form>
         <small><?= $isDatabaseUser ? 'Acceso real con MySQL' : 'Acceso demo / caché temporal' ?></small>
     </div>

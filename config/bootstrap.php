@@ -192,7 +192,15 @@ function modulesForRole(string $role): array
 {
     $allowed = [];
     foreach (modulesCatalog() as $module) {
-        if (is_array($module) && isset($module['id']) && canAccessModule($role, (string) $module['id'])) {
+        if (!is_array($module) || !isset($module['id'])) {
+            continue;
+        }
+
+        if (($module['show_in_menu'] ?? true) !== true) {
+            continue;
+        }
+
+        if (canAccessModule($role, (string) $module['id'])) {
             $allowed[] = $module;
         }
     }
@@ -215,6 +223,12 @@ function moduleUrl(string $moduleId): string
         'mis-seguros' => 'mis_seguros.php',
         'mis-pagos' => 'mis_pagos.php',
         'mis-siniestros' => 'mis_siniestros.php',
+        'desarrollo-usuarios' => 'desarrollo_usuarios.php',
+        'sesion' => 'desarrollo_sesion.php',
+        'configuracion' => 'configuracion.php',
+        'gestion-archivos' => 'configuracion_archivos.php',
+        'gestion-correos' => 'configuracion_correos.php',
+        'gestion-whatsapp' => 'configuracion_whatsapp.php',
     ];
 
     return isset($custom[$moduleId])

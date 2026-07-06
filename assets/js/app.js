@@ -2,7 +2,7 @@
   const body = document.body;
   const userId = body.dataset.user || 'anonymous';
   const actionKey = `broker_seguros_demo_actions_${userId}`;
-  const styleVersion = 'BS-20260627-193319-PET';
+  const styleVersion = 'BS-20260705-NAVDESARROLLOV11';
 
   function ensureStyles(path, attribute) {
     if (document.querySelector(`link[${attribute}]`)) return;
@@ -18,22 +18,20 @@
 
   ensureStyles('../css/notifications.css', 'data-broker-notification-styles');
   ensureStyles('../css/modal-ui.css', 'data-broker-modal-ui-styles');
+  ensureStyles('../css/sidebar-compact.css', 'data-broker-sidebar-compact-styles');
 
   let globalHost = null;
   let lastSignature = '';
   let lastAt = 0;
-
   const escapeHtml = (value) => {
     const node = document.createElement('span');
     node.textContent = String(value ?? '');
     return node.innerHTML;
   };
-
   function getActiveDialog() {
     const dialogs = [...document.querySelectorAll('dialog')].filter((dialog) => dialog.open);
     return dialogs[dialogs.length - 1] || null;
   }
-
   function getGlobalHost() {
     if (globalHost && document.body.contains(globalHost)) return globalHost;
     globalHost = document.createElement('section');
@@ -43,41 +41,24 @@
     document.body.appendChild(globalHost);
     return globalHost;
   }
-
   function getDialogHost(dialog) {
-    const root = dialog.querySelector(':scope > form')
-      || dialog.querySelector(':scope > .expedient-dialog-content')
-      || dialog;
-
+    const root = dialog.querySelector(':scope > form') || dialog.querySelector(':scope > .expedient-dialog-content') || dialog;
     const current = [...root.children].find((child) => child.classList?.contains('broker-dialog-notification-host'));
     if (current) return current;
-
     const host = document.createElement('section');
     host.className = 'broker-notification-host broker-dialog-notification-host';
     host.setAttribute('aria-live', 'polite');
     host.setAttribute('aria-label', 'Mensajes del formulario');
-
     const head = root.querySelector('.policy-editor-heading, .expedient-dialog-heading, .catalog-dialog-heading, .dialog-head');
-    if (head) head.insertAdjacentElement('afterend', host);
-    else root.prepend(host);
-
+    if (head) head.insertAdjacentElement('afterend', host); else root.prepend(host);
     dialog.addEventListener('close', () => host.remove(), { once: true });
     return host;
   }
-
-  function getHost(options = {}) {
-    if (options.placement === 'global') return getGlobalHost();
-    const dialog = getActiveDialog();
-    return dialog ? getDialogHost(dialog) : getGlobalHost();
-  }
-
+  function getHost(options = {}) { return options.placement === 'global' ? getGlobalHost() : (getActiveDialog() ? getDialogHost(getActiveDialog()) : getGlobalHost()); }
   function dismiss(card) {
     if (!card || card.dataset.leaving === '1') return;
-    card.dataset.leaving = '1';
-    card.classList.add('is-leaving');
-    window.setTimeout(() => card.remove(), 180);
+    card.dataset.leaving = '1'; card.classList.add('is-leaving'); window.setTimeout(() => card.remove(), 180);
   }
-
   function show(type, message, options = {}) {
     const allowed = ['success', 'error', 'warning', 'info'];
     const kind = allowed.includes(type) ? type : 'info';
@@ -90,43 +71,20 @@
     const settings = { ...defaults[kind], ...options };
     const signature = `${kind}|${settings.title}|${message}`;
     const now = Date.now();
-
     if (signature === lastSignature && now - lastAt < 700) return null;
-    lastSignature = signature;
-    lastAt = now;
-
+    lastSignature = signature; lastAt = now;
     const card = document.createElement('article');
     card.className = `broker-notification broker-notification-${kind}`;
     card.setAttribute('role', kind === 'error' ? 'alert' : 'status');
-
     const actions = Array.isArray(settings.actions) && settings.actions.length
-      ? `<div class="broker-notification-actions">${settings.actions.map((action, index) => `<button type="button" class="broker-notification-action ${action.kind === 'danger' ? 'is-danger' : ''}" data-notify-action="${index}">${escapeHtml(action.label)}</button>`).join('')}</div>`
-      : '';
-
-    card.innerHTML = `
-      <span class="broker-notification-icon" aria-hidden="true">${escapeHtml(settings.icon)}</span>
-      <div class="broker-notification-copy">
-        <p class="broker-notification-title">${escapeHtml(settings.title)}</p>
-        <p class="broker-notification-message">${escapeHtml(message)}</p>
-        ${actions}
-      </div>
-      <button type="button" class="broker-notification-close" aria-label="Cerrar mensaje">×</button>
-    `;
-
+      ? `<div class="broker-notification-actions">${settings.actions.map((action, index) => `<button type="button" class="broker-notification-action ${action.kind === 'danger' ? 'is-danger' : ''}" data-notify-action="${index}">${escapeHtml(action.label)}</button>`).join('')}</div>` : '';
+    card.innerHTML = `<span class="broker-notification-icon" aria-hidden="true">${escapeHtml(settings.icon)}</span><div class="broker-notification-copy"><p class="broker-notification-title">${escapeHtml(settings.title)}</p><p class="broker-notification-message">${escapeHtml(message)}</p>${actions}</div><button type="button" class="broker-notification-close" aria-label="Cerrar mensaje">×</button>`;
     card.querySelector('.broker-notification-close')?.addEventListener('click', () => dismiss(card));
-    card.querySelectorAll('[data-notify-action]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const action = settings.actions?.[Number(button.dataset.notifyAction)];
-        action?.callback?.();
-        dismiss(card);
-      });
-    });
-
+    card.querySelectorAll('[data-notify-action]').forEach((button) => button.addEventListener('click', () => { const action = settings.actions?.[Number(button.dataset.notifyAction)]; action?.callback?.(); dismiss(card); }));
     getHost(settings).appendChild(card);
     if (settings.duration > 0) window.setTimeout(() => dismiss(card), settings.duration);
     return card;
   }
-
   window.BrokerNotify = {
     show,
     success: (message, options = {}) => show('success', message, options),
@@ -135,31 +93,12 @@
     info: (message, options = {}) => show('info', message, options),
     confirm: (message, options = {}) => new Promise((resolve) => {
       let completed = false;
-      const finish = (result) => {
-        if (completed) return;
-        completed = true;
-        resolve(result);
-      };
-
-      const card = show('warning', message, {
-        title: options.title || 'Confirma la acción',
-        duration: 0,
-        placement: options.placement,
-        actions: [
-          { label: options.confirmLabel || 'Confirmar', kind: options.kind || 'danger', callback: () => finish(true) },
-          { label: options.cancelLabel || 'Cancelar', callback: () => finish(false) },
-        ],
-      });
-
-      if (!card) {
-        finish(false);
-        return;
-      }
-
+      const finish = (result) => { if (!completed) { completed = true; resolve(result); } };
+      const card = show('warning', message, { title: options.title || 'Confirma la acción', duration: 0, placement: options.placement, actions: [{ label: options.confirmLabel || 'Confirmar', kind: options.kind || 'danger', callback: () => finish(true) }, { label: options.cancelLabel || 'Cancelar', callback: () => finish(false) }] });
+      if (!card) { finish(false); return; }
       card.querySelector('.broker-notification-close')?.addEventListener('click', () => finish(false), { once: true });
     }),
   };
-
   let lastInvalid = 0;
   document.addEventListener('invalid', (event) => {
     const element = event.target;
@@ -174,31 +113,35 @@
   const overlay = document.getElementById('sidebar-overlay');
   const toggle = document.getElementById('menu-toggle');
   const close = document.getElementById('sidebar-close');
-
-  const closeMenu = () => {
-    sidebar?.classList.remove('is-open');
-    overlay?.classList.remove('is-visible');
-  };
-
-  toggle?.addEventListener('click', () => {
-    sidebar?.classList.add('is-open');
-    overlay?.classList.add('is-visible');
-  });
+  const compactToggle = document.getElementById('sidebar-compact-toggle');
+  const compactKey = 'broker_seguros_sidebar_compact';
+  const isMobileMenu = () => window.matchMedia('(max-width: 800px)').matches;
+  const closeMenu = () => { sidebar?.classList.remove('is-open'); overlay?.classList.remove('is-visible'); };
+  toggle?.addEventListener('click', () => { sidebar?.classList.add('is-open'); overlay?.classList.add('is-visible'); });
   close?.addEventListener('click', closeMenu);
   overlay?.addEventListener('click', closeMenu);
+  document.querySelectorAll('[data-module-id]').forEach((link) => link.addEventListener('click', closeMenu));
 
-  document.querySelectorAll('[data-module-id]').forEach((link) => {
-    link.addEventListener('click', closeMenu);
+  function setSidebarCompact(compact) {
+    body.classList.toggle('sidebar-is-collapsed', compact);
+    compactToggle?.setAttribute('aria-pressed', compact ? 'true' : 'false');
+    compactToggle?.setAttribute('aria-label', compact ? 'Expandir menú' : 'Comprimir menú');
+    compactToggle?.setAttribute('title', compact ? 'Expandir menú' : 'Comprimir menú');
+    const label = compactToggle?.querySelector('.sidebar-compact-label');
+    if (label) label.textContent = compact ? 'Expandir' : 'Comprimir';
+    try { localStorage.setItem(compactKey, compact ? '1' : '0'); } catch {}
+  }
+  try { setSidebarCompact(localStorage.getItem(compactKey) === '1'); } catch { setSidebarCompact(false); }
+  compactToggle?.addEventListener('click', () => {
+    if (isMobileMenu()) { closeMenu(); return; }
+    setSidebarCompact(!body.classList.contains('sidebar-is-collapsed'));
   });
 
-  // Keep an optional local action trail without failing any page when API endpoints are absent.
   const list = document.getElementById('cache-list');
   if (list) {
     try {
       const actions = JSON.parse(localStorage.getItem(actionKey) || '[]');
-      list.innerHTML = Array.isArray(actions) && actions.length
-        ? actions.slice(0, 5).map((item) => `<li><span>${escapeHtml(item.action || 'Acción registrada')}</span></li>`).join('')
-        : '<li>Sin acciones registradas todavía.</li>';
+      list.innerHTML = Array.isArray(actions) && actions.length ? actions.slice(0, 5).map((item) => `<li><span>${escapeHtml(item.action || 'Acción registrada')}</span></li>`).join('') : '<li>Sin acciones registradas todavía.</li>';
     } catch {}
   }
 })();

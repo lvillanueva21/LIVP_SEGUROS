@@ -24,17 +24,22 @@
   function setupDocumentFilter() {
     var type = document.getElementById('document_type');
     var input = document.getElementById('document');
-    if (!type || !input) return;
+    if (!input) return;
 
-    type.addEventListener('change', updateDocumentField);
+    if (type) {
+      type.addEventListener('change', updateDocumentField);
+      input.addEventListener('input', function () {
+        if (type.value === 'DNI' || type.value === 'RUC') input.value = input.value.replace(/\D+/g, '');
+        else input.value = input.value.replace(/\s+/g, '').toUpperCase();
+      });
+      updateDocumentField();
+      return;
+    }
+
+    // Login V1: no solicita tipo. Conserva letras para CE y elimina solo espacios.
     input.addEventListener('input', function () {
-      if (type.value === 'DNI' || type.value === 'RUC') {
-        input.value = input.value.replace(/\D+/g, '');
-      } else {
-        input.value = input.value.replace(/\s+/g, '').toUpperCase();
-      }
+      input.value = input.value.replace(/\s+/g, '').toUpperCase();
     });
-    updateDocumentField();
   }
 
   function setupPasswordToggles() {
@@ -61,13 +66,9 @@
     var pointerDown = false;
     var dragMoved = false;
     var suppressClick = false;
-
     carousel.addEventListener('pointerdown', function (event) {
       if (event.pointerType === 'mouse' && event.button !== 0) return;
-      pointerDown = true;
-      dragMoved = false;
-      startX = event.clientX;
-      carousel.classList.add('is-dragging');
+      pointerDown = true; dragMoved = false; startX = event.clientX; carousel.classList.add('is-dragging');
     });
     carousel.addEventListener('pointermove', function (event) {
       if (pointerDown && Math.abs(event.clientX - startX) > 6) dragMoved = true;
@@ -75,8 +76,7 @@
     function endDrag(event) {
       if (!pointerDown) return;
       var diff = event.clientX - startX;
-      pointerDown = false;
-      carousel.classList.remove('is-dragging');
+      pointerDown = false; carousel.classList.remove('is-dragging');
       if (Math.abs(diff) >= 35 && $carousel && count > 1) {
         $carousel.carousel(diff < 0 ? 'next' : 'prev');
         suppressClick = true;
@@ -106,12 +106,14 @@
     var type = document.getElementById('document_type');
     var documentInput = document.getElementById('document');
     var password = document.getElementById('password-field');
-    if (!type || !documentInput || !password) return;
+    if (!documentInput || !password) return;
 
     document.querySelectorAll('.demo-access-option').forEach(function (option) {
       option.addEventListener('click', function () {
-        type.value = this.getAttribute('data-doc-type') || 'DNI';
-        updateDocumentField();
+        if (type) {
+          type.value = this.getAttribute('data-doc-type') || 'DNI';
+          updateDocumentField();
+        }
         documentInput.value = this.getAttribute('data-document') || '';
         password.value = this.getAttribute('data-password') || '';
         if (window.jQuery) window.jQuery('#demoAccessModal').modal('hide');

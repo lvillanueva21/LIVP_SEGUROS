@@ -7,7 +7,8 @@
 - Sistema: **Broker Seguros**.
 - Entorno actual: maqueta PHP/JavaScript con datos principalmente en `localStorage`, JSON temporal y archivos en `almacen/`.
 - Base visual interna: se conserva la maqueta existente.
-- Entrega en preparación: **Autenticación Desarrollo V1**. El código y las consultas están listos, pero esta fase queda implementada solo después de subir el pack y ejecutar manualmente las consultas SQL.
+- Autenticación Desarrollo V1: implementada como primera capa real con PDO/MySQL.
+- Ajuste actual: **Navegación Desarrollo V1.1** pendiente de subir y probar.
 
 ## Implementación actual: Autenticación Desarrollo V1
 
@@ -39,12 +40,14 @@
 
 ### Rol Desarrollo
 
-- Menú permitido: `Inicio` y `Configuración`.
-- `Configuración` se muestra con `modulo.php?modulo=configuracion` como página protegida sin funcionalidad aún.
+- Menú permitido tras Navegación Desarrollo V1.1: `Inicio`, `Usuarios`, `Sesión` y `Configuración`.
+- `Usuarios` y `Sesión` son páginas temporales protegidas, todavía sin lógica operativa.
+- `Configuración` tendrá tres submenús protegidos: Gestión de Archivos, Gestión de Correos y Gestión de WhatsApp.
+- Los tres submenús no se muestran en el sidebar: se abren desde Configuración.
 - Si Desarrollo intenta abrir módulos de Gerente, Ejecutivo o Cliente por URL directa, el sistema debe enviar a `acceso_denegado.php`.
 - El dashboard muestra la fuente `default` porque el identificador de sesión de Desarrollo se guarda como `development-{id}` y no choca con IDs demo.
 
-## Tablas MySQL requeridas para esta fase (pendientes de ejecución manual)
+## Tablas MySQL requeridas para esta fase
 
 - `seg_roles`
 - `seg_usuarios`
@@ -88,9 +91,17 @@ Reglas:
 - No usar GET para logout.
 - No aplicar estilos del login a las páginas internas de Broker Seguros.
 
+## Ajuste implementado: Navegación Desarrollo V1.1
+
+- Corregido el logout del header: ahora usa `POST` y token CSRF, igual que el cierre de sesión del sidebar.
+- El login ya no pide tipo de documento. Detecta: 8 dígitos = DNI, 11 dígitos = RUC y otros formatos = CE.
+- Nuevo botón persistente de compresión del sidebar. En escritorio guarda la preferencia en `localStorage` y deja visibles solo íconos para ampliar el área de trabajo.
+- Nuevas páginas protegidas para Desarrollo: `Usuarios`, `Sesión`, `Configuración`, Gestión de Archivos, Gestión de Correos y Gestión de WhatsApp.
+- No se crean ni modifican tablas en este ajuste.
+
 ## Próximos pasos sugeridos
 
-1. Ejecutar las cuatro consultas SQL de autenticación en phpMyAdmin.
-2. Completar `config/database.php` con la conexión real.
-3. Subir este pack, probar demos, registrar Desarrollo y probar restricciones de menú.
-4. Implementar posteriormente la primera pantalla real dentro de Configuración para administrar usuarios Desarrollo o parámetros de seguridad.
+1. Subir el pack Navegación Desarrollo V1.1 y probar logout desde header y sidebar.
+2. Probar la compresión del sidebar, recargar y comprobar que se conserva la preferencia.
+3. Probar cada nueva ruta como Desarrollo y validar que Gerente/Ejecutivo/Cliente no puedan abrirlas.
+4. Implementar la primera funcionalidad real dentro de Configuración cuando se defina qué datos deberán guardarse.

@@ -19,6 +19,28 @@ function authNormalizeDocument(string $documentType, string $document): string
     return strtoupper(preg_replace('/\s+/', '', $document) ?: '');
 }
 
+/**
+ * Detecta el tipo de documento sin pedirlo en el login.
+ * Regla V1: 8 dígitos = DNI, 11 dígitos = RUC y cualquier otro formato = CE.
+ * Los CE numéricos de 8 u 11 caracteres son ambiguos; en esta V1 se consideran
+ * DNI/RUC por longitud para conservar el acceso rápido de la maqueta.
+ */
+function authDetectLoginDocumentType(string $document): string
+{
+    $compact = trim($document);
+    $onlyDigits = preg_replace('/\D+/', '', $compact) ?: '';
+
+    if (preg_match('/^\d{8}$/', $onlyDigits) === 1) {
+        return 'DNI';
+    }
+
+    if (preg_match('/^\d{11}$/', $onlyDigits) === 1) {
+        return 'RUC';
+    }
+
+    return 'CE';
+}
+
 function authFindDevelopmentByDni(string $dni): ?array
 {
     $statement = livpDb()->prepare(

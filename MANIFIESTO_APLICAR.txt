@@ -1,31 +1,47 @@
-SOBREESCRIBIR EN EL REPOSITORIO LIVP_SEGUROS:
-- index.php
-- registro.php (nuevo)
-- logout.php
-- config/bootstrap.php
-- config/database.php (nuevo: editar credenciales antes de subir)
-- config/security.php (nuevo)
-- config/auth.php (nuevo)
-- config/login_assets.php (nuevo)
-- config/modules.php
-- config/.htaccess (nuevo)
-- views/partials/sidebar.php
-- assets/login/css/ls-login-theme.css (nuevo)
-- assets/login/js/login-ui.js (nuevo)
-- assets/login/default/favicon/.gitkeep (nuevo)
-- assets/login/default/logo/.gitkeep (nuevo)
-- assets/login/default/carrusel/.gitkeep (nuevo)
-- docs/00_control_proyecto.md (nuevo)
+LIVP_SEGUROS — FIX NAVEGACIÓN DESARROLLO V1.1
 
-NO REEMPLAZAR:
+Este pack contiene SOLO archivos nuevos o modificados para copiar encima del repositorio local.
+No elimina archivos existentes.
+
+ARCHIVOS MODIFICADOS
+- config/auth.php
+- config/bootstrap.php
+- config/modules.php
+- index.php
+- assets/login/js/login-ui.js
+- assets/js/app.js
+- views/partials/sidebar.php
+- views/partials/topbar.php
+- docs/00_control_proyecto.md
+
+ARCHIVOS NUEVOS
+- assets/css/sidebar-compact.css
+- assets/css/development.css
+- config/development_page.php
+- configuracion.php
+- configuracion_archivos.php
+- configuracion_correos.php
+- configuracion_whatsapp.php
+- desarrollo_usuarios.php
+- desarrollo_sesion.php
+
+NO TOCAR / NO REEMPLAZAR EN ESTE PACK
+- config/database.php
 - config/client_accounts.php
 - config/demo_users.php
-- dashboard.php
-- assets/css/app.css
-- assets/js/login.js
-- cualquier archivo de almacen/
+- logout.php
+- almacen/
+- assets/login/default/
 
-ANTES DEL PUSH:
-1) Ejecutar en phpMyAdmin las cuatro consultas SQL que se entregan por chat.
-2) Editar config/database.php con host, base, usuario y contraseña correctos.
-3) Subir el contenido de esta carpeta respetando las rutas.
+BASE DE DATOS
+No hay queries nuevas. Se reutilizan las tablas de Autenticación Desarrollo V1.
+
+PRUEBA RÁPIDA
+1. Cierra sesión desde el botón del header: debe redirigir a index.php?m=logout.
+2. En login usa solo documento y contraseña. Prueba DNI demo 12345678 y RUC demo 20123456789.
+3. Entra con Desarrollo y confirma: Inicio, Usuarios, Sesión y Configuración.
+4. Dentro de Configuración abre los tres submenús.
+5. Presiona el botón de compresión del sidebar y recarga: debe conservarse.
+
+COMMIT RECOMENDADO
+fix(navigation): corrige logout y agrega módulos desarrollo
