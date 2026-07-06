@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -11,6 +12,7 @@ $sidebarInitials = implode('', array_map(
     static fn (string $part): string => strtoupper(firstChar($part)),
     array_slice(preg_split('/\s+/', (string) ($user['name'] ?? '')) ?: [], 0, 2)
 ));
+$isDatabaseUser = ($user['auth_source'] ?? '') === 'database';
 ?>
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-top">
@@ -36,12 +38,7 @@ $sidebarInitials = implode('', array_map(
     <nav class="main-nav" aria-label="Navegación principal">
         <?php foreach ($menu as $item): ?>
             <?php $itemId = (string) ($item['id'] ?? ''); ?>
-            <a
-                href="<?= e(moduleUrl($itemId)) ?>"
-                class="nav-item <?= $itemId === $activeModule ? 'is-active' : '' ?>"
-                data-module-id="<?= e($itemId) ?>"
-                data-module-label="<?= e((string) ($item['label'] ?? 'Módulo')) ?>"
-            >
+            <a href="<?= e(moduleUrl($itemId)) ?>" class="nav-item <?= $itemId === $activeModule ? 'is-active' : '' ?>" data-module-id="<?= e($itemId) ?>" data-module-label="<?= e((string) ($item['label'] ?? 'Módulo')) ?>">
                 <span class="nav-icon" aria-hidden="true"><?= e((string) ($item['icon'] ?? '•')) ?></span>
                 <span><?= e((string) ($item['label'] ?? 'Módulo')) ?></span>
             </a>
@@ -49,7 +46,10 @@ $sidebarInitials = implode('', array_map(
     </nav>
 
     <div class="sidebar-footer">
-        <a href="<?= e(appRelativeUrl('logout.php')) ?>" class="logout-link">Cerrar sesión <span>→</span></a>
-        <small>Maqueta sin base de datos</small>
+        <form method="post" action="<?= e(appRelativeUrl('logout.php')) ?>">
+            <input type="hidden" name="csrf_token" value="<?= e(csrfToken('logout_form')) ?>">
+            <button type="submit" class="logout-link" style="display:block;width:100%;border:0;background:transparent;padding:0;text-align:left;font:inherit;">Cerrar sesión <span>→</span></button>
+        </form>
+        <small><?= $isDatabaseUser ? 'Acceso real con MySQL' : 'Acceso demo / caché temporal' ?></small>
     </div>
 </aside>

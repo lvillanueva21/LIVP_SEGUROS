@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 require __DIR__ . '/config/bootstrap.php';
@@ -9,123 +10,263 @@ if (isAuthenticated()) {
     exit;
 }
 
-$users = loginUsers();
+$assets = loginAssets();
 $error = '';
-$documentType = $_POST['document_type'] ?? 'DNI';
+$notice = '';
+$documentType = strtoupper(trim((string) ($_POST['document_type'] ?? 'DNI')));
 $document = trim((string) ($_POST['document'] ?? ''));
+
+if (isset($_GET['m']) && $_GET['m'] === 'logout') {
+    $notice = 'Sesión cerrada correctamente.';
+} elseif (isset($_GET['m']) && $_GET['m'] === 'sesion') {
+    $notice = 'Inicia sesión para continuar.';
+} elseif (isset($_GET['m']) && $_GET['m'] === 'acceso_actualizado') {
+    $notice = 'Tu sesión se cerró porque el acceso fue actualizado o desactivado.';
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = (string) ($_POST['password'] ?? '');
-    $documentType = strtoupper(trim((string) $documentType));
-    $document = $documentType === 'RUC' ? clientNormalizeDocument($document) : $document;
-
+    $csrfToken = (string) ($_POST['csrf_token'] ?? '');
     $allowedTypes = ['DNI', 'CE', 'RUC'];
-    if (!in_array($documentType, $allowedTypes, true) || $document === '' || $password === '') {
+
+    $document = authNormalizeDocument($documentType, $document);
+
+    if (!csrfValidate('login_form', $csrfToken)) {
+        $error = 'No se pudo validar el formulario. Intenta nuevamente.';
+        securityRecordLoginAttempt($documentType, $document, 'csrf', 'login', null, 'Token CSRF inválido');
+    } elseif (!in_array($documentType, $allowedTypes, true) || $document === '' || $password === '') {
         $error = 'Completa el tipo de documento, número y contraseña.';
     } else {
-        $matchedUser = null;
-        foreach ($users as $user) {
-            if (!is_array($user)) {
-                continue;
+        $block = securityLoginBlockInfo($documentType, $document);
+
+        if (($block['blocked'] ?? false) === true) {
+            $minutes = max(1, (int) ($block['minutes'] ?? LIVP_LOGIN_BLOCK_MINUTES));
+            $error = 'El acceso está bloqueado temporalmente por intentos fallidos. Intenta nuevamente en aproximadamente ' . $minutes . ' minuto(s).';
+            securityRecordLoginAttempt($documentType, $document, 'bloqueado', 'login', null, 'Bloqueo temporal');
+        } else {
+            $developmentAttempt = authAttemptDevelopmentLogin($documentType, $document, $password);
+            $developmentStatus = (string) ($developmentAttempt['status'] ?? 'not_found');
+
+            if ($developmentStatus === 'success') {
+                securityClearLoginFailures($documentType, $document);
+                securityRecordLoginAttempt($documentType, $document, 'exitoso', 'database', (int) $developmentAttempt['database_user_id'], 'Usuario Desarrollo');
+                createUserSession((array) $developmentAttempt['user']);
+                header('Location: ' . appRelativeUrl('dashboard.php'));
+                exit;
             }
 
-            $candidateType = strtoupper(trim((string) ($user['document_type'] ?? '')));
-            $candidateDocument = $candidateType === 'RUC'
-                ? clientNormalizeDocument((string) ($user['document'] ?? ''))
-                : (string) ($user['document'] ?? '');
+            if ($developmentStatus === 'inactive') {
+                securityRecordLoginAttempt($documentType, $document, 'fallido', 'database', (int) $developmentAttempt['database_user_id'], 'Usuario Desarrollo inactivo');
+                $error = 'Las credenciales no coinciden, la cuenta está inactiva o todavía no fue creada.';
+            } elseif ($developmentStatus === 'invalid_password') {
+                securityRecordLoginAttempt($documentType, $document, 'fallido', 'database', (int) $developmentAttempt['database_user_id'], 'Contraseña incorrecta');
+                $error = 'Las credenciales no coinciden, la cuenta está inactiva o todavía no fue creada.';
+            } elseif ($developmentStatus === 'database_error') {
+                $error = 'No se pudo validar el acceso real. Revisa la conexión y las tablas de autenticación.';
+            } else {
+                $matchedUser = null;
+                foreach (loginUsers() as $user) {
+                    if (!is_array($user)) {
+                        continue;
+                    }
 
-            if ($candidateType === $documentType && $candidateDocument === $document) {
-                $matchedUser = $user;
-                break;
+                    $candidateType = strtoupper(trim((string) ($user['document_type'] ?? '')));
+                    $candidateDocument = authNormalizeDocument($candidateType, (string) ($user['document'] ?? ''));
+
+                    if ($candidateType === $documentType && $candidateDocument === $document) {
+                        $matchedUser = $user;
+                        break;
+                    }
+                }
+
+                if ($matchedUser !== null
+                    && (($matchedUser['active'] ?? true) !== false)
+                    && password_verify($password, (string) ($matchedUser['password_hash'] ?? ''))
+                ) {
+                    securityClearLoginFailures($documentType, $document);
+                    securityRecordLoginAttempt($documentType, $document, 'exitoso', 'demo', null, 'Acceso demo o cliente temporal');
+                    createUserSession($matchedUser);
+                    header('Location: ' . appRelativeUrl('dashboard.php'));
+                    exit;
+                }
+
+                securityRecordLoginAttempt($documentType, $document, 'fallido', 'demo', null, 'Credenciales no válidas');
+                $error = 'Las credenciales no coinciden, la cuenta está inactiva o todavía no fue creada.';
             }
         }
-
-        if ($matchedUser !== null && (($matchedUser['active'] ?? true) !== false) && password_verify($password, (string) ($matchedUser['password_hash'] ?? ''))) {
-            createUserSession($matchedUser);
-            header('Location: ' . appRelativeUrl('dashboard.php'));
-            exit;
-        }
-
-        $error = 'Las credenciales no coinciden, la cuenta está inactiva o todavía no fue creada.';
     }
 }
+
+$csrfLoginToken = csrfToken('login_form');
+$hour = (int) date('G');
+$greeting = $hour < 12 ? '¡Buenos días!' : ($hour < 19 ? '¡Buenas tardes!' : '¡Buenas noches!');
+$greetingMessages = [
+    $greeting . ' 👋 Bienvenido a Broker Seguros.',
+    $greeting . ' ✨ Inicia sesión para continuar.',
+    '🔐 La seguridad comienza con un inicio de sesión.',
+    $greeting . ' 🚀 Sigamos avanzando con el sistema.',
+];
+$welcome = $greetingMessages[array_rand($greetingMessages)];
 ?>
 <!doctype html>
 <html lang="es">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= e(APP_NAME) ?> | Maqueta funcional</title>
-    <link rel="stylesheet" href="assets/css/app.css?v=BS-20260627-234916-CLIENTACCOUNTSV1">
+    <title><?= e(APP_NAME) ?> | Iniciar sesión</title>
+    <?php if ($assets['favicon'] !== ''): ?>
+        <link rel="icon" href="<?= e($assets['favicon']) ?>">
+    <?php endif; ?>
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/login/css/ls-login-theme.css?v=AUTHDESARROLLOV1">
 </head>
-<body class="login-body">
-<main class="login-shell">
-    <section class="login-branding">
-        <div class="brand-mark">B</div>
-        <p class="eyebrow">MAQUETA FUNCIONAL · ENTORNO DE DEMOSTRACIÓN</p>
-        <h1>BROKER<br>SEGUROS</h1>
-        <p class="brand-description">Prototipo para validar expedientes, pólizas, pagos, siniestros y el portal de consulta del cliente.</p>
-        <div class="brand-notes">
-            <span>PHP + sesiones</span>
-            <span>Accesos Cliente protegidos</span>
-            <span>Diseño responsive</span>
-        </div>
-    </section>
-
-    <section class="login-panel" aria-labelledby="login-title">
-        <div class="panel-header">
-            <p class="eyebrow">ACCESO AL SISTEMA</p>
-            <h2 id="login-title">Iniciar sesión</h2>
-            <p>Las empresas y consorcios pueden ingresar con el acceso creado por Gerencia.</p>
+<body>
+<section class="ftco-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-9 text-center mb-5">
+                <h2 class="heading-section"><?= e($welcome) ?></h2>
+            </div>
         </div>
 
-        <?php if ($error !== ''): ?>
-            <div class="alert alert-error" role="alert"><?= e($error) ?></div>
-        <?php endif; ?>
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="wrap">
+                    <?php if ($assets['carrusel'] !== []): ?>
+                        <div id="loginCoverCarousel" class="carousel slide login-cover-carousel" data-ride="carousel" data-interval="5000">
+                            <div class="carousel-inner">
+                                <?php foreach ($assets['carrusel'] as $index => $image): ?>
+                                    <div class="carousel-item <?= $index === 0 ? 'active' : '' ?>">
+                                        <img
+                                            src="<?= e($image['url']) ?>"
+                                            class="d-block w-100 js-cover-image"
+                                            alt="Portada de acceso <?= $index + 1 ?>"
+                                            draggable="false"
+                                            data-toggle="modal"
+                                            data-target="#coverImageModal"
+                                            data-full-src="<?= e($image['url']) ?>"
+                                            data-download-name="<?= e($image['name']) ?>"
+                                        >
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
 
-        <form method="post" class="login-form" novalidate>
-            <label for="document_type">Tipo de documento</label>
-            <select id="document_type" name="document_type" required>
-                <option value="DNI" <?= $documentType === 'DNI' ? 'selected' : '' ?>>DNI</option>
-                <option value="CE" <?= $documentType === 'CE' ? 'selected' : '' ?>>Carné de extranjería</option>
-                <option value="RUC" <?= $documentType === 'RUC' ? 'selected' : '' ?>>RUC</option>
-            </select>
+                    <div class="login-wrap p-4 p-md-5">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="w-100">
+                                <?php if ($assets['logo'] !== ''): ?>
+                                    <img class="login-default-logo" src="<?= e($assets['logo']) ?>" alt="<?= e(APP_NAME) ?>">
+                                <?php endif; ?>
+                                <h4 class="mb-0">Iniciar sesión</h4>
+                                <p class="login-caption mb-0">Acceso a la maqueta funcional de Broker Seguros.</p>
+                            </div>
+                            <div class="w-100">
+                                <p class="social-media d-flex justify-content-end m-0">
+                                    <button type="button" class="social-icon d-flex align-items-center justify-content-center" data-toggle="modal" data-target="#demoAccessModal" title="Accesos de prueba" aria-label="Abrir accesos de prueba">
+                                        <span class="fa fa-flask"></span>
+                                    </button>
+                                </p>
+                            </div>
+                        </div>
 
-            <label id="document_label" for="document">Número de DNI</label>
-            <input id="document" name="document" value="<?= e($document) ?>" inputmode="numeric" autocomplete="username" placeholder="Ingresa tu documento" required>
+                        <?php if ($notice !== ''): ?>
+                            <div class="alert alert-info py-2 mb-3" role="alert"><?= e($notice) ?></div>
+                        <?php endif; ?>
+                        <?php if ($error !== ''): ?>
+                            <div class="alert alert-danger py-2 mb-3" role="alert"><?= e($error) ?></div>
+                        <?php endif; ?>
 
-            <label for="password">Contraseña</label>
-            <div class="password-field">
-                <input id="password" type="password" name="password" autocomplete="current-password" placeholder="Ingresa tu contraseña" required>
-                <button type="button" class="text-button" id="toggle-password" aria-label="Mostrar contraseña">Ver</button>
+                        <form id="form-login" method="post" class="signin-form" autocomplete="off" novalidate>
+                            <input type="hidden" name="csrf_token" value="<?= e($csrfLoginToken) ?>">
+                            <div class="form-group mt-3">
+                                <label for="document_type" class="form-label-fixed">Tipo de documento</label>
+                                <select id="document_type" name="document_type" class="form-control" required>
+                                    <option value="DNI" <?= $documentType === 'DNI' ? 'selected' : '' ?>>DNI</option>
+                                    <option value="CE" <?= $documentType === 'CE' ? 'selected' : '' ?>>Carné de extranjería</option>
+                                    <option value="RUC" <?= $documentType === 'RUC' ? 'selected' : '' ?>>RUC</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="document" class="form-label-fixed">
+                                    <span id="document-label">Número de DNI</span>
+                                    <span class="fa fa-info-circle info-icon" tabindex="0" role="button" data-toggle="tooltip" data-placement="right" title="Desarrollo ingresa solo con DNI de 8 dígitos. Los accesos demo también admiten CE y RUC." aria-label="Información sobre documento"></span>
+                                </label>
+                                <input id="document" type="text" name="document" class="form-control" autocomplete="username" required value="<?= e($document) ?>">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="password-field" class="form-label-fixed">
+                                    Contraseña
+                                    <span class="fa fa-info-circle info-icon" tabindex="0" role="button" data-toggle="tooltip" data-placement="right" title="No compartas tu contraseña." aria-label="Información sobre contraseña"></span>
+                                </label>
+                                <div class="position-relative">
+                                    <input id="password-field" type="password" name="password" class="form-control" autocomplete="current-password" required>
+                                    <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password" title="Mostrar u ocultar"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <button id="btn-login" class="form-control btn btn-primary rounded submit px-3" type="submit">Ingresar</button>
+                            </div>
+                        </form>
+
+                        <p class="text-center text-muted mt-3 mb-0 small">© <?= date('Y') ?> - Broker Seguros - Entorno de pruebas.</p>
+                    </div>
+                </div>
             </div>
+        </div>
+    </div>
+</section>
 
-            <button class="primary-button" type="submit">Ingresar al sistema <span>→</span></button>
-        </form>
+<div class="modal fade" id="demoAccessModal" tabindex="-1" aria-labelledby="demoAccessModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="demoAccessModalLabel">Accesos de prueba</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p class="small text-muted">Selecciona un acceso. El formulario se completará, pero tú decidirás cuándo presionar Ingresar.</p>
+                <div class="demo-access-list">
+                    <button type="button" class="demo-access-option" data-doc-type="DNI" data-document="12345678" data-password="Gerente2026!">
+                        <strong>Gerente demo</strong><span>DNI 12345678</span><small>Clave: Gerente2026!</small>
+                    </button>
+                    <button type="button" class="demo-access-option" data-doc-type="DNI" data-document="87654321" data-password="Ejecutivo2026!">
+                        <strong>Ejecutivo demo</strong><span>DNI 87654321</span><small>Clave: Ejecutivo2026!</small>
+                    </button>
+                    <button type="button" class="demo-access-option" data-doc-type="RUC" data-document="20123456789" data-password="Empresa2026!">
+                        <strong>Empresa demo</strong><span>RUC 20123456789</span><small>Clave: Empresa2026!</small>
+                    </button>
+                    <button type="button" class="demo-access-option" data-doc-type="RUC" data-document="20698765432" data-password="Consorcio2026!">
+                        <strong>Consorcio demo</strong><span>RUC 20698765432</span><small>Clave: Consorcio2026!</small>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-        <section class="demo-access" aria-labelledby="demo-title">
-            <div class="demo-access-title">
-                <h3 id="demo-title">Accesos de prueba</h3>
-                <span>Haz clic para completar el formulario</span>
+<div class="modal fade" id="coverImageModal" tabindex="-1" aria-labelledby="coverImageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="coverImageModalLabel">Vista de la imagen</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
             </div>
-            <div class="demo-grid">
-                <button type="button" class="demo-card" data-doc-type="DNI" data-document="12345678" data-password="Gerente2026!">
-                    <strong>Gerente</strong><span>DNI 12345678</span><small>Clave: Gerente2026!</small>
-                </button>
-                <button type="button" class="demo-card" data-doc-type="DNI" data-document="87654321" data-password="Ejecutivo2026!">
-                    <strong>Ejecutivo</strong><span>DNI 87654321</span><small>Clave: Ejecutivo2026!</small>
-                </button>
-                <button type="button" class="demo-card" data-doc-type="RUC" data-document="20123456789" data-password="Empresa2026!">
-                    <strong>Empresa demo</strong><span>RUC 20123456789</span><small>Clave: Empresa2026!</small>
-                </button>
-                <button type="button" class="demo-card" data-doc-type="RUC" data-document="20698765432" data-password="Consorcio2026!">
-                    <strong>Consorcio demo</strong><span>RUC 20698765432</span><small>Clave: Consorcio2026!</small>
-                </button>
-            </div>
-            <p class="demo-detail">Los accesos creados en Usuarios no aparecen aquí: se usan directamente con su RUC y contraseña asignada.</p>
-        </section>
-    </section>
-</main>
-<script src="assets/js/login.js?v=BS-20260627-234916-CLIENTACCOUNTSV1"></script>
+            <div class="modal-body text-center"><img id="coverModalImage" src="" class="img-fluid rounded" alt="Vista ampliada"></div>
+            <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cerrar</button></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/login/js/login-ui.js?v=AUTHDESARROLLOV1"></script>
 </body>
 </html>

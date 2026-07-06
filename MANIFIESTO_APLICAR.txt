@@ -1,0 +1,31 @@
+SOBREESCRIBIR EN EL REPOSITORIO LIVP_SEGUROS:
+- index.php
+- registro.php (nuevo)
+- logout.php
+- config/bootstrap.php
+- config/database.php (nuevo: editar credenciales antes de subir)
+- config/security.php (nuevo)
+- config/auth.php (nuevo)
+- config/login_assets.php (nuevo)
+- config/modules.php
+- config/.htaccess (nuevo)
+- views/partials/sidebar.php
+- assets/login/css/ls-login-theme.css (nuevo)
+- assets/login/js/login-ui.js (nuevo)
+- assets/login/default/favicon/.gitkeep (nuevo)
+- assets/login/default/logo/.gitkeep (nuevo)
+- assets/login/default/carrusel/.gitkeep (nuevo)
+- docs/00_control_proyecto.md (nuevo)
+
+NO REEMPLAZAR:
+- config/client_accounts.php
+- config/demo_users.php
+- dashboard.php
+- assets/css/app.css
+- assets/js/login.js
+- cualquier archivo de almacen/
+
+ANTES DEL PUSH:
+1) Ejecutar en phpMyAdmin las cuatro consultas SQL que se entregan por chat.
+2) Editar config/database.php con host, base, usuario y contraseña correctos.
+3) Subir el contenido de esta carpeta respetando las rutas.
