@@ -8,6 +8,7 @@
 - Entorno: maqueta PHP/JavaScript con datos principalmente en `localStorage`, JSON temporal y archivos en `almacen/`.
 - Base visual interna: se conserva la maqueta existente.
 - Autenticación real inicial: rol `desarrollo` mediante MySQL/PDO.
+- Configuración de Correos V1: núcleo real para configurar, probar, enviar y auditar correos SMTP Zoho desde una cuenta global del sistema.
 
 ## Autenticación Desarrollo V1
 
@@ -48,10 +49,57 @@
   - Usuarios;
   - Sesión;
   - Configuración.
-- Configuración contiene submenús sin funcionalidad aún:
+- Configuración contiene submenús:
   - Gestión de Archivos;
   - Gestión de Correos;
   - Gestión de WhatsApp.
+
+## Configuración de Correos V1
+
+### Objetivo
+
+Crear el núcleo inicial de notificaciones por correo para Broker Seguros, sin decidir todavía qué módulos futuros enviarán recordatorios o alertas.
+
+### Alcance implementado
+
+- Nueva página protegida para Desarrollo: `configuracion_correos.php`.
+- Acceso desde `Configuración -> Gestión de Correos`.
+- Tres pestañas internas:
+  - Resumen y prueba;
+  - Configuración;
+  - Historial.
+- Un único correo remitente global Zoho para todo el sistema.
+- Nombre visible editable. Valor sugerido por defecto: `Broker Seguros - Helmut Leiva`.
+- Clave de aplicación Zoho cifrada en MySQL.
+- Llave maestra de cifrado definida en `config/correo.php`.
+- Host SMTP fijo en sistema: `smtppro.zoho.com`, puerto `587`, TLS/STARTTLS.
+- Uno o dos destinatarios de prueba.
+- Correo de copia administrativa opcional como CC visible.
+- Asunto y mensaje de prueba editables.
+- Botón `Probar notificaciones por correo`.
+- Limpieza automática de espacios en la clave Zoho desde JavaScript y PHP.
+- Icono de ojo para ver u ocultar la clave que se está escribiendo.
+- Historial con asunto, mensaje enviado, remitente, destinatarios, CC, estado y error técnico.
+- Métricas simples: correos generados, enviados, fallidos, parciales, destinatarios aceptados y fallidos.
+- Servicio reutilizable en `services/correo_sistema.php` para que futuros módulos llamen el envío centralizado.
+
+### Reglas importantes
+
+- La prueba usa siempre la configuración guardada, no campos sin guardar.
+- Cambiar correo remitente o clave Zoho obliga a nueva prueba.
+- Si la clave ya está guardada, el input aparece vacío; dejarlo vacío conserva la clave actual.
+- Si se escribe una nueva clave, reemplaza la anterior.
+- El sistema registra si Zoho aceptó o rechazó el envío SMTP, pero no puede garantizar bandeja principal/spam.
+- El correo de copia administrativa se incluye en pruebas si está configurado.
+- Futuros módulos no deben conectarse directo a SMTP; deben usar el servicio central.
+
+### Tablas MySQL agregadas
+
+- `seg_correo_configuracion`
+- `seg_correo_destinatarios_prueba`
+- `seg_correo_envios`
+- `seg_correo_envio_destinatarios`
+- `seg_correo_auditoria`
 
 ## Tablas MySQL actuales
 
@@ -59,8 +107,11 @@
 - `seg_usuarios`
 - `seg_usuario_roles`
 - `seg_login_intentos`
-
-**No se requieren queries adicionales para Corrección UI y navegación V1.2.**
+- `seg_correo_configuracion`
+- `seg_correo_destinatarios_prueba`
+- `seg_correo_envios`
+- `seg_correo_envio_destinatarios`
+- `seg_correo_auditoria`
 
 ## Recursos del login
 
@@ -98,7 +149,8 @@ Reglas:
 - No usar GET para logout.
 - No aplicar los estilos del login a páginas internas.
 - No volver a usar clic de imágenes de carrusel para abrir modal sin una prueba completa de cierre, foco y navegación.
+- No duplicar lógica SMTP en módulos futuros; usar `services/correo_sistema.php`.
 
 ## Próximo paso recomendado
 
-Implementar dentro de Desarrollo la primera función real: creador/administrador de usuarios, reemplazando después `registro.php` temporal.
+Probar Configuración de Correos V1 en Hostinger con una cuenta Zoho real: guardar remitente, clave de aplicación, destinatarios, copia opcional y ejecutar la prueba real. Después de confirmar envío, integrar el servicio central con un primer módulo real, por ejemplo alertas de pagos o pólizas.

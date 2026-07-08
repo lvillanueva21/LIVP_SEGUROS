@@ -17,18 +17,21 @@ $options = [
         'icon' => '▧',
         'title' => 'Gestión de Archivos',
         'description' => 'Configuración futura de almacenamiento, rutas, documentos y archivos adjuntos.',
+        'url' => moduleUrl('configuracion-archivos'),
     ],
     [
         'id' => 'configuracion-correos',
         'icon' => '✉',
         'title' => 'Gestión de Correos',
-        'description' => 'Configuración futura de correo saliente, SMTP, plantillas y notificaciones.',
+        'description' => 'Configuración real del correo Zoho remitente, prueba SMTP, historial y métricas de notificaciones.',
+        'url' => appRelativeUrl('configuracion_correos.php'),
     ],
     [
         'id' => 'configuracion-whatsapp',
         'icon' => '◍',
         'title' => 'Gestión de WhatsApp',
         'description' => 'Configuración futura de WhatsApp, mensajes automáticos e integraciones.',
+        'url' => moduleUrl('configuracion-whatsapp'),
     ],
 ];
 ?>
@@ -38,8 +41,8 @@ $options = [
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e(APP_NAME) ?> | Configuración</title>
-    <link rel="stylesheet" href="assets/css/app.css?v=BS-NAVFIXV2">
-    <link rel="stylesheet" href="assets/css/modules.css?v=BS-NAVFIXV2">
+    <link rel="stylesheet" href="assets/css/app.css?v=BS-CORREOV1">
+    <link rel="stylesheet" href="assets/css/modules.css?v=BS-CORREOV1">
 </head>
 <body class="app-body" data-role="<?= e((string) $user['role']) ?>" data-user="<?= e((string) $user['id']) ?>">
 <div class="app-shell">
@@ -53,14 +56,14 @@ $options = [
                 <div>
                     <p class="eyebrow">DESARROLLO</p>
                     <h2>Configuración</h2>
-                    <p>Secciones preparadas para futuras configuraciones técnicas del sistema.</p>
+                    <p>Secciones preparadas para configuraciones técnicas del sistema.</p>
                 </div>
                 <span class="module-access-badge">Acceso habilitado</span>
             </article>
 
             <section class="configuration-menu-grid" aria-label="Submenús de configuración">
                 <?php foreach ($options as $option): ?>
-                    <a class="configuration-menu-card" href="<?= e(moduleUrl((string) $option['id'])) ?>">
+                    <a class="configuration-menu-card" href="<?= e((string) $option['url']) ?>">
                         <span class="configuration-menu-icon" aria-hidden="true"><?= e((string) $option['icon']) ?></span>
                         <h3><?= e((string) $option['title']) ?></h3>
                         <p><?= e((string) $option['description']) ?></p>
@@ -70,6 +73,6 @@ $options = [
         </section>
     </main>
 </div>
-<script src="assets/js/app.js?v=BS-NAVFIXV2"></script>
+<script src="assets/js/app.js?v=BS-CORREOV1"></script>
 </body>
 </html>

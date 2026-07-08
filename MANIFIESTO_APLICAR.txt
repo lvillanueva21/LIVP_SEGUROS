@@ -1,46 +1,64 @@
-LIVP_SEGUROS — Corrección UI y navegación Desarrollo V1.2
+PACK: Configuración de Correos V1 - Broker Seguros
 
 OBJETIVO
-- Corregir salida de sesión del header.
-- Rehacer navegación lateral sin botón textual "Comprimir".
-- Eliminar bloqueo por modal al tocar imágenes del carrusel.
-- Dejar el login sin selector de tipo de documento.
-- Agregar páginas Desarrollo: Usuarios, Sesión y Configuración con tres submenús.
+Implementa Configuración -> Gestión de Correos con configuración Zoho, clave cifrada, prueba real SMTP, historial y métricas simples.
 
-ARCHIVOS PARA REEMPLAZAR
-- index.php
-- registro.php
-- config/bootstrap.php
-- config/modules.php
-- views/partials/sidebar.php
-- views/partials/topbar.php
-- assets/login/js/login-ui.js
-- docs/00_control_proyecto.md
+ARCHIVOS A CREAR
+1) config/correo.php
+   - Configuración técnica SMTP Zoho fija.
+   - Llave maestra nueva para cifrar clave Zoho.
+   - No reemplaza ni altera las claves actuales de conexión a base de datos.
 
-ARCHIVOS NUEVOS
-- assets/css/navigation-shell.css
-- assets/js/navigation-shell.js
-- desarrollo_usuarios.php
-- desarrollo_sesion.php
-- configuracion.php
+2) services/correo_sistema.php
+   - Servicio central reutilizable de correos.
+   - Cifra/descifra clave Zoho.
+   - Guarda configuración, métricas, historial y detalle por destinatario.
+   - Envía por SMTP Zoho usando sockets TLS, sin Composer ni vendor.
 
-NO REEMPLAZAR
+3) configuracion_correos.php
+   - Nueva interfaz protegida para Desarrollo.
+   - Pestañas: Resumen y prueba, Configuración, Historial.
+
+4) assets/css/correo-configuracion.css
+   - Estilos propios del módulo de correos.
+
+5) assets/js/correo-configuracion.js
+   - Pestañas, ojo para clave y limpieza de espacios en clave Zoho.
+
+ARCHIVOS A REEMPLAZAR
+1) configuracion.php
+   - Actualiza la tarjeta Gestión de Correos para abrir configuracion_correos.php.
+   - No cambia el resto del diseño ni la navegación principal.
+
+2) docs/00_control_proyecto.md
+   - Actualiza el control vivo del proyecto con Configuración de Correos V1.
+
+ARCHIVOS QUE NO SE TOCAN
 - config/database.php
-- config/auth.php
-- config/security.php
 - config/client_accounts.php
 - config/demo_users.php
+- logout.php
+- index.php
+- registro.php
 - almacen/
-- assets/login/default/ (tus imágenes, favicon y logo)
+- assets/login/default/
 
-SQL
-- No ejecutar queries nuevas.
+QUERIES MYSQL
+- Ejecutar manualmente en phpMyAdmin los CREATE TABLE e INSERT indicados en el chat, en orden.
+- Este pack no incluye archivo .sql porque se pidió ejecutar queries manualmente por chat.
 
-PRUEBA RÁPIDA
-1. Haz recarga forzada: Ctrl + F5.
-2. Ingresa como Desarrollo.
-3. Cierra sesión desde el header.
-4. Prueba el icono de navegación lateral.
-5. Entra a Usuarios, Sesión y Configuración.
-6. En Configuración entra a sus tres tarjetas.
-7. En login, pulsa/arrastra las imágenes del carrusel: no debe aparecer modal ni overlay.
+PRUEBA DE HUMO
+1) Subir/reemplazar archivos.
+2) Ejecutar queries en phpMyAdmin.
+3) Entrar como Desarrollo.
+4) Abrir Configuración -> Gestión de Correos.
+5) Ir a Configuración.
+6) Guardar correo Zoho remitente, clave de aplicación, destinatario 1 y opcionalmente destinatario 2 y CC.
+7) Ir a Resumen y prueba.
+8) Presionar Probar notificaciones por correo.
+9) Revisar estado y luego Historial.
+
+COMMIT RECOMENDADO
+git add .
+git commit -m "feat(correos): configurar pruebas y auditoria SMTP Zoho"
+git push origin main
