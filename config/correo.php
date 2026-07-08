@@ -6,10 +6,11 @@ declare(strict_types=1);
  * Configuración técnica del núcleo de correos.
  * No se edita desde la interfaz: la pantalla solo administra remitente, clave Zoho,
  * destinatarios de prueba, copia, asunto y mensaje de prueba.
+ * Para cuenta Zoho gratuita / free organization se usa smtp.zoho.com.
  */
 
 if (!defined('SEG_CORREO_SMTP_HOST')) {
-    define('SEG_CORREO_SMTP_HOST', 'smtppro.zoho.com');
+    define('SEG_CORREO_SMTP_HOST', 'smtp.zoho.com');
 }
 
 if (!defined('SEG_CORREO_SMTP_PORT')) {

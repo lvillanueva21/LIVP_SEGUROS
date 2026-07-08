@@ -72,7 +72,7 @@ Crear el núcleo inicial de notificaciones por correo para Broker Seguros, sin d
 - Nombre visible editable. Valor sugerido por defecto: `Broker Seguros - Helmut Leiva`.
 - Clave de aplicación Zoho cifrada en MySQL.
 - Llave maestra de cifrado definida en `config/correo.php`.
-- Host SMTP fijo en sistema: `smtppro.zoho.com`, puerto `587`, TLS/STARTTLS.
+- Host SMTP fijo en sistema: `smtp.zoho.com`, puerto `587`, TLS/STARTTLS. Se ajustó para cuenta Zoho gratuita / free organization tras error SMTP 554 Access Restricted usando `smtppro.zoho.com`.
 - Uno o dos destinatarios de prueba.
 - Correo de copia administrativa opcional como CC visible.
 - Asunto y mensaje de prueba editables.

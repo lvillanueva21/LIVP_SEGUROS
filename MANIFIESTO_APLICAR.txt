@@ -1,64 +1,31 @@
-PACK: Configuración de Correos V1 - Broker Seguros
+PACK: Broker Seguros - Corrección SMTP Zoho Free
 
 OBJETIVO
-Implementa Configuración -> Gestión de Correos con configuración Zoho, clave cifrada, prueba real SMTP, historial y métricas simples.
-
-ARCHIVOS A CREAR
-1) config/correo.php
-   - Configuración técnica SMTP Zoho fija.
-   - Llave maestra nueva para cifrar clave Zoho.
-   - No reemplaza ni altera las claves actuales de conexión a base de datos.
-
-2) services/correo_sistema.php
-   - Servicio central reutilizable de correos.
-   - Cifra/descifra clave Zoho.
-   - Guarda configuración, métricas, historial y detalle por destinatario.
-   - Envía por SMTP Zoho usando sockets TLS, sin Composer ni vendor.
-
-3) configuracion_correos.php
-   - Nueva interfaz protegida para Desarrollo.
-   - Pestañas: Resumen y prueba, Configuración, Historial.
-
-4) assets/css/correo-configuracion.css
-   - Estilos propios del módulo de correos.
-
-5) assets/js/correo-configuracion.js
-   - Pestañas, ojo para clave y limpieza de espacios en clave Zoho.
+- Cambiar el servidor SMTP fijo del módulo de correos de smtppro.zoho.com a smtp.zoho.com.
+- Esto corrige el caso típico de Zoho gratuito / free organization que devuelve SMTP 554 Access Restricted al usar smtppro.zoho.com.
 
 ARCHIVOS A REEMPLAZAR
-1) configuracion.php
-   - Actualiza la tarjeta Gestión de Correos para abrir configuracion_correos.php.
-   - No cambia el resto del diseño ni la navegación principal.
+1) config/correo.php
+   - Reemplazar el archivo actual por este.
+   - No modifica claves de base de datos.
+   - Conserva la llave SEG_CORREO_ENCRYPTION_KEY generada en el pack anterior.
+   - Si ya guardaste la clave Zoho cifrada con esta misma llave, no tienes que volver a guardarla por este cambio.
 
 2) docs/00_control_proyecto.md
-   - Actualiza el control vivo del proyecto con Configuración de Correos V1.
-
-ARCHIVOS QUE NO SE TOCAN
-- config/database.php
-- config/client_accounts.php
-- config/demo_users.php
-- logout.php
-- index.php
-- registro.php
-- almacen/
-- assets/login/default/
+   - Reemplazar para dejar documentado el ajuste SMTP.
 
 QUERIES MYSQL
-- Ejecutar manualmente en phpMyAdmin los CREATE TABLE e INSERT indicados en el chat, en orden.
-- Este pack no incluye archivo .sql porque se pidió ejecutar queries manualmente por chat.
+- No requiere queries nuevas.
+- No borres ni recrees tablas.
 
-PRUEBA DE HUMO
-1) Subir/reemplazar archivos.
-2) Ejecutar queries en phpMyAdmin.
-3) Entrar como Desarrollo.
-4) Abrir Configuración -> Gestión de Correos.
-5) Ir a Configuración.
-6) Guardar correo Zoho remitente, clave de aplicación, destinatario 1 y opcionalmente destinatario 2 y CC.
-7) Ir a Resumen y prueba.
-8) Presionar Probar notificaciones por correo.
-9) Revisar estado y luego Historial.
+PRUEBA
+1. Sube/reemplaza los archivos indicados.
+2. Entra como Desarrollo.
+3. Ve a Configuración -> Gestión de Correos.
+4. Presiona Probar notificaciones por correo.
+5. Revisa Resumen e Historial.
 
-COMMIT RECOMENDADO
-git add .
-git commit -m "feat(correos): configurar pruebas y auditoria SMTP Zoho"
-git push origin main
+CONFIGURACIÓN FINAL ESPERADA
+- Host: smtp.zoho.com
+- Puerto: 587
+- Seguridad: TLS / STARTTLS
